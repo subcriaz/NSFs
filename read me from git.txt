@@ -1,0 +1,11 @@
+from github to NSF update
+
+F:\GitHub\FromGit>git init
+Initialized empty Git repository in F:/GitHub/FromGit/.git/
+
+F:\GitHub\FromGit>git remote add origin https://github.com/subcriaz/NSFs
+
+
+F:\GitHub\FromGit>git pull  origin master
+From https://github.com/subcriaz/NSFs
+ * branch            master     -> FETCH_HEAD
