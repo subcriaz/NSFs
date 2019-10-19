@@ -1,0 +1,59 @@
+Body{background-color:white; margin:0px; font-family:georgia}
+pre{line-height:10px;width:600px;background-color:#EEEEEE;border:1px solid #888888;display:block;font-size:11px;margin:5px;padding:3px}
+h1{	font-family:Verdana; font-size:14px; color: black;}
+Quote{	text-decoration:italic}
+Table, TD{	font-family:Verdana; font-size:12px}
+.docSubject{border:1px solid #C0C0C0;border-bottom:0px;padding:10px}
+.docBody,.docPostFooter{border:1px solid #C0C0C0;padding:10px;border-bottom:0px;font-family:verdana}
+.comments{border:1px solid #C0C0C0;padding:10px;border-bottom:0px;font-family:verdana}
+.comment{border:1px solid #C0C0C0;padding:10px;margin-bottom:20px}
+.box{width:280px;border:1px solid #C0C0C0;padding:10px;margin-left:10px;margin-top:8px;background-color:#F6F6F6}
+.boxNoBorder{padding:15px;margin:2px;background-color:#FFFFFF}
+.boxWhite{border:1px solid #C0C0C0;padding:10px}
+.boxinner{border:1px solid #C0C0C0;padding:8px;background-color:#FFFFFF}
+#banner{background-color:#44558D;padding:40px;color:#FFFFFF;font-size:30px}
+.maintable{align:middle;margin:0px auto;margin-top:15px;margin-bottom:20px;border:1px solid #C0C0C0;padding:5px}
+A{color:#777777}
+.box A{color:#777777;font-size:12px}
+.com{border-bottom:1px solid #C0C0C0;padding:10px}
+
+.icomments{border:1px solid #C0C0C0;padding:8px;margin-bottom:10px}
+.isubject{margin-bottom:3px}
+.icomments p{margin-bottom:15px}
+
+#mypanel{background-color:#FFFFC0;border:1px solid #C0C0C0;padding:10px}
+BUTTON{font-size:10px;background-color:#EEEEEE;font-family:verdana}
+.profilesButtonCommand{color:#ffffff;font-weight:normal;height:2.5em;margin-right:3px;margin-left:3px;vertical-align:text-bottom;padding:0px 3px;border:1px solid #4c94d6;background:url(./buttonBlue3.gif) top left repeat-x;}
+.msgbox{background-color:#FFFFC0;padding:10px;border:1px solid #C0C0C0;margin-bottom:5px}
+.msgbox2{background-color:#FFFFC0;padding:10px}
+-moz-border-radius: 10px;
+-webkit-border-radius: 10px;
+
+.boxPointerRight {
+	position:absolute;
+	margin-left:-23px;
+	width:0; 
+	height:0; 
+	border-left: 0; 
+	border-right-style:solid;
+	border-right-width:16px;
+	border-right-color:blue;
+	border-top: 10px solid transparent;
+	border-bottom: 10px solid transparent;		
+}
+.docSubject{cursor:pointer}
+.bodyhide{display:none}
+.pagerOuter{padding:5px}
+.pagerInner{margin:5px}
+.lotusPaging span{padding-left:2px;padding-right:2px;} 
+
+.OuterBox{width: 680px;position: relative;clear: both;height:90px}
+.innerLeft{width: 310px;position: relative;float: left; border:1px solid #C0C0C0;padding:10px;height:70px}
+.innerRight{width: 310px;position: relative;float: right; border:1px solid #C0C0C0;padding:10px;height:70px}
+//#banner{-moz-border-radius: 8px; border-radius: px}
+
+.subjectLeft{width: 500px;position: relative;float: left; border:1px solid #C0C0C0}
+.subjectRight{width: 100px;position: relative;float: right; border:1px solid #C0C0C0}
+
+
+

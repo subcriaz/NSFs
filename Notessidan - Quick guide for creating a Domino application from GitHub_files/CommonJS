@@ -1,0 +1,202 @@
+
+dojo.addOnLoad(function(){
+
+	
+	
+	var divbody = dojo.query("[id$='divBody']")[0];
+	var pager = dojo.query("[id$='pager1']")[0];
+	
+	// if divBody available, initially collapse all 
+	//if(divbody){ 
+	//	togglePosts();
+	//}
+	
+	// if pager is available do not open, single posts always open
+	//if(!pager){ 
+	//	openFirst();
+	//}
+	
+	// always focus searchfield
+	var searchFld = dojo.query("[id$='st']")[0];
+	searchFld.focus();
+		
+//	dojo.query(".icomments http").forEach(function(x){
+//		dojo.style(x,"background-color","#000000");
+//	})
+	
+//	var dv= dojo.query("[id$='divSubject']")[0];
+//	dojo.style(dv,"border", "1px solid #000000");
+	//alert(dv.length);
+
+//http://www.oreillynet.com/onlamp/blog/2008/02/dojo_goodness_part_1_1.html
+
+//	dojo.query("div[id$='divSubject']").onmouseover(function(evt){
+//		if(evt.target.Class=='docSubject'){
+//			dojo.style(evt.target, "border", "1px solid #000000");
+//		}
+//	});
+
+/*
+	dojo.query("div[id$='divSubject']").onmouseout(function(evt){
+		dojo.style(evt.target, "border", "1px solid #C0C0C0");
+	});
+	
+
+
+	var dv= dojo.query("[id$='divSubject']");
+	dojo.connect(dv, "onmouseover", function(event){
+		console.log(e.target);
+		dojo.style(dv,{opacity:"1"});
+		dojo.stopEvent(event);
+	});
+			
+	dojo.connect(dv, "onmouseout", function(event){
+		console.log(e.target);
+		dojo.style(controlsPane,{opacity:"0.3"});
+		dojo.stopEvent(event);
+	});
+
+*/
+	
+});
+
+
+
+
+function openFirst(){
+	
+	var divbody = dojo.query("[id$='divBody']")[0];
+	var divpostfooter = dojo.query("[id$='divPostFooter']")[0];
+	var divcomments = dojo.query("[id$='divComments']")[0];
+	var img = dojo.query("[id$='imgEC']")[0];
+	dojo.removeClass(divbody,"bodyhide");
+	dojo.removeClass(divpostfooter,"bodyhide");
+	dojo.removeClass(divcomments,"bodyhide");
+	dojo.attr(img,"src","/blogg.nsf/collapse.gif");
+	
+	
+	//div.toggleClass("bodyhide");
+	
+	
+
+/*	
+	dojo.query("[id$='divSubject']").onMouseOver(function(e){
+		console.log(e.target);
+		//e.target.
+		e.style("background-color:red")
+	});
+*/
+	
+}
+
+function togglePosts(){
+	if(dojo.cookie("style")=="c"){
+		dojo.query(".docBody").addClass("bodyhide");
+		dojo.query(".docPostFooter").addClass("bodyhide");
+		dojo.query(".comments").addClass("bodyhide");
+		dojo.query(".expcol").attr("src","/blogg.nsf/expand.gif");
+	}else if(dojo.cookie("style")=="e")	{
+		dojo.query(".docBody").removeClass("bodyhide");
+		dojo.query(".docPostFooter").removeClass("bodyhide");
+		dojo.query(".comments").removeClass("bodyhide");
+		dojo.query(".expcol").attr("src","/blogg.nsf/collapse.gif");
+	}else{
+		dojo.query(".docBody").addClass("bodyhide");
+		dojo.query(".docPostFooter").addClass("bodyhide");
+		dojo.query(".comments").addClass("bodyhide");
+		dojo.query(".expcol").attr("src","/blogg.nsf/expand.gif");
+		
+	
+	}
+}
+
+function addClick(){
+	
+	if(dojo.hasClass("#{id:divBody}","bodyhide")){
+		dojo.removeClass("#{id:divBody}","bodyhide");
+		dojo.removeClass("#{id:divComments}","bodyhide");
+		dojo.removeClass("#{id:divComment}","bodyhide");
+		dojo.attr("#{id:imgEC}","src","/blogg.nsf/collapse.gif");
+		return false;
+	}else{
+		dojo.addClass("#{id:divBody}","bodyhide");
+		dojo.addClass("#{id:divComments}","bodyhide");
+		dojo.addClass("#{id:divComment}","bodyhide");
+		dojo.attr("#{id:imgEC}","src","/blogg.nsf/expand.gif");
+		return false
+	}
+}	
+
+function clickSubject(){
+	if(dojo.hasClass("#{id:divBody}","bodyhide")){
+		dojo.removeClass("#{id:divBody}","bodyhide");
+		dojo.removeClass("#{id:divComments}","bodyhide");
+		dojo.removeClass("#{id:divPostFooter}","bodyhide");
+		dojo.removeClass("#{id:divComment}","bodyhide");
+		dojo.attr("#{id:imgEC}","src","/blogg.nsf/collapse.gif");
+		dojo.attr("#{id:divSubject}","title","Klicka f\u00F6r att g\u00F6mma posten");
+		dojo.attr("#{id:divSubject}","style","background-color:#FAFAFA");
+		
+		return false;
+	}else{
+		dojo.addClass("#{id:divBody}","bodyhide");
+		dojo.addClass("#{id:divPostFooter}","bodyhide");
+		dojo.addClass("#{id:divComments}","bodyhide");
+		dojo.addClass("#{id:divComment}","bodyhide");
+		dojo.attr("#{id:imgEC}","src","/blogg.nsf/expand.gif");
+		dojo.attr("#{id:divSubject}","title","Klicka f\u00F6r att visa posten");
+		dojo.attr("#{id:divSubject}","style","background-color:#FFFFFF");
+		return false;
+	}
+}
+	//dojo.byId("#{id:div1}").style("background-Color","#C0C0C0");
+
+	//var idx = "#{id:txt}";
+	//dojo.query(txt).attr("value","test");
+	 
+///	var xid = '#{javascript:getClientId("txt")}';
+//	$(xid).attr("value","Test");
+
+	//var ib = '#{javascript:getClientId("txt")}';
+	//txt.value="Test"; 
+	//var x = document.getElementById("#{id:st}").focus();
+	//alert("Test");
+	//dojo.query("INPUT").attr("value","Test");
+		
+
+
+/*
+var disableLinks = function(){
+	    dojo.query("a").connect("onclick",function(e){
+		e.preventDefault(); // stop the event
+		console.log('clicked: ',e.target); // the node we clicked on
+	    });	
+	};
+
+//dojo.addOnLoad(disableLinks);
+
+*/
+
+function doAction(docUnid,ip,action,webId) {
+	dojo.xhrGet( {
+		preventCache: true,
+		url: "/blogg.nsf/action?openagent&unid=" + docUnid + "&action=" + action + "&ip=" + ip, 
+		handleAs: "xml",
+		load: function(response, ioArgs) {
+	        var x = response.getElementsByTagName("response")[0].childNodes[0].nodeValue;
+	        if(x==1){
+		        var c1 = dojo.byId(webId);
+		        var c2 = c1.innerHTML;
+		        c1.innerHTML = +c2 + 1;
+		        alert("Tack f\u00F6r din medverkan");
+				return response;
+			}else{
+				alert("Du gillar redan denna post");
+			}
+       	},        
+        error: function(err){
+			console.debug("Error: ", err);
+		}
+	});
+}
+
