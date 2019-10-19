@@ -1,4 +1,4 @@
-<Emoty Foldrer are not push to github >
+<Empty Foldrer are not push to github >
 
 
 Add new repo NSFs on github
@@ -16,3 +16,9 @@ F:\GitHub\NSfs>git commit -m "sacdsad"
  create mode 100644 readme.txt
 
 git push origin master
+
+------------------
+
+Now create 2 folders db1 , db2 under NSFs folder 
+
+create 2 nsf files (db1.nsf and db2.nsf )  in desgner and set source control pointing to these folders respectively
