@@ -62,3 +62,7 @@ fatal: unable to auto-detect email address (got 'Riz@win732.(none)')
 
 solution:  
 git config --global user.email "rhassan70@gmail.com"
+
+
+====================
+
