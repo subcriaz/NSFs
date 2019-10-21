@@ -1,0 +1,2851 @@
+<?xml version='1.0' encoding='utf-8'?>
+<note class='form' xmlns='http://www.lotus.com/dxl' version='10.0' maintenanceversion='1.0'
+ replicaid='452583FC0023B0DF'>
+<noteinfo noteid='2d2' unid='FB75EA3CEF9C068145258352003D5CE2' sequence='9'>
+<created><datetime>20181127T161014,74+05</datetime></created>
+<modified><datetime>20190627T164213,42+05</datetime></modified>
+<revised><datetime>20190101T131101,73+05</datetime></revised>
+<lastaccessed><datetime>20190627T164213,41+05</datetime></lastaccessed>
+<addedtofile><datetime>20190627T164213,41+05</datetime></addedtofile></noteinfo>
+<updatedby><name>CN=Samiullah Arshed/OU=IT/O=BahriaTown/C=PK</name></updatedby>
+<wassignedby><name>CN=Samiullah Arshed/OU=IT/O=BahriaTown/C=PK</name></wassignedby>
+<item name='Depos_Date' summary='false' sign='true'>
+<rawitemdata type='400'>
+AAAAAAAAAAA=
+</rawitemdata></item>
+<item name='BreakUpPart_1' summary='false' sign='true'><number>0</number></item>
+<item name='$$PaymentDesc_2' summary='false' sign='true'><text>'++LotusScript Development Environment:2:5:(Options):0:66
+
+'++LotusScript Development Environment:2:5:(Forward):0:1
+Declare Sub Onchange(Source As Field)
+Declare Sub Exiting(Source As Field)
+
+'++LotusScript Development Environment:2:5:(Declarations):0:2
+
+'++LotusScript Development Environment:2:2:BindEvents:1:129
+Private Sub BindEvents(Byval Objectname_ As String)
+	Static Source As FIELD
+	Set Source = Bind(Objectname_)
+	On Event Onchange From Source Call Onchange
+	On Event Exiting From Source Call Exiting
+End Sub
+
+'++LotusScript Development Environment:2:2:Onchange:1:12
+Sub Onchange(Source As Field)
+	
+	'========================================================
+	'NOTE by Mujahid ur Rehman
+	'date: 05 Dec 2005
+	'three things to take care of while calculating the due amount.
+	'1 - previous adjustments made against the selected account head.
+	'2- waive offs made against the selected account head for the same plot
+	'3- payment docs against the selected account head.
+	'So the amount due will be Actual amount of Account Head - all adjustments - all waive offs - all payments docs for the same account head
+	'========================================================	
+	
+	Dim uiws As New NotesUIWorkspace 
+	Dim appview As notesview
+	Dim docCurrent As NotesDocument
+	Set docCurrent = uiws.CurrentDocument.Document
+	
+	pkey = uiws.CurrentDocument.FieldGetText("subkey")
+	
+	If pkey = "" Then
+		Exit Sub
+		
+		
+	Else ' pkey is not empty
+		
+		pdesc=uiws.CurrentDocument.Document.PaymentDesc(0)
+		
+		Msgbox Cstr( uiws.CurrentDocument.Document.PaymentDesc(0) )
+		
+		Dim plotdb As NotesDatabase 
+		Dim crmdb As NotesDatabase 
+		
+		Set crmdb = getDBCRM()
+		Set plotdb = getDBPLOT()
+		
+		Dim dblOriginalDueAmount As Double
+		dblOriginalDueAmount = 0
+		
+		Dim viewAdjustments As NotesView
+		Set viewAdjustments = db.GetView("(Lookup_AmountAdjustment)")
+		
+		Dim dcAdjustments As NotesDocumentCollection
+		Dim dblAmountToAdjust  As Double
+		
+		Dim dblWaiveOffs As Double
+		Dim dblPayments As Double
+		Dim strAdjustmentkey As String
+		Dim strRegNo As String
+		
+		dblAmountToAdjust = 0
+		dblWaiveOffs = 0
+		dblPayments = 0
+		
+		
+		'if the selected account head i,e. the field of Payment Dec is one of the fees....
+		'then no need to fetch the payment scheme from the plot DB. it shoud then be fetched from the
+		'CRM DB --&gt; plot Application document.
+		If pdesc = "Transfer Fee" Or pdesc =  "File Opening" Or pdesc = "Restoration" Or pdesc = "Refund"  Or uiws.CurrentDocument.Document.AdjustedFor(0)  = "Surcharge"  Then
+			
+			Dim docPlotApplication As NotesDocument
+			Set docPlotApplication = getDocByKeyDB( crmdb , "NPA1" , "Reg_No" , uiws.CurrentDocument.FieldGetText("Reg_No") )
+			
+			''if the plot application document is found from the CRM DB
+			If Not docPlotApplication Is Nothing Then
+				
+				'now gona fetch the due amount against the selected fees.....
+				If docCurrent.PaymentDesc(0)="Transfer Fee" Then		
+					dblOriginalDueAmount = docPlotApplication.PlotTransfer( 0 ) 
+					
+				End If
+				
+				If docCurrent.PaymentDesc(0)="File Opening" Then		
+					dblOriginalDueAmount =  docPlotApplication.FileOpening( 0 )  
+					
+				End If
+				
+				If docCurrent.PaymentDesc(0)="Restoration" Then		
+					dblOriginalDueAmount = docPlotApplication.PlotRestoration( 0 )
+					
+				End If
+				
+				If docCurrent.PaymentDesc(0)="Refund" Then		
+					dblOriginalDueAmount = docPlotApplication.Refund( 0 )
+					
+				End If
+				
+				uiws.CurrentDocument.Document.Due_Date  = ""
+				
+			Else 
+				
+				alertUser "Could not find Plot Application from the CRM Database. Please contact Database Administrator"
+				Exit Sub
+				
+			'end if  Not docPlotApplication Is Nothing Then
+			End If
+			
+		Else ' fetch the amount of the payment to be made from the plot schemes
+			
+			Dim plotdoc As NotesDocument 
+			Dim plotdocDownGovt As NotesDocument
+			Dim plotdocDownOthers As NotesDocument		
+			Dim viewPlotScheme As NotesView 
+			Set viewPlotScheme = plotdb.GetView("(PS_By_Phase_Size_Batch_Head)")
+			
+			Dim docPlotScheme As NotesDocument
+			key=Cstr(pkey) &amp;Cstr(pdesc)
+			
+			Msgbox Cstr( pdesc )
+			Set docPlotScheme = viewPlotScheme.GetDocumentByKey( key,True)	
+			
+			If Not docPlotScheme Is Nothing Then
+				
+				dblOriginalDueAmount = Cdbl( docPlotScheme.Payment_Amount(0) )
+				uiws.CurrentDocument.Document.Due_Date = docPlotScheme.Due_Date(0)	
+				
+				strAdjustmentkey = ""
+				strRegNo = ""
+				
+				strRegNo =Cstr( uiws.CurrentDocument.Document.RegistrationNumber(0) )
+				strAdjustmentkey = strRegNo &amp; pkey &amp; pdesc
+				
+				Set dcAdjustments= viewAdjustments.GetAllDocumentsByKey( strAdjustmentkey ,True)
+				
+				'calculating the waiveoffs for this account head.... if any
+				dblWaiveOffs = calculateWaiveOffs( strRegNo  , crmdb  , Cstr( pdesc )  )
+				
+				'calculating the payments made for this account head
+				dblPayments = calculatePayments( Cstr( pdesc )  , strRegNo  )
+				
+				'calculating the amount to be adjusted
+				dblAmountToAdjust = calculateAdjustments( dcAdjustments  )
+				
+			Else
+				
+				alertUser "Either no Payment Scheme is defined for this Account Head in the Database or there was an Error"
+				uiws.CurrentDocument.Document.PaymentDesc = ""
+				uiws.CurrentDocument.Document.amountDue = ""
+				uiws.CurrentDocument.Document.Due_Date = ""
+				Call uiws.CurrentDocument.Refresh()
+				Exit Sub
+				
+			End If
+			
+			'instalno = uiws.CurrentDocument.FieldGetText("Installment_Number")
+			
+		'end if  pdesc = "Transfer Fee" Or pdesc =  "File Opening" Or pdesc = "Restoration" Or pdesc = "Refund"  Or uiws.CurrentDocument.Document.AdjustedFor(0)  = "Surcharge"  Then
+		End If
+		
+		'if the total comes up to zero then no need to pouplate the fields.....
+		If dblOriginalDueAmount - dblAmountToAdjust - dblWaiveOffs - dblPayments  &lt;= 0 Then
+			
+			alertUser "Amount Due for this Account Head is ZERO. You cannot make Adjustment against this Account Head"
+			uiws.CurrentDocument.Document.PaymentDesc = ""
+			uiws.CurrentDocument.Document.amountDue = ""
+			uiws.CurrentDocument.Document.Due_Date = ""
+			Call uiws.CurrentDocument.Refresh()
+			Exit Sub				
+			
+		'end if  dblOriginalDueAmount - dblAmountToAdjust - dblWaiveOffs - dblPayments  = 0 Then
+		End If
+		
+		'setting the values
+		uiws.CurrentDocument.Document.amountDue = dblOriginalDueAmount - dblAmountToAdjust - dblWaiveOffs - dblPayments 
+		Call uiws.CurrentDocument.Refresh()
+		
+		
+	End If 
+	
+	
+%REM
+
+
+		If pdesc="Downpayment" Then
+			
+			key=Cstr(pkey) &amp; pdesc
+			
+			Dim DownPaymentView As NotesView
+			Dim DownPaymentDoc As NotesDocument
+			Dim DownPaymentRegNo As String
+			Dim DownPaymentKey As String
+			DownPaymentRegNo=uiws.CurrentDocument.Document.Reg_No(0)
+			DownPaymentKey= Cstr(DownPaymentRegNo) &amp; Cstr(key)
+			Set DownPaymentView=thisdb.GetView("(Lookup_PaymentAmount)")
+			Set DownPaymentDoc=DownPaymentView.GetDocumentByKey(DownPaymentKey,True)
+			
+			If Not DownPaymentDoc Is Nothing Then
+				Messagebox "DownPayment Fee is already paid",0+64,"Data Entry Error"
+				Exit Sub
+			End If
+			
+			Set plotdocDownGovt = viewPlotScheme.GetDocumentByKey(key, True)
+			
+			If Not plotdocDownGovt Is Nothing Then
+				
+				dblOriginalDueAmount = Cdbl(plotdocDownGovt.Payment_Amount(0))
+				
+				strRegNo =Cstr( uiws.CurrentDocument.Document.reg_no( 0 ) )
+				strAdjustmentkey = strRegNo &amp; pkey &amp; pdesc
+				
+				Set dcAdjustments= viewAdjustments.GetAllDocumentsByKey( strAdjustmentkey ,True)
+				
+				dblAmountToAdjust = 0
+				
+				'calculating
+				dblAmountToAdjust = calculateMultipleAdjustment( dcAdjustments )
+				
+				'assignment on the document
+				uiws.CurrentDocument.Document.amountDue = dblOriginalDueAmount - dblAmountToAdjust
+				uiws.CurrentDocument.Document.Due_Date = plotdocDownGovt.Due_Date(0)	
+				
+			'end if  Not plotdocDownGovt Is Nothing Then	
+			End If
+			
+		Elseif pdesc="Membership Fees"  Then
+			
+			key=Cstr(pkey) &amp;Cstr(pdesc)
+			
+			Set plotdocDownOthers = viewPlotScheme.GetDocumentByKey( key,True)	
+			
+			If Not plotdocDownOthers Is Nothing Then
+				
+				
+				dblOriginalDueAmount = Cdbl(plotdocDownOthers.Payment_Amount(0))
+				
+				strRegNo =Cstr( uiws.CurrentDocument.Document.reg_no(0) )
+				strAdjustmentkey = strRegNo &amp; pkey &amp; pdesc
+				
+				Set dcAdjustments= viewAdjustments.GetAllDocumentsByKey( strAdjustmentkey ,True)
+				
+				dblAmountToAdjust = 0
+				dblAmountToAdjust = calculateMultipleAdjustment( dcAdjustments  )
+				
+				uiws.CurrentDocument.Document.amountDue = dblOriginalDueAmount - dblAmountToAdjust
+				uiws.CurrentDocument.Document.Due_Date = plotdocDownOthers.Due_Date(0)	
+				
+			'end if  Not plotdocDownOthers Is Nothing Then	
+			End If
+			
+			
+		Elseif pdesc="Transfer Fee" Then
+			
+			
+			'If Not docPlotApplication Is Nothing Then
+			uiws.CurrentDocument.Document.AmountDue=uiws.CurrentDocument.Document.PlotTransfer(0)
+				'uiws.CurrentDocument.Document.Due_Date="N.A"
+			'End If
+			
+			
+		'by: Mujahid ur Rehman
+		'Dec 05 2005
+		'land and development will not be in the adjustment anymore.
+		Else 
+			 ' payment selected is Land and Development charges having installment no as key
+			
+			' --------------------------------------------------------------------------------------------
+			 '  Code for Automatic Detection of Next Installment Number
+			
+			Dim NextPaymentView As NotesView
+			Dim NextPaymentDc As NotesDocumentCollection
+			Dim NextPaymentDoc As NotesDocument
+			
+			Set NextPaymentView=thisdb.GetView("(LookupAutmaticNextInstallmentPayment)")
+			
+			Dim NextPaymentkey As String
+			
+			Dim NextPaymentregno As String
+			NextPaymentregno=Cstr(uiws.CurrentDocument.Document.reg_no(0))
+			
+			NextPaymentkey=NextPaymentregno '&amp;  instalno
+			Set NextPaymentdc=NextPaymentView.GetAllDocumentsByKey(NextPaymentkey,True)
+			
+			If NextPaymentdc.count&lt;&gt;0 Then
+				
+				'------------------------------------------------------------------------------------------
+			' check the Installment having Largest Number i.e Latest Installment
+				
+				Set Firstdoc=NextPaymentdc.GetFirstDocument	
+				Largest=0
+				'LoopCounter=Cdbl(NextPaymentdc.Count)
+				
+				While Not firstdoc Is Nothing
+					InstallNo=Cdbl(Firstdoc.Installment_Number(0))
+					If InstallNo&gt;Largest Then
+						Largest=InstallNo	
+					End If
+					Set Firstdoc=NextPaymentdc.GetNextDocument(FirstDoc)
+				Wend
+				
+			'------------------------------------------------------------------------------------------	
+				'Set NextPaymentdoc=NextPaymentdc.GetLastDocument
+				
+				'Dim LastInstallmentNumber As Double
+				Dim NextInstallmentNumber As Double
+				
+				'LastInstallmentNumber=Cdbl(NextPaymentDoc.Installment_Number(0))
+				'NextInstallmentNumber=LastInstallmentNumber+1
+				NextInstallmentNumber=Largest+1
+				
+				'Set NextPaymentdoc=NextPaymentdc.GetLastDocument
+				
+				'Dim LastInstallmentNumber As Double
+				'Dim NextInstallmentNumber As Double
+				
+				'LastInstallmentNumber=Cdbl(NextPaymentDoc.Installment_Number(0))
+				'NextInstallmentNumber=LastInstallmentNumber+1
+				
+				
+				uiws.CurrentDocument.Document.Installment_Number=NextInstallmentNumber
+			Elseif NextPaymentdc.count=0 Then
+				uiws.CurrentDocument.Document.Installment_Number=1
+				
+			End If
+			
+			'-----------------------------------------------------------------------------------------------
+			
+			Set plotdoc = viewPlotScheme.GetDocumentByKey( pkey &amp; pdesc &amp; instalno,True)
+			
+			If Not plotdoc Is Nothing Then
+		'---------------------------------------------------------------------------------------
+		' code to deduct due amount from amount adjustment (if applicable)
+				
+				Dim OriginalDueAmount1 As Double
+				'Dim OriginalDuedate As Double
+				
+				OriginalDueAmount1=Cdbl(plotdoc.Payment_Amount(0))
+				OriginalDuedate1=plotdoc.Due_Date(0)
+				
+				Dim ExistAdjustView1 As NotesView
+				Dim dc1 As NotesDocumentCollection
+				Dim doc1 As NotesDocument
+				
+				Set ExistAdjustView1=thisdb.GetView("(Lookup_AmountAdjustment)")
+				
+				Dim Adjustmentkey1 As String
+				Dim regno1 As String
+				regno1=Cstr(uiws.CurrentDocument.Document.reg_no(0))
+				Adjustmentkey1=regno1 &amp; pkey &amp; pdesc &amp; instalno
+				Set dc1=ExistAdjustView1.GetAllDocumentsByKey(Adjustmentkey1,True)
+				If dc1.Count=1 Then
+					Set doc1=dc1.GetFirstDocument
+					Dim AmountToAdjust1 As Double
+					Dim RemainingAmount1 As Double
+					
+					AmountToAdjust1=doc1.AmountToAdjust(0)
+					RemainingAmount1=OriginalDueAmount1-AmountToAdjust1
+					uiws.CurrentDocument.Document.amountDue = RemainingAmount1
+					uiws.CurrentDocument.Document.Due_Date = OriginalDuedate1	
+					
+				Elseif dc1.count&gt;1 Then
+						' Multiple Adjustments against same Installment Number
+					' code to be developed later
+					
+					
+				Elseif dc1.Count=0 Then
+					'No Amount Adjustment, Display Original Due Amount
+					
+					uiws.CurrentDocument.Document.amountDue = OriginalDueAmount1
+					uiws.CurrentDocument.Document.Due_Date = OriginalDuedate1
+					
+				End If
+				
+		'---------------------------------------------------------------------------------------
+				
+			End If
+			
+		End If
+		
+		
+	End If ' end-if for pkey check
+	
+	
+	
+	
+
+ OLD code 
+
+	Dim uiws As New NotesUIWorkspace 
+	Dim appview As notesview
+	Dim thisdb As NotesDatabase
+	Dim session As New NotesSession 
+	Set thisdb=session.CurrentDatabase
+	
+	pkey = uiws.CurrentDocument.FieldGetText("subkey")
+	
+	If pkey = "" Then
+		Exit Sub
+	Else ' pkey is not empty
+		Dim docPlotApplication As NotesDocument
+		Dim profdoc As NotesDocument 
+		Set  profdoc = session.CurrentDatabase.GetProfileDocument("profile")
+		Dim plotdb As New NotesDatabase(session.CurrentDatabase.Server,profdoc.proppath(0))
+		Dim crmdb As New NotesDatabase(session.CurrentDatabase.Server,profdoc.crmpath(0))
+		'Msgbox Cstr(plotdb.Title)
+		'Msgbox Cstr(crmdb.Title)
+		'Exit Sub
+		
+		Dim viewPlotScheme As NotesView 
+		Set viewPlotScheme = plotdb.GetView("(PS_By_Phase_Size_Batch_Head)")
+		Dim plotdoc As NotesDocument 
+		
+		''''''''''''''''''' new addition
+		
+		Dim plotdocDownGovt As NotesDocument
+		Dim plotdocDownOthers As NotesDocument		
+		
+		key_regno = uiws.CurrentDocument.FieldGetText("Reg_No")
+		
+		
+		Set appview=crmdb.GetView("PlotApp_ByRegNo")
+		Set docPlotApplication=appview.GetDocumentByKey(key_regno,True)
+		pdesc=uiws.CurrentDocument.Document.PaymentDesc(0)
+		instalno = uiws.CurrentDocument.FieldGetText("Installment_Number")
+		
+		Set  profdoc = session.CurrentDatabase.GetProfileDocument("profile")
+		'Dim occupation As String
+		'occupation=docPlotApplication.App_Occupation(0)
+		
+		If pdesc="Downpayment" Then
+			
+			key=Cstr(pkey) &amp; pdesc
+			
+			Set plotdocDownGovt = viewPlotScheme.GetDocumentByKey(key, True)						
+			uiws.CurrentDocument.Document.amountDue = plotdocDownGovt.Payment_Amount(0)
+			uiws.CurrentDocument.Document.Due_Date = plotdocDownGovt.Due_Date(0)
+			
+			
+
+	
+Elseif pdesc="Membership Fees"  Then
+	key=Cstr(pkey) &amp;Cstr(pdesc)
+	
+	Set plotdocDownOthers = viewPlotScheme.GetDocumentByKey( key,True)			
+	uiws.CurrentDocument.Document.amountDue = plotdocDownOthers.Payment_Amount(0)
+	uiws.CurrentDocument.Document.Due_Date = plotdocDownOthers.Due_Date(0)	
+Else ' payment selected is Land and Development charges having installment no as key
+	Set plotdoc = viewPlotScheme.GetDocumentByKey( pkey &amp; pdesc &amp; instalno,True)
+	
+					' --------------------------------------------------------------------------------------------
+			 '  Code for Automatic Detection of Next Installment Number
+	
+	Dim NextPaymentView As NotesView
+	Dim NextPaymentDc As NotesDocumentCollection
+	Dim NextPaymentDoc As NotesDocument
+	
+	Set NextPaymentView=thisdb.GetView("(LookupAutmaticNextInstallmentPayment)")
+	
+	Dim NextPaymentkey As String
+	
+	Dim NextPaymentregno As String
+	NextPaymentregno=Cstr(uiws.CurrentDocument.Document.reg_no(0))
+	
+	NextPaymentkey=NextPaymentregno '&amp;  instalno
+	Set NextPaymentdc=NextPaymentView.GetAllDocumentsByKey(NextPaymentkey,True)
+	
+	If Not NextPaymentdc Is Nothing Then
+		Set NextPaymentdoc=NextPaymentdc.GetLastDocument
+		
+		Dim LastInstallmentNumber As Double
+		Dim NextInstallmentNumber As Double
+		
+		LastInstallmentNumber=Cdbl(NextPaymentDoc.Installment_Number(0))
+		NextInstallmentNumber=LastInstallmentNumber+1
+		
+		
+		uiws.CurrentDocument.Document.Installment_Number=NextInstallmentNumber
+		
+	End If
+	
+	
+			'-----------------------------------------------------------------------------------------------
+	If Not plotdoc Is Nothing Then
+		
+		uiws.CurrentDocument.Document.amountDue = plotdoc.Payment_Amount(0)
+		uiws.CurrentDocument.Document.Due_Date = plotdoc.Due_Date(0)	
+	End If
+	
+End If
+
+
+		'''''''''''''''''''''''''''''''''''
+
+
+
+
+End If ' end-if for pkey check
+
+%END REM
+	
+End Sub
+'++LotusScript Development Environment:2:2:Exiting:1:12
+Sub Exiting(Source As Field)
+	
+%REM
+
+
+	Dim uiws As New NotesUIWorkspace 
+	Dim appview As notesview
+	Dim thisdb As NotesDatabase
+	Dim session As New NotesSession 
+	Set thisdb=session.CurrentDatabase
+	
+	pdesc=uiws.CurrentDocument.Document.PaymentDesc(0)
+	pkey = uiws.CurrentDocument.FieldGetText("subkey")
+	
+	key=Cstr(pkey) &amp;Cstr(pdesc)
+	
+	
+	
+	
+	Dim MembershipView As NotesView
+	Dim MembershipDoc As NotesDocument
+	Dim MembershipRegNo As String
+	Dim MembershipKey As String
+	MembershipRegNo=uiws.CurrentDocument.Document.Reg_No(0)
+	MembershipKey= Cstr(MembershipRegNo) &amp; Cstr(key)
+	Set MembershipView=thisdb.GetView("(Lookup_PaymentAmount)")
+	Set MembershipDoc=MembershipView.GetDocumentByKey(MembershipKey,True)
+	
+	If Not MembershipDoc Is Nothing Then
+		Messagebox "Membership Fee is already paid",0+64,"Data Entry Error"			
+	End If
+%END REM	
+	
+End Sub<break/></text></item>
+<item name='$PaymentDesc_2_O' sign='true'>
+<rawitemdata type='14'>
+AQAAAkxTT0IDABQIZW4AAAQATgBYBAQAAABQDsQLAAAAAMAI8AJACTgOAAAkAAwBGAA4AAAAwABU
+AAAAAAAAAAMAAAAYAMQGAAAAAMQGxAYAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAGABsAQgAAADcCDwNdAt0CwAAAAAAAAAAAAAAAAAAAAAAAAAA3AhoDHQKdAoAAAAAAAAA
+ADwNPA0ICtQMAAAAAAgAAADMAEAJnAOwB8wAzAAgAnQFAAAAAGAEYAQAAAAAAAAAAAAAAAAAAAAA
+AAAAAPwCQAkAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAEABQBMb3R1cyBQcm9kdWN0AAAAVjAuMAAAAAAAAAAAAAAAAAAA
+AAAEAAAAWAQAAAAAAABQDgAAxAsAAAAAAAAAAAAAAQAAAAAAAAABAAAAAAAAAAEAAAAAAAAAAAAA
+AAYAAABXMzJJhwEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAwDICwAAAABoAQgAKgA3AEYAQQAzAEUARgA0AAAAAABsAAMATgBFAFcAAACAAAYARABFAEwA
+RQBUAEUAAAAAAAwCCgBJAE4ASQBUAEkAQQBMAEkAWgBFAAAAAACUAQkAVABFAFIATQBJAE4AQQBU
+AEUAAACIAAYATwBCAEoARQBDAFQAAAAAAPgAAAAAAAAAzAEZACgARwBMAE8AQgBBAEwAUwApAEMA
+UgBNAF8ARABSAEEARgBUAEQARQBUAEEASQBMAFMAAAAoARkAKABHAGwAbwBiAGEAbABzACkAQwBS
+AE0AXwBEAHIAYQBmAHQARABlAHQAYQBpAGwAcwAAAEQBBgBTAE8AVQBSAEMARQAAAAAAVAEKAEIA
+SQBOAEQARQBWAEUATgBUAFMAAAAAAKQBCwBPAEIASgBFAEMAVABOAEEATQBFAF8AAACAAQUARgBJ
+AEUATABEAAAAfAQGACUATABTAEkARABFAAAAAABIBAgATwBOAEMASABBAE4ARwBFAAAAAADIAgcA
+RQBYAEkAVABJAE4ARwAAAPQBBABVAEkAVwBTAAAAAAB8AhAATgBPAFQARQBTAFUASQBXAE8AUgBL
+AFMAUABBAEMARQAAAAAA4AEGACUATABTAFgAVQBJAAAAAADoAgcAQQBQAFAAVgBJAEUAVwAAACAC
+CQBOAE8AVABFAFMAVgBJAEUAVwAAADwDBgAlAEwAUwBYAEIARQAAAAAAPAIKAEQATwBDAEMAVQBS
+AFIARQBOAFQAAAAAAFwCDQBOAE8AVABFAFMARABPAEMAVQBNAEUATgBUAAAAuAINAE4ATwBUAEUA
+UwBEAEEAVABBAEIAQQBTAEUAAACgAg8AQwBVAFIAUgBFAE4AVABEAE8AQwBVAE0ARQBOAFQAAAAM
+AwgARABPAEMAVQBNAEUATgBUAAAAAADQAwQAUABLAEUAWQAAAAAATAMMAEYASQBFAEwARABHAEUA
+VABUAEUAWABUAAAAAAD8AgYAcwB1AGIAawBlAHkAAAAAACgDBQBQAEQARQBTAEMAAADcAwsAUABB
+AFkATQBFAE4AVABEAEUAUwBDAAAAQAUGAFAATABPAFQARABCAAAAAABkAwUAQwBSAE0ARABCAAAA
+rAMIAEcARQBUAEQAQgBDAFIATQAAAAAAfAMJAEcARQBUAEQAQgBQAEwATwBUAAAACAUUAEQAQgBM
+AE8AUgBJAEcASQBOAEEATABEAFUARQBBAE0ATwBVAE4AVAAAAAAAIAUPAFYASQBFAFcAQQBEAEoA
+VQBTAFQATQBFAE4AVABTAAAAKAQCAEQAQgAAAAAA8AMHAEcARQBUAFYASQBFAFcAAADEBBkAKABM
+AG8AbwBrAHUAcABfAEEAbQBvAHUAbgB0AEEAZABqAHUAcwB0AG0AZQBuAHQAKQAAAOAEDQBEAEMA
+QQBEAEoAVQBTAFQATQBFAE4AVABTAAAAxAUXAE4ATwBUAEUAUwBEAE8AQwBVAE0ARQBOAFQAQwBP
+AEwATABFAEMAVABJAE8ATgAAAKQEEQBEAEIATABBAE0ATwBVAE4AVABUAE8AQQBEAEoAVQBTAFQA
+AABcCAwARABCAEwAVwBBAEkAVgBFAE8ARgBGAFMAAAAAAPAFCwBEAEIATABQAEEAWQBNAEUATgBU
+AFMAAABgBRAAUwBUAFIAQQBEAEoAVQBTAFQATQBFAE4AVABLAEUAWQAAAAAAkAUIAFMAVABSAFIA
+RQBHAE4ATwAAAAAAlAYMAFQAcgBhAG4AcwBmAGUAcgAgAEYAZQBlAAAAAACsBQwARgBpAGwAZQAg
+AE8AcABlAG4AaQBuAGcAAAAAAHwFCwBSAGUAcwB0AG8AcgBhAHQAaQBvAG4AAAAgBgYAUgBlAGYA
+dQBuAGQAAAAAABAGCwBBAEQASgBVAFMAVABFAEQARgBPAFIAAACsBwkAUwB1AHIAYwBoAGEAcgBn
+AGUAAABwBhIARABPAEMAUABMAE8AVABBAFAAUABMAEkAQwBBAFQASQBPAE4AAAAAADQGDQBHAEUA
+VABEAE8AQwBCAFkASwBFAFkARABCAAAAVAYEAE4AUABBADEAAAAAALAIBgBSAGUAZwBfAE4AbwAA
+AAAA2AYMAFAATABPAFQAVABSAEEATgBTAEYARQBSAAAAAADABgsARgBJAEwARQBPAFAARQBOAEkA
+TgBHAAAAqAYPAFAATABPAFQAUgBFAFMAVABPAFIAQQBUAEkATwBOAAAAmAcGAFIARQBGAFUATgBE
+AAAAAAAwCQgARABVAEUAXwBEAEEAVABFAAAAAAD4BwkAQQBMAEUAUgBUAFUAUwBFAFIAAADQB1wA
+QwBvAHUAbABkACAAbgBvAHQAIABmAGkAbgBkACAAUABsAG8AdAAgAEEAcABwAGwAaQBjAGEAdABp
+AG8AbgAgAGYAcgBvAG0AIAB0AGgAZQAgAEMAUgBNACAARABhAHQAYQBiAGEAcwBlAC4AIABQAGwA
+ZQBhAHMAZQAgAGMAbwBuAHQAYQBjAHQAIABEAGEAdABhAGIAYQBzAGUAIABBAGQAbQBpAG4AaQBz
+AHQAcgBhAHQAbwByAAAAAAB8CAcAUABMAE8AVABEAE8AQwAAANQIDwBQAEwATwBUAEQATwBDAEQA
+TwBXAE4ARwBPAFYAVAAAABwIEQBQAEwATwBUAEQATwBDAEQATwBXAE4ATwBUAEgARQBSAFMAAACQ
+Cg4AVgBJAEUAVwBQAEwATwBUAFMAQwBIAEUATQBFAAAAAABcCR0AKABQAFMAXwBCAHkAXwBQAGgA
+YQBzAGUAXwBTAGkAegBlAF8AQgBhAHQAYwBoAF8ASABlAGEAZAApAAAAtAkNAEQATwBDAFAATABP
+AFQAUwBDAEgARQBNAEUAAACICAMASwBFAFkAAACECRAARwBFAFQARABPAEMAVQBNAEUATgBUAEIA
+WQBLAEUAWQAAAAAAAAkOAFAAQQBZAE0ARQBOAFQAXwBBAE0ATwBVAE4AVAAAAAAA//8SAFIARQBH
+AEkAUwBUAFIAQQBUAEkATwBOAE4AVQBNAEIARQBSAAAAAAD//xQARwBFAFQAQQBMAEwARABPAEMA
+VQBNAEUATgBUAFMAQgBZAEsARQBZAAAAAAD//xIAQwBBAEwAQwBVAEwAQQBUAEUAVwBBAEkAVgBF
+AE8ARgBGAFMAAAAAAHgKEQBDAEEATABDAFUATABBAFQARQBQAEEAWQBNAEUATgBUAFMAAAD//xQA
+QwBBAEwAQwBVAEwAQQBUAEUAQQBEAEoAVQBTAFQATQBFAE4AVABTAAAAAACMC18ARQBpAHQAaABl
+AHIAIABuAG8AIABQAGEAeQBtAGUAbgB0ACAAUwBjAGgAZQBtAGUAIABpAHMAIABkAGUAZgBpAG4A
+ZQBkACAAZgBvAHIAIAB0AGgAaQBzACAAQQBjAGMAbwB1AG4AdAAgAEgAZQBhAGQAIABpAG4AIAB0
+AGgAZQAgAEQAYQB0AGEAYgBhAHMAZQAgAG8AcgAgAHQAaABlAHIAZQAgAHcAYQBzACAAYQBuACAA
+RQByAHIAbwByAAAApAoJAEEATQBPAFUATgBUAEQAVQBFAAAAaAsHAFIARQBGAFIARQBTAEgAAACk
+C14AQQBtAG8AdQBuAHQAIABEAHUAZQAgAGYAbwByACAAdABoAGkAcwAgAEEAYwBjAG8AdQBuAHQA
+IABIAGUAYQBkACAAaQBzACAAWgBFAFIATwAuACAAWQBvAHUAIABjAGEAbgBuAG8AdAAgAG0AYQBr
+AGUAIABBAGQAagB1AHMAdABtAGUAbgB0ACAAYQBnAGEAaQBuAHMAdAAgAHQAaABpAHMAIABBAGMA
+YwBvAHUAbgB0ACAASABlAGEAZAAAAAAA//8PAE4ATwBUAEUAUwBVAEkARABPAEMAVQBNAEUATgBU
+AAAA//8IAEUAUgBfAFUAVABJAEwAUwAAAAAA//8MAE4ATwBUAEUAUwBTAEUAUwBTAEkATwBOAAAA
+AAAFAFQOAAAAAEgEzxkYAAAAAACMAOAA9wUAAAAAAAAAAAgAAABsAWwBEAEAAAAAAAACAAAAsABc
+AQAAAAAAAAAAAAAAAAAAAACwALAAAAAAAAAAAAAAAAAAAAAAAAAAAABcAVwBAAAAAAAAAAABAAAA
+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
+CQKcAwkCYAQGAAYAAAAGAAkCnAMJAnQFFgAAADgGG0sAABkAFgBUC1gGnvoAABkAFgCYDXQG3nUA
+ABkAFgAgDJgGrA0AABkAFgAAAKwG2TkAABkAIQDACBwaAAAIAEAAaAwAAMQGAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAF
+AAYACQJACQkCYAQZAAMAAgAAAAAAgAgAAIAAAAASABQALAwAAIwICYIAAAAAEAUAAAAA/ALwAv//
+AAAAAAYAAwAAAAkCnAMJAvwCAACBCBkAFgAAALQI2RoAABkAFgAAANgI9K4AABkAEgAUAAAAAAAE
+CQmCAAAAABoFAAAAAPwC8AL//wAAAAAGAAMAAAAJAnQFCQL8AgAAgQgZACEABAAgEQAABwBAANQM
+AAA0CQQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAMACgAEAAYACQJgBAYABAAJAnQFCQKcAyEABAAoEAAABwBAADwNAABgCQQA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAIACAAEAAYABgAJAnQFBAAJApwDIQAEACgSAAAHAEAAAAAAAIgJBAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAG
+AAQACQJ0BQkCnAMEABYAAAB8Cl95AAAZABIAFAAAAAAAlAoKAAAAAADYBgAAAACwBxQC//8AAAAA
+BAACAAAACgAJArAHgAAZABkAGQACAAAAAAAAAAAAAAAAAAAABQAAAAAAAAACANgNAAAAAAAAAAAA
+AAAABQAAAAAAAAACAPANAAAAAAAAAAAAAAAABQAAAAAAAAACAAgOAAAAAAAAAAAAAAAABQAAAAAA
+AAACACAOAAAAAAAAAAAAAAAABQAAAAAAAAAEAFwEAAAAANLEAB0AABoMAFtcAUmwAMrMAKYaDQBH
+XAHL7AAAAGwBGg4AR1wBy9cAAADEBhoPAB0aHgBe4AIrIAIkphohAF4kBUvgAi2MByMtQAgjphoj
+AF5kCEvgAi2MByMsdAh97AIjpRolAEpkCH2EALg4CgAaJgAcGikAOtYDGisAXqQIS+ACLYwHIy1A
+CCNTtAiFJaUaLQBL4AItjAcjLUAII1O0CIUlm5uAgAYHGjIAXkQFKdwII6YaMwBeNAUpCAojpho2
+AGIFOAB+4A2nBRo5AF5kBUt0CiyECn30AyOmGkMAYgVIAH74DacFGkQAYgVQAH4QDqcFGkUAYgVY
+AH4oDqcFGksASqQIfSQFuEqkCH1EBbjDSqQIfWQFuMNKpAh9gAW4w0vgAi2MByMtQAgjU7QKhSV9
+sAW4wzj0ABpOAF5kBinICl5EBX0UBn0kBkvgAi2MByMsdAh9JAYjI6YaUQBKZAaBxaA4rwAaVABL
+JAVTtAiFJX0kBbg4EAAaVQBiBTgAS2QGUzALhSWlGlcAGlkASyQFU7QIhSV9RAW4OBAAGloAYgU4
+AEtkBlM8C4UlpRpcABpeAEskBVO0CIUlfWQFuDgQABpfAGIFOABLZAZTSAuFJaUaYQAaYwBLJAVT
+tAiFJX2ABbg4EAAaZABiBTgAS2QGU1QLhSWlGmYAGmgAS+ACLYwHIy1ACCNRYAt9hAClGmoAOhEA
+GmwAKXQLfdwGIxptABwacAAacgA6bAEaeABepAZLNAUshAp9IAgjphp7AF7QC0pkCJtKpAibv6Ua
+fQBKpAibm4CABgcafgBetAZLpAYs4Ate0AuEI6YagABKtAaBxaA4vgAaggBiBTgAS7QGUxQMhSWY
+pwUagwBL4AItjAcjLUAII1FgC0u0BlNgC4UlpRqFAF5EBn2EAKUahgBeVAZ9hAClGogAXlQGS+AC
+LYwHIy1ACCNTIAyFJZulGokAXkQGSlQGSmQIv0qkCL+bpRqLAF4EBktkBSwsDF5EBoQjphqOAGIF
+UAApaAxeVAZeRAVKpAibI6cFGpEAYgVYACnUDEqkCJteVAYjpwUalABiBUgAKTwNXgQGI6cFGpYA
+OmAAGpgAKXQLfbgJIxqZAEvgAi2MByMtQAgjUbQIfYQApRqaAEvgAi2MByMtQAgjUZgNfYQApRqb
+AEvgAi2MByMtQAgjUWALfYQApRqcAEvgAi2MByMspA2LACManQAcGp8AGqQAGqcAWAU4AFgFSACp
+WAVQAKlYBVgAqX5ADrE4XQAaqQApdAt9qAojGqoAS+ACLYwHIy1ACCNRtAh9hAClGqsAS+ACLYwH
+Iy1ACCNRmA19hAClGqwAS+ACLYwHIy1ACCNRYAt9hAClGq0AS+ACLYwHIyykDYsAIxquABwasQAa
+tABL4AItjAcjLUAII1GYDVgFOABYBUgAqVgFUACpWAVYAKmlGrUAS+ACLYwHIyykDYsAIxq4ABr6
+AR0aHQIdAgAAABEAHAAAAAAA//8BAAMAAwAAAAcAEAEJAGwBEQCEAfsBCgAAAA==
+</rawitemdata></item>
+<item name='AmountDue_1' summary='false' sign='true'><number>0</number></item>
+<item name='$$PaymentDescXXX' summary='false' sign='true'><text>'++LotusScript Development Environment:2:5:(Options):0:66
+
+'++LotusScript Development Environment:2:5:(Forward):0:1
+Declare Sub Entering(Source As Field)
+Declare Sub Onchange(Source As Field)
+Declare Sub Exiting(Source As Field)
+Declare Sub Terminate
+
+'++LotusScript Development Environment:2:5:(Declarations):0:2
+
+'++LotusScript Development Environment:2:2:BindEvents:1:129
+Private Sub BindEvents(Byval Objectname_ As String)
+	Static Source As FIELD
+	Set Source = Bind(Objectname_)
+	On Event Entering From Source Call Entering
+	On Event Onchange From Source Call Onchange
+	On Event Exiting From Source Call Exiting
+End Sub
+
+'++LotusScript Development Environment:2:2:Entering:1:12
+Sub Entering(Source As Field)
+%REM	
+	Dim ws As New NotesUIWorkspace
+	Dim s As New NotesSession
+	Dim thisdb As NotesDatabase
+	Dim crmProfileDoc As NotesDocument
+	Dim profdoc As NotesDocument
+	Set thisdb=s.CurrentDatabase
+	Set profdoc=thisdb.GetProfileDocument("Profile")
+	
+	
+	
+	If Not profdoc Is Nothing Then
+		Dim CRMpath As String
+		CRMpath=profdoc.proppath(0)
+		Dim CRMdb As  New NotesDatabase(s.CurrentDatabase.server,CRMpath)	
+		
+		
+		Set CrmProfileDoc=CRMdb.GetProfileDocument("Profile")
+		
+		'Forall r In CrmProfileDoc.crm_acct_heads(0)
+			'ws.CurrentDocument.Document.Payment_Desc=CrmProfileDoc.crm_acct_heads(0)		
+		ws.CurrentDocument.Document.Testprofile=CrmProfileDoc.crm_acct_heads(0)		
+		
+		'	Msgbox Cstr(CrmProfileDoc.crm_acct_heads(0))
+		
+'		End Forall
+		
+		
+		
+	End If
+	
+	
+%ENDREM
+	
+End Sub
+'++LotusScript Development Environment:2:2:Onchange:1:12
+Sub Onchange(Source As Field)
+	
+	
+	Dim uiws As New NotesUIWorkspace 
+	Dim appview As notesview
+	Dim thisdb As NotesDatabase
+	Dim session As New NotesSession 
+	Set thisdb=session.CurrentDatabase
+	
+	Dim ExistWaiveOffView As NotesView
+	Dim waivedc As NotesDocumentCollection
+	Dim waivedoc As NotesDocument
+	Dim waivekey As String
+	
+	
+	Dim NextPaymentregno As String
+	Dim Firstdoc As NotesDocument
+	Dim InstallNo As Integer
+	Dim Largest As Integer
+	Dim IsBreak As String
+	Dim IsBreakLargest As String
+	
+	pkey = uiws.CurrentDocument.FieldGetText("subkey")
+	
+	If pkey = "" Then
+		Exit Sub
+	Else ' pkey is not empty
+		Dim appdoc As NotesDocument
+		Dim FileOpeningPeriod As Long
+		Dim profdoc As NotesDocument 
+		Dim crmprofdoc As NotesDocument
+		Set  profdoc = session.CurrentDatabase.GetProfileDocument("profile")
+		Dim plotdb As New NotesDatabase(session.CurrentDatabase.Server,profdoc.proppath(0))
+		Dim crmdb As New NotesDatabase(session.CurrentDatabase.Server,profdoc.crmpath(0))
+		Set crmprofdoc=crmdb.GetProfileDocument("profile")
+		FileOpeningPeriod=Clng(crmprofdoc.crm_openingperiod(0))
+		'Msgbox Cstr(plotdb.Title)
+		'Msgbox Cstr(crmdb.Title)
+		'Exit Sub
+		
+		Dim schemeview As NotesView 
+		Set schemeview = plotdb.GetView("(PS_By_Phase_Size_Batch_Head)")
+		Dim plotdoc As NotesDocument 
+		
+		
+		
+		Dim plotdocDownGovt As NotesDocument
+		Dim plotdocDownOthers As NotesDocument		
+		
+		key_regno = uiws.CurrentDocument.FieldGetText("Reg_No")
+		
+		
+		Set appview=crmdb.GetView("PlotApp_ByRegNo")
+		Set appdoc=appview.GetDocumentByKey(key_regno,True)
+		pdesc=uiws.CurrentDocument.Document.PaymentDesc(0)
+		instalno = uiws.CurrentDocument.FieldGetText("Installment_Number")
+		breakuppart=uiws.CurrentDocument.FieldGetText("BreakUpPart")
+		
+		Set  profdoc = session.CurrentDatabase.GetProfileDocument("profile")
+		'Dim occupation As String
+		'occupation=docPlotApplication.App_Occupation(0)
+		
+		If pdesc="Downpayment" Then
+			
+			key=Cstr(pkey) &amp; pdesc
+			
+				'-------------------------------------------------------------------------------------
+			
+			' Code for Checking Downpayment Entry.
+			' if DownPayment is  paid, it'll prompt.
+			
+			Dim DownPaymentView As NotesView
+			Dim DownPaymentDoc As NotesDocument
+			Dim DownPaymentRegNo As String
+			Dim DownPaymentKey As String
+			DownPaymentRegNo=uiws.CurrentDocument.Document.Reg_No(0)
+			DownPaymentKey= Cstr(DownPaymentRegNo) &amp; Cstr(key)
+			Set DownPaymentView=thisdb.GetView("(Lookup_PaymentAmount)")
+			Set DownPaymentDoc=DownPaymentView.GetDocumentByKey(DownPaymentKey,True)
+			
+			If Not DownPaymentDoc Is Nothing Then
+				Messagebox "DownPayment Fee is already paid",0+64,"Data Entry Error"
+				
+			End If
+			
+			
+			'-------------------------------------------------------------------------------------
+			
+			
+			Set plotdocDownGovt = schemeview.GetDocumentByKey(key, True)
+			If Not plotdocDownGovt Is Nothing Then
+						'---------------------------------------------------------------------------------------
+		' code to deduct due amount from amount adjustment (if applicable)
+				'(Lookup_AmountAdjustment) is the view containing details of Reg No having 
+				' Amount Adjusted other than the surcharge
+				
+				Dim OriginalDueAmount3 As Double
+				'Dim OriginalDuedate As Double
+				
+				OriginalDueAmount3=Cdbl(plotdocDownGovt.Payment_Amount(0))
+				OriginalDuedate3=plotdocDownGovt.Due_Date(0)
+				
+				Dim ExistAdjustView3 As NotesView
+				Dim dc3 As NotesDocumentCollection
+				Dim doc3 As NotesDocument
+				
+				Set ExistAdjustView3=thisdb.GetView("(Lookup_AmountAdjustment)")
+				
+				Dim Adjustmentkey3 As String
+				Dim regno3 As String
+				regno3=Cstr(uiws.CurrentDocument.Document.reg_no(0))
+				Adjustmentkey3=regno3 &amp; pkey &amp; pdesc
+				Set dc3=ExistAdjustView3.GetAllDocumentsByKey(Adjustmentkey3,True)
+				If dc3.Count=1 Then
+					Set doc3=dc3.GetFirstDocument
+					Dim AmountToAdjust3 As Double
+					Dim RemainingAmount3 As Double
+					
+					AmountToAdjust3=doc3.AmountToAdjust(0)
+					RemainingAmount3=OriginalDueAmount3-AmountToAdjust3
+					
+					uiws.CurrentDocument.Document.amountDue = RemainingAmount3
+					uiws.CurrentDocument.Document.Due_Date = OriginalDuedate3	
+					
+				Elseif dc3.count&gt;1 Then
+						' Multiple Adjustments against same Installment Number
+					' code to be developed later
+					
+					
+				Elseif dc3.Count=0 Then
+					
+					
+					
+					'No Amount Adjustment, Display Original Due Amount
+					
+					uiws.CurrentDocument.Document.amountDue = OriginalDueAmount3
+					uiws.CurrentDocument.Document.Due_Date = OriginalDuedate3	
+					
+					
+				End If			
+				
+		'---------------------------------------------------------------------------------------
+				
+			End If
+			
+			
+			
+		Elseif pdesc="Membership Fees"  Then
+			key=Cstr(pkey) &amp;Cstr(pdesc)
+			
+				'-------------------------------------------------------------------------------------
+			' Code for Checking Downpayment Entry.
+			' if DownPayment is paid, it'll prompt.
+			
+			Dim MembershipView As NotesView
+			Dim MembershipDoc As NotesDocument
+			Dim MembershipRegNo As String
+			Dim MembershipKey As String
+			MembershipRegNo=uiws.CurrentDocument.Document.Reg_No(0)
+			MembershipKey= Cstr(MembershipRegNo) &amp; Cstr(key)
+			Set MembershipView=thisdb.GetView("(Lookup_PaymentAmount)")
+			Set MembershipDoc=MembershipView.GetDocumentByKey(MembershipKey,True)
+			
+			If Not MembershipDoc Is Nothing Then
+				Messagebox "Membership Fee is already paid",0+64,"Data Entry Error"			
+			End If
+			
+			
+			'-------------------------------------------------------------------------------------
+			
+			Set plotdocDownOthers = schemeview.GetDocumentByKey( key,True)			
+			If Not plotdocDownOthers Is Nothing Then
+				
+					'---------------------------------------------------------------------------------------
+		' code to deduct due amount from amount adjustment (if applicable)
+				'(Lookup_AmountAdjustment) is the view containing details of Reg No having 
+				' Amount Adjusted other than the surcharge
+				
+				Dim OriginalDueAmount2 As Double
+				'Dim OriginalDuedate As Double
+				
+				OriginalDueAmount2=Cdbl(plotdocDownOthers.Payment_Amount(0))
+				OriginalDuedate2=plotdocDownOthers.Due_Date(0)
+				
+				Dim ExistAdjustView2 As NotesView
+				Dim dc2 As NotesDocumentCollection
+				Dim doc2 As NotesDocument
+				
+				Set ExistAdjustView2=thisdb.GetView("(Lookup_AmountAdjustment)")
+				
+				Dim Adjustmentkey2 As String
+				Dim regno2 As String
+				regno2=Cstr(uiws.CurrentDocument.Document.reg_no(0))
+				Adjustmentkey2=regno2 &amp; pkey &amp; pdesc
+				Set dc2=ExistAdjustView2.GetAllDocumentsByKey(Adjustmentkey2,True)
+				If dc2.Count=1 Then
+					Set doc2=dc2.GetFirstDocument
+					Dim AmountToAdjust2 As Double
+					Dim RemainingAmount2 As Double
+					
+					AmountToAdjust2=doc2.AmountToAdjust(0)
+					RemainingAmount2=OriginalDueAmount2-AmountToAdjust2
+					
+					uiws.CurrentDocument.Document.amountDue = RemainingAmount2
+					uiws.CurrentDocument.Document.Due_Date = OriginalDuedate2	
+					
+				Elseif dc2.count&gt;1 Then
+						' Multiple Adjustments against same Installment Number
+					' code to be developed later
+					
+					
+				Elseif dc2.Count=0 Then
+					
+					'No Amount Adjustment, Display Original Due Amount
+					
+					uiws.CurrentDocument.Document.amountDue = OriginalDueAmount2
+					uiws.CurrentDocument.Document.Due_Date = OriginalDuedate2	
+					
+				End If			
+			'---------------------------------------------------------------------------------------
+				
+			End If
+			
+		Elseif pdesc="Transfer Fee" Then
+			Set notesview=crmdb.GetView("PlotApp_ByRegNo") ' change view name
+			Set appdoc=notesview.GetDocumentByKey(key_regno,True)
+			If Not appdoc Is Nothing Then
+				uiws.CurrentDocument.Document.AmountDue=docPlotApplication.PlotTransfer(0)
+				'uiws.CurrentDocument.Document.Due_Date="N.A"
+			End If
+			
+			
+		Elseif pdesc="File Opening" Then
+			
+			Set notesview=crmdb.GetView("PlotApp_ByRegNo") ' change view name
+			Set appdoc=notesview.GetDocumentByKey(key_regno,True)
+			If Not appdoc Is Nothing Then
+				Dim DueFileOpeningAmount As Double
+				Dim LastFileClosingDate As NotesDateTime
+				Dim TodayDate As NotesDateTime
+				Dim Months As Double
+				Dim Min As Double
+				Dim Hrs As Double
+				Dim Days As Double
+				
+				Dim TimeDifference As Long
+				Dim OriginalFileClosingDate As NotesDateTime
+				
+				DueFileOpeningAmount=Cdbl(docPlotApplication.FileOpening(0))
+				
+				If uiws.CurrentDocument.Document.FileClosingDate(0)="" Then
+							' 1st File Opening					
+					uiws.CurrentDocument.Document.AmountDue=DueFileOpeningAmount
+				Else 
+							'Calculate Last File Opening Period
+					
+					Set LastFileClosingDate = New NotesDateTime( uiws.CurrentDocument.Document.FileClosingDate(0) )
+					Set TodayDate=New NotesDateTime("Today") '07/08/2006
+					TimeDifference=Todaydate.TimeDifference(LastFileClosingDate)
+					
+					Min=TimeDifference/(60)
+					Hrs=Min/60
+					Days=Hrs/24
+					Months=Days/30
+					
+					
+					If Months&lt;FileOpeningPeriod Then
+						' well in time
+						'doc.FileOpeningdate=Cstr(LastFileClosingDate.DateOnly)
+						uiws.CurrentDocument.Document.AmountDue=DueFileOpeningAmount
+						
+					Elseif Months&gt;FileOpeningPeriod Then
+						'Remainder=Months Mod 4
+						Quotient=Cdbl(Months/FileOpeningPeriod)
+						NoOfFileOpenings=Cdbl(Quotient)
+						Call LastFileClosingDate.AdjustMonth(Months)
+						
+						DueFileOpeningAmount=NoOfFileOpenings*DueFileOpeningAmount
+						
+						'Add the New Last ClosingMonth Date on original applicant data
+						uiws.CurrentDocument.Document.Quotient=LastFileClosingDate.DateOnly
+						uiws.CurrentDocument.Document.AmountDue=DueFileOpeningAmount
+						'docPlotApplication.FileClosingDate(0)=Cdat(Quotient)
+						'docPlotApplication.Save True,True
+						
+					End If
+					
+				End If ' End-if for FileClosingdate=""
+				
+			End If ' Appdoc is not nothing
+			
+			
+		Else
+			
+			 ' payment selected is Land and Development charges having installment no as key
+			' --------------------------------------------------------------------------------------------
+			 '  Code for Automatic Detection of Next Installment Number
+			
+			Dim NextPaymentView As NotesView
+			Dim NextPaymentDc As NotesDocumentCollection
+			Dim NextPaymentDoc As NotesDocument
+			
+			Set NextPaymentView=thisdb.GetView("(LookupAutmaticNextInstallmentPayment)")
+			Dim NextPaymentkey As String
+			Dim NextInstallmentNumber As Integer
+			NextPaymentregno=Cstr(uiws.CurrentDocument.Document.reg_no(0))
+			NextPaymentkey=NextPaymentregno '&amp;  instalno
+			Set NextPaymentdc=NextPaymentView.GetAllDocumentsByKey(NextPaymentkey,True)
+			If NextPaymentdc.count&lt;&gt;0 Then
+			'------------------------------------------------------------------------------------------
+			' check the Installment having Largest Number i.e Latest Installment
+				
+				Set Firstdoc=NextPaymentdc.GetFirstDocument	
+				Largest=0
+				
+				While Not firstdoc Is Nothing
+					InstallNo=Cdbl(Firstdoc.Installment_Number(0))
+					IsBreak=Cstr(Firstdoc.isBreakup(0))
+					If InstallNo&gt;Largest Then
+						Largest=InstallNo	
+						IsBreakLargest=IsBreak
+					End If
+					Set Firstdoc=NextPaymentdc.GetNextDocument(FirstDoc)
+				Wend
+				
+				If IsBreakLargest="Yes" Then
+					' This Installment is Breakup
+					uiws.CurrentDocument.Document.Installment_Number=Largest
+					
+					
+					'get the Due Amount and Due Date for next Breakup Installment
+					Dim EndOfBreakUps As String
+					Set ExistWaiveOffView=crmdb.GetView("(Lookup_WaivedAmount)") 
+					waivekey=key_regno &amp; pkey &amp; pdesc &amp; InstallNo
+					EndOfBreakUps=BreakupNext(ExistWaiveOffView,waivekey)
+					
+					If EndOfBreakUps="Yes" Then
+						' Breakups are ended. Now Look for the next Installment Number
+						'Dim NextInstallmentNumber As Integer
+						
+						NextInstallmentNumber=Largest+1
+						
+						
+						uiws.CurrentDocument.Document.Installment_Number=NextInstallmentNumber
+						uiws.CurrentDocument.Refresh
+						Exit Sub
+						
+					Else
+						
+						Exit Sub	
+					End If
+					
+					
+					'Goto InstallmentBreakup
+				Else
+					' Normal installment -- Continue As it is
+					
+				End If ' for IsBreakLargest="Yes"	
+				
+			'------------------------------------------------------------------------------------------	
+				
+				
+				NextInstallmentNumber=Largest+1
+				
+				
+				uiws.CurrentDocument.Document.Installment_Number=NextInstallmentNumber
+				uiws.CurrentDocument.Refresh
+				
+			Elseif NextPaymentdc.count=0 Then
+				uiws.CurrentDocument.Document.Installment_Number=1
+				uiws.CurrentDocument.Refresh
+				
+			End If
+			
+			
+			
+			
+			
+			
+			Set plotdoc = schemeview.GetDocumentByKey( pkey &amp; pdesc &amp; instalno,True)
+			
+			
+			If Not plotdoc Is Nothing Then
+				'---------------------------------------------------------------------------------------
+				' code to deduct due amount from amount adjustment (if applicable)
+				
+				Dim OriginalDueAmount1 As Double
+				'Dim OriginalDuedate As Double
+				
+				OriginalDueAmount1=Cdbl(plotdoc.Payment_Amount(0))
+				OriginalDuedate1=plotdoc.Due_Date(0)
+				
+				Dim ExistAdjustView1 As NotesView
+				Dim dc1 As NotesDocumentCollection
+				Dim doc1 As NotesDocument
+				
+				Set ExistAdjustView1=thisdb.GetView("(Lookup_AmountAdjustment)")
+				
+				Dim Adjustmentkey1 As String
+				Dim regno1 As String
+				regno1=Cstr(uiws.CurrentDocument.Document.reg_no(0))
+				Adjustmentkey1=regno1 &amp; pkey &amp; pdesc &amp; instalno
+				Set dc1=ExistAdjustView1.GetAllDocumentsByKey(Adjustmentkey1,True)
+				
+				If dc1.Count=1 Then
+					Set doc1=dc1.GetFirstDocument
+					Dim AmountToAdjust1 As Double
+					Dim RemainingAmount1 As Double
+					
+					AmountToAdjust1=doc1.AmountToAdjust(0)
+					RemainingAmount1=OriginalDueAmount1-AmountToAdjust1
+					
+					uiws.CurrentDocument.Document.amountDue = RemainingAmount1
+					uiws.CurrentDocument.Document.Due_Date = OriginalDuedate1	
+					
+				Elseif dc1.count&gt;1 Then
+						' Multiple Adjustments against same Installment Number
+					' code to be developed later
+					
+					
+				Elseif dc1.Count=0 Then
+					
+						'No Amount Adjustment, 
+					'Now check in waive off view. if Exist there, Display that amount otherwise					
+					'Display Original Due Amount
+					
+'InstallmentBreakup:
+					'Dim ExistWaiveOffView As NotesView
+					'Dim waivedc As NotesDocumentCollection
+					'Dim waivedoc As NotesDocument
+					
+					
+					
+				End If
+				'---------------------------------------------------------------------------------------
+				
+			End If ' plotddoc nothing
+			
+			
+			
+			
+		End If
+		
+		
+	End If ' end-if for pkey check
+End Sub
+
+'++LotusScript Development Environment:2:2:Exiting:1:12
+Sub Exiting(Source As Field)
+	
+%REM
+
+
+	'the dashed portion was commented by Mujahid ur Rehman on 09 Dec, 2005
+	'=============================================
+	Dim uiws As New NotesUIWorkspace 
+	Dim appview As notesview
+	Dim thisdb As NotesDatabase
+	Dim session As New NotesSession 
+	Set thisdb=session.CurrentDatabase
+	
+	pdesc=uiws.CurrentDocument.Document.PaymentDesc(0)
+	pkey = uiws.CurrentDocument.FieldGetText("subkey")
+	
+	key=Cstr(pkey) &amp;Cstr(pdesc)
+	If pdesc="File Opening" Then
+		Exit Sub
+	End If
+	
+	'=============================================
+	
+%END REM
+	
+	
+%REM
+				'-------------------------------------------------------------------------------------
+			' Code for Checking Downpayment Entry.
+			' if DownPayment is paid, it'll prompt.
+	
+	Dim MembershipView As NotesView
+	Dim MembershipDoc As NotesDocument
+	Dim MembershipRegNo As String
+	Dim MembershipKey As String
+	MembershipRegNo=uiws.CurrentDocument.Document.Reg_No(0)
+	MembershipKey= Cstr(MembershipRegNo) &amp; Cstr(key)
+	Set MembershipView=thisdb.GetView("(Lookup_PaymentAmount)")
+	Set MembershipDoc=MembershipView.GetDocumentByKey(MembershipKey,True)
+	
+	If Not MembershipDoc Is Nothing Then
+		Messagebox "Membership Fee is already paid",0+64,"Data Entry Error"			
+	End If
+	
+%END REM
+	
+	
+	
+			'-------------------------------------------------------------------------------------
+End Sub
+'++LotusScript Development Environment:2:2:Terminate:1:10
+Sub Terminate
+	
+End Sub
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<break/></text></item>
+<item name='$PaymentDescXXX_O' sign='true'>
+<rawitemdata type='14'>
+AQAAAkxTT0IDABQIZW4AAAQAmADDCgQAAACYEzwTAADUDAQAmAP0DYATAAAkAAwBGAAAAGgBwABU
+AAAAAAAAAAUAAAAYANQMAAAAACwMLAwAAAAAbAFsAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAANQM
+1AwAAAAAGAAUAgEAAABMEkwSAAAAAAAAAAAAAAAAAAAAAEwSTBIAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAkAAADMAPQNmAb0DcwAzADIAvgFAAAAAEQERAQAAAAAAAAAAAwKDAoAAAAA
+AAAAAKQDGAUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAEABQBMb3R1cyBQcm9kdWN0AAAAVjAuMAAAAAAAAAAAAAAAAAAA
+AAAEAAAAwwoAAAAAAACYEwAAPBMAAAAAAAAAAAAAAQAAAAAAAAABAAAAAAAAAAEAAAAAAAAAAAAA
+AAgAAABXMzJJgAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAwD8DwAAAAA4AAgAKgBBADUAMAAyAEUARgA0AAAAAABsAAMATgBFAFcAAACAAAYARABFAEwA
+RQBUAEUAAAAAACQCCgBJAE4ASQBUAEkAQQBMAEkAWgBFAAAAAACsAQkAVABFAFIATQBJAE4AQQBU
+AEUAAACIAAYATwBCAEoARQBDAFQAAAAAAPgAAAAAAAAA5AEZACgARwBMAE8AQgBBAEwAUwApAEMA
+UgBNAF8ARABSAEEARgBUAEQARQBUAEEASQBMAFMAAAAoARkAKABHAGwAbwBiAGEAbABzACkAQwBS
+AE0AXwBEAHIAYQBmAHQARABlAHQAYQBpAGwAcwAAAEQBBgBTAE8AVQBSAEMARQAAAAAAVAEKAEIA
+SQBOAEQARQBWAEUATgBUAFMAAAAAALwBCwBPAEIASgBFAEMAVABOAEEATQBFAF8AAACYAQUARgBJ
+AEUATABEAAAANAMGACUATABTAEkARABFAAAAAACAAQgARQBOAFQARQBSAEkATgBHAAAAAACgAggA
+TwBOAEMASABBAE4ARwBFAAAAAABcBAcARQBYAEkAVABJAE4ARwAAAAwCBABVAEkAVwBTAAAAAACA
+AhAATgBPAFQARQBTAFUASQBXAE8AUgBLAFMAUABBAEMARQAAAAAA+AEGACUATABTAFgAVQBJAAAA
+AADsAgcAQQBQAFAAVgBJAEUAVwAAADgCCQBOAE8AVABFAFMAVgBJAEUAVwAAAGwCBgAlAEwAUwBY
+AEIARQAAAAAATAIGAFQASABJAFMARABCAAAAAABMAw0ATgBPAFQARQBTAEQAQQBUAEEAQgBBAFMA
+RQAAAMQCBwBTAEUAUwBTAEkATwBOAAAAhAMMAE4ATwBUAEUAUwBTAEUAUwBTAEkATwBOAAAAAAAA
+Aw8AQwBVAFIAUgBFAE4AVABEAEEAVABBAEIAQQBTAEUAAAAEBBEARQBYAEkAUwBUAFcAQQBJAFYA
+RQBPAEYARgBWAEkARQBXAAAA3AMHAFcAQQBJAFYARQBEAEMAAACQBBcATgBPAFQARQBTAEQATwBD
+AFUATQBFAE4AVABDAE8ATABMAEUAQwBUAEkATwBOAAAAbAMIAFcAQQBJAFYARQBEAE8AQwAAAAAA
+KAQNAE4ATwBUAEUAUwBEAE8AQwBVAE0ARQBOAFQAAACsAwgAVwBBAEkAVgBFAEsARQBZAAAAAADw
+AxAATgBFAFgAVABQAEEAWQBNAEUATgBUAFIARQBHAE4ATwAAAAAAxAMIAEYASQBSAFMAVABEAE8A
+QwAAAAAAmAYJAEkATgBTAFQAQQBMAEwATgBPAAAAfAQHAEwAQQBSAEcARQBTAFQAAAA4BAcASQBT
+AEIAUgBFAEEASwAAAKQEDgBJAFMAQgBSAEUAQQBLAEwAQQBSAEcARQBTAFQAAAAAAPwEBABQAEsA
+RQBZAAAAAABkBQ8AQwBVAFIAUgBFAE4AVABEAE8AQwBVAE0ARQBOAFQAAABQBQwARgBJAEUATABE
+AEcARQBUAFQARQBYAFQAAAAAAMwEBgBzAHUAYgBrAGUAeQAAAAAA4AQGAEEAUABQAEQATwBDAAAA
+AAAoBREARgBJAEwARQBPAFAARQBOAEkATgBHAFAARQBSAEkATwBEAAAAPAUHAFAAUgBPAEYARABP
+AEMAAADEBgoAQwBSAE0AUABSAE8ARgBEAE8AQwAAAAAAoAUSAEcARQBUAFAAUgBPAEYASQBMAEUA
+RABPAEMAVQBNAEUATgBUAAAAAAB8BQcAcAByAG8AZgBpAGwAZQAAAEwGBgBQAEwATwBUAEQAQgAA
+AAAAjAUGAFMARQBSAFYARQBSAAAAAADkBQgAUABSAE8AUABQAEEAVABIAAAAAADIBQUAQwBSAE0A
+RABCAAAAOAYHAEMAUgBNAFAAQQBUAEgAAACwBhEAQwBSAE0AXwBPAFAARQBOAEkATgBHAFAARQBS
+AEkATwBEAAAAcAoKAFMAQwBIAEUATQBFAFYASQBFAFcAAAAAAPgFBwBHAEUAVABWAEkARQBXAAAA
+cAYdACgAUABTAF8AQgB5AF8AUABoAGEAcwBlAF8AUwBpAHoAZQBfAEIAYQB0AGMAaABfAEgAZQBh
+AGQAKQAAAOgGBwBQAEwATwBUAEQATwBDAAAAEAcPAFAATABPAFQARABPAEMARABPAFcATgBHAE8A
+VgBUAAAAIAcRAFAATABPAFQARABPAEMARABPAFcATgBPAFQASABFAFIAUwAAAJgHCQBLAEUAWQBf
+AFIARQBHAE4ATwAAAGwHBgBSAGUAZwBfAE4AbwAAAAAAtAcPAFAAbABvAHQAQQBwAHAAXwBCAHkA
+UgBlAGcATgBvAAAA7AcQAEcARQBUAEQATwBDAFUATQBFAE4AVABCAFkASwBFAFkAAAAAANAHBQBQ
+AEQARQBTAEMAAAA4BwgARABPAEMAVQBNAEUATgBUAAAAAABUBwsAUABBAFkATQBFAE4AVABEAEUA
+UwBDAAAAjAgIAEkATgBTAFQAQQBMAE4ATwAAAAAAbAkSAEkAbgBzAHQAYQBsAGwAbQBlAG4AdABf
+AE4AdQBtAGIAZQByAAAAAAAcCAsAQgBSAEUAQQBLAFUAUABQAEEAUgBUAAAA+AcLAEIAcgBlAGEA
+awBVAHAAUABhAHIAdAAAABgJCwBEAG8AdwBuAHAAYQB5AG0AZQBuAHQAAACgCAMASwBFAFkAAABo
+CA8ARABPAFcATgBQAEEAWQBNAEUATgBUAFYASQBFAFcAAABACA4ARABPAFcATgBQAEEAWQBNAEUA
+TgBUAEQATwBDAAAAAAD4CRAARABPAFcATgBQAEEAWQBNAEUATgBUAFIARQBHAE4ATwAAAAAAuAkO
+AEQATwBXAE4AUABBAFkATQBFAE4AVABLAEUAWQAAAAAAFAoGAFIARQBHAF8ATgBPAAAAAADUCBYA
+KABMAG8AbwBrAHUAcABfAFAAYQB5AG0AZQBuAHQAQQBtAG8AdQBuAHQAKQAAAAAAkAkfAEQAbwB3
+AG4AUABhAHkAbQBlAG4AdAAgAEYAZQBlACAAaQBzACAAYQBsAHIAZQBhAGQAeQAgAHAAYQBpAGQA
+AABACRAARABhAHQAYQAgAEUAbgB0AHIAeQAgAEUAcgByAG8AcgAAAAAAtAoSAE8AUgBJAEcASQBO
+AEEATABEAFUARQBBAE0ATwBVAE4AVAAzAAAAAADQCQ4AUABBAFkATQBFAE4AVABfAEEATQBPAFUA
+TgBUAAAAAABMChAATwBSAEkARwBJAE4AQQBMAEQAVQBFAEQAQQBUAEUAMwAAAAAAoA0IAEQAVQBF
+AF8ARABBAFQARQAAAAAABAoQAEUAWABJAFMAVABBAEQASgBVAFMAVABWAEkARQBXADMAAAAAABAL
+AwBEAEMAMwAAAIQKBABEAE8AQwAzAAAAAABcCxkAKABMAG8AbwBrAHUAcABfAEEAbQBvAHUAbgB0
+AEEAZABqAHUAcwB0AG0AZQBuAHQAKQAAAMQKDgBBAEQASgBVAFMAVABNAEUATgBUAEsARQBZADMA
+AAAAANwLBgBSAEUARwBOAE8AMwAAAAAAmAsUAEcARQBUAEEATABMAEQATwBDAFUATQBFAE4AVABT
+AEIAWQBLAEUAWQAAAAAA7AoFAEMATwBVAE4AVAAAALgMEABHAEUAVABGAEkAUgBTAFQARABPAEMA
+VQBNAEUATgBUAAAAAAAgDA8AQQBNAE8AVQBOAFQAVABPAEEARABKAFUAUwBUADMAAAA4CxAAUgBF
+AE0AQQBJAE4ASQBOAEcAQQBNAE8AVQBOAFQAMwAAAAAAdAsOAEEATQBPAFUATgBUAFQATwBBAEQA
+SgBVAFMAVAAAAAAA7AwJAEEATQBPAFUATgBUAEQAVQBFAAAAvAsPAE0AZQBtAGIAZQByAHMAaABp
+AHAAIABGAGUAZQBzAAAAzA4OAE0ARQBNAEIARQBSAFMASABJAFAAVgBJAEUAVwAAAAAAAAwNAE0A
+RQBNAEIARQBSAFMASABJAFAARABPAEMAAABkDA8ATQBFAE0AQgBFAFIAUwBIAEkAUABSAEUARwBO
+AE8AAACQDA0ATQBFAE0AQgBFAFIAUwBIAEkAUABLAEUAWQAAACANHgBNAGUAbQBiAGUAcgBzAGgA
+aQBwACAARgBlAGUAIABpAHMAIABhAGwAcgBlAGEAZAB5ACAAcABhAGkAZAAAAAAAaA4SAE8AUgBJ
+AEcASQBOAEEATABEAFUARQBBAE0ATwBVAE4AVAAyAAAAAAD8DBAATwBSAEkARwBJAE4AQQBMAEQA
+VQBFAEQAQQBUAEUAMgAAAAAA4AwQAEUAWABJAFMAVABBAEQASgBVAFMAVABWAEkARQBXADIAAAAA
+AFgNAwBEAEMAMgAAAMwNBABEAE8AQwAyAAAAAAA0DQ4AQQBEAEoAVQBTAFQATQBFAE4AVABLAEUA
+WQAyAAAAAADsDQYAUgBFAEcATgBPADIAAAAAAHARDwBBAE0ATwBVAE4AVABUAE8AQQBEAEoAVQBT
+AFQAMgAAAIANEABSAEUATQBBAEkATgBJAE4ARwBBAE0ATwBVAE4AVAAyAAAAAAA8DgwAVAByAGEA
+bgBzAGYAZQByACAARgBlAGUAAAAAAKAOEgBEAE8AQwBQAEwATwBUAEEAUABQAEwASQBDAEEAVABJ
+AE8ATgAAAAAADA4MAFAATABPAFQAVABSAEEATgBTAEYARQBSAAAAAACIDgwARgBpAGwAZQAgAE8A
+cABlAG4AaQBuAGcAAAAAALQOFABEAFUARQBGAEkATABFAE8AUABFAE4ASQBOAEcAQQBNAE8AVQBO
+AFQAAAAAAPgPEwBMAEEAUwBUAEYASQBMAEUAQwBMAE8AUwBJAE4ARwBEAEEAVABFAAAANA8NAE4A
+TwBUAEUAUwBEAEEAVABFAFQASQBNAEUAAADADgkAVABPAEQAQQBZAEQAQQBUAEUAAADcDgYATQBP
+AE4AVABIAFMAAAAAAAAPAwBNAEkATgAAAMQPAwBIAFIAUwAAAJwPBABEAEEAWQBTAAAAAABQDw4A
+VABJAE0ARQBEAEkARgBGAEUAUgBFAE4AQwBFAAAAAAB0DxcATwBSAEkARwBJAE4AQQBMAEYASQBM
+AEUAQwBMAE8AUwBJAE4ARwBEAEEAVABFAAAAhA8LAEYASQBMAEUATwBQAEUATgBJAE4ARwAAAHwR
+DwBGAEkATABFAEMATABPAFMASQBOAEcARABBAFQARQAAAGAQBQBUAG8AZABhAHkAAADgDwgAUQBV
+AE8AVABJAEUATgBUAAAAAAAcEBAATgBPAE8ARgBGAEkATABFAE8AUABFAE4ASQBOAEcAUwAAAAAA
+tBALAEEARABKAFUAUwBUAE0ATwBOAFQASAAAANgQCABEAEEAVABFAE8ATgBMAFkAAAAAAAMASAP4
+DwAAnBEPAE4ARQBYAFQAUABBAFkATQBFAE4AVABWAEkARQBXAAAAPBANAE4ARQBYAFQAUABBAFkA
+TQBFAE4AVABEAEMAAAAIEQ4ATgBFAFgAVABQAEEAWQBNAEUATgBUAEQATwBDAAAAAADMESYAKABM
+AG8AbwBrAHUAcABBAHUAdABtAGEAdABpAGMATgBlAHgAdABJAG4AcwB0AGEAbABsAG0AZQBuAHQA
+UABhAHkAbQBlAG4AdAApAAAAAAAoEg4ATgBFAFgAVABQAEEAWQBNAEUATgBUAEsARQBZAAAAAADo
+ERUATgBFAFgAVABJAE4AUwBUAEEATABMAE0ARQBOAFQATgBVAE0AQgBFAFIAAAA0ERIASQBOAFMA
+VABBAEwATABNAEUATgBUAF8ATgBVAE0AQgBFAFIAAAAAAEwRCQBJAFMAQgBSAEUAQQBLAFUAUAAA
+AP//DwBHAEUAVABOAEUAWABUAEQATwBDAFUATQBFAE4AVAAAAIQSAwBZAGUAcwAAAPwRDQBFAE4A
+RABPAEYAQgBSAEUAQQBLAFUAUABTAAAA//8VACgATABvAG8AawB1AHAAXwBXAGEAaQB2AGUAZABB
+AG0AbwB1AG4AdAApAAAAlBILAEIAUgBFAEEASwBVAFAATgBFAFgAVAAAAHgSBwBSAEUARgBSAEUA
+UwBIAAAAUBISAE8AUgBJAEcASQBOAEEATABEAFUARQBBAE0ATwBVAE4AVAAxAAAAAAD//xAATwBS
+AEkARwBJAE4AQQBMAEQAVQBFAEQAQQBUAEUAMQAAAAAAzBIQAEUAWABJAFMAVABBAEQASgBVAFMA
+VABWAEkARQBXADEAAAAAAPASAwBEAEMAMQAAAP//BABEAE8AQwAxAAAAAAC4Eg4AQQBEAEoAVQBT
+AFQATQBFAE4AVABLAEUAWQAxAAAAAAD//wYAUgBFAEcATgBPADEAAAAAAP//DwBBAE0ATwBVAE4A
+VABUAE8AQQBEAEoAVQBTAFQAMQAAABgTEABSAEUATQBBAEkATgBJAE4ARwBBAE0ATwBVAE4AVAAx
+AAAAAAD//w8ATgBPAFQARQBTAFUASQBEAE8AQwBVAE0ARQBOAFQAAAAFAPwPAAAAACdz8MsYAAAA
+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
+FACEATkAnAH5AVgALAIKAAAA
+</rawitemdata></item>
+<item name='dateA' summary='false' sign='true'>
+<rawitemdata type='400'>
+AAAAAAAAAAA=
+</rawitemdata></item>
+<item name='dateB' summary='false' sign='true'>
+<rawitemdata type='400'>
+AAAAAAAAAAA=
+</rawitemdata></item>
+<item name='quotient' summary='false' sign='true'>
+<rawitemdata type='400'>
+AAAAAAAAAAA=
+</rawitemdata></item>
+<item name='Surcharge' summary='false' sign='true'><number>0</number></item>
+<item name='AmountRemaining' summary='false' sign='true'><number>0</number></item>
+<item name='OriginalModTime' sign='true'><datetime>20071006T120134,69+05</datetime></item>
+<item name='CreationDate_1' summary='false' sign='true'>
+<rawitemdata type='400'>
+AAAAAAAAAAA=
+</rawitemdata></item>
+<item name='$BackgroundR5'>
+<rawitemdata type='1'>
+3QYBAJkAmQAcAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAH0AHAAAAAIA0AfcBQAAAAAAAAAAAAAA
+AAAAAAD2/zEAAAAAAAMAEwAPAAAAAAAAAAAAAAAAAAAAAAAAAAAAcGF5bWVudF9tYW4uanBnAN4G
+AQCZAA==
+</rawitemdata></item>
+<item name='$HTMLCode' sign='true'>
+<rawitemdata type='1'>
+X/8QAAIADwAHAAAAAAAAAA==
+</rawitemdata></item>
+<item name='$TITLE'><text>CRM_DraftDetails_created</text></item>
+<item name='$Comment' sign='true'><text>28 March 2006 Optimized code with views</text></item>
+<item name='$Info' sign='true'>
+<rawitemdata type='1'>
+hhgBAJEAAAAAAAAAAQABAP///wAQAAAA
+</rawitemdata></item>
+<item name='$SubForms'><textlist><text>security</text><text>Header_New</text><text
+>CommonSubForm</text></textlist></item>
+<item name='$SubForm_RepIDs' sign='true'><textlist><text>0000000000000000</text><text
+>0000000000000000</text><text>0000000000000000</text></textlist></item>
+<item name='$WindowTitle' sign='true'><formula>"Plot Payments"</formula></item>
+<item name='$Flags'><text>CD</text></item>
+<item name='$DesignerVersion'><text>8.5.3</text></item>
+<item name='$Fonts'>
+<rawitemdata type='1'>
+i/9KAAIABSZWZXJkYW5hAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAYxQ291cmllcgAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAA=
+</rawitemdata></item>
+<item name='$Script' summary='false' sign='true'><text>'++LotusScript Development Environment:2:5:(Options):0:74
+
+'++LotusScript Development Environment:2:5:(Forward):0:1
+
+'++LotusScript Development Environment:2:5:(Declarations):0:2
+
+<break/></text></item>
+<item name='$$Script_O' sign='true'>
+<rawitemdata type='14'>
+AQAAAkxTT0IDABQIZW4AAAQAAAADAAAAAAAEAIgAAAAAAAAAAAAAAAAAAAAkAP//AAA4AP////9U
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAEABQBMb3R1cyBQcm9kdWN0AAAAVjAuMAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAwAAAAAAAAAEAAAAiAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAA
+AAMAAABXMzJJJQMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAwCMAAAAAAAYAAkAKgAxADgAOAA1ADQARAAxADgAAABsAAMATgBFAFcAAACAAAYARABFAEwA
+RQBUAEUAAAAAAP//CgBJAE4ASQBUAEkAQQBMAEkAWgBFAAAAAAD//wkAVABFAFIATQBJAE4AQQBU
+AEUAAAD//wYATwBCAEoARQBDAFQAAAAAAP//AAAAAAAABQAIAAAAAAA+7vYsBAAHAAAAAAAdAAAC
+AAAAEQAQAAAAAAD//wEAAwADAAAABQAKAAAA
+</rawitemdata></item>
+<item name='$$ScriptName' summary='false' sign='true'><text>CRM_DraftDetails</text></item>
+<item name='$$FormScript' summary='false' sign='true'><text>'++LotusScript Development Environment:2:5:(Options):0:66
+
+'++LotusScript Development Environment:2:5:(Forward):0:1
+Declare Sub Querymodechange(Source As Notesuidocument, Continue As Variant)
+Declare Sub Postsave(Source As Notesuidocument)
+
+'++LotusScript Development Environment:2:5:(Declarations):0:2
+
+'++LotusScript Development Environment:2:2:BindEvents:1:129
+Private Sub BindEvents(Byval Objectname_ As String)
+	Static Source As NOTESUIDOCUMENT
+	Set Source = Bind(Objectname_)
+	On Event Querymodechange From Source Call Querymodechange
+	On Event Postsave From Source Call Postsave
+End Sub
+
+'++LotusScript Development Environment:2:2:Querymodechange:1:12
+Sub Querymodechange(Source As Notesuidocument, Continue As Variant)
+	Continue=False
+End Sub
+'++LotusScript Development Environment:2:2:Postsave:1:12
+Sub Postsave(Source As Notesuidocument)
+	Continue=False
+End Sub<break/></text></item>
+<item name='$$$FormScript_O' sign='true'>
+<rawitemdata type='14'>
+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
+vAEVAAoAAAA=
+</rawitemdata></item>
+<item name='$$DSNo_Log' summary='false' sign='true'><text>'++LotusScript Development Environment:2:5:(Options):0:66
+
+'++LotusScript Development Environment:2:5:(Forward):0:1
+Declare Sub Exiting(Source As Field)
+
+'++LotusScript Development Environment:2:5:(Declarations):0:2
+
+'++LotusScript Development Environment:2:2:BindEvents:1:129
+Private Sub BindEvents(Byval Objectname_ As String)
+	Static Source As FIELD
+	Set Source = Bind(Objectname_)
+	On Event Exiting From Source Call Exiting
+End Sub
+
+'++LotusScript Development Environment:2:2:Exiting:1:12
+Sub Exiting(Source As Field)
+	
+	'Call CheckDSInCrms()
+	'Call checkUniqueDSDDNo()
+	
+%REM
+	Dim ws As New NotesUIWorkspace 
+	Dim docCurrent As NotesDocument
+	Dim uiDoc As NotesUIDocument
+	Set uiDoc=ws.CurrentDocument
+	
+	Dim session As New NotesSession
+	Dim db As NotesDatabase
+	Set db = session.CurrentDatabase
+	txtServername = db.Server
+	positionOfChar&amp; = Instr(txtServername, "BTSrv03")
+	If ( positionOfChar&amp; = 0 ) Then
+		Call FunctionForExit(uiDoc)
+	End If
+	
+	
+%END REM '
+	
+	
+	
+	
+End Sub<break/></text></item>
+<item name='$DSNo_Log_O' sign='true'>
+<rawitemdata type='14'>
+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
+AAoAAAA=
+</rawitemdata></item>
+<item name='$$amountpaid_Log' summary='false' sign='true'><text>'++LotusScript Development Environment:2:5:(Options):0:66
+
+'++LotusScript Development Environment:2:5:(Forward):0:1
+Declare Sub Exiting(Source As Field)
+
+'++LotusScript Development Environment:2:5:(Declarations):0:2
+
+'++LotusScript Development Environment:2:2:BindEvents:1:129
+Private Sub BindEvents(Byval Objectname_ As String)
+	Static Source As FIELD
+	Set Source = Bind(Objectname_)
+	On Event Exiting From Source Call Exiting
+End Sub
+
+'++LotusScript Development Environment:2:2:Exiting:1:12
+Sub Exiting(Source As Field)
+%REM
+Dim uiws As New NotesUIWorkspace
+	Dim uidoc As NotesUIDocument
+	Set uidoc=uiws.CurrentDocument
+	Dim typeCheck As Variant
+	
+	typeCheck=Isnumeric(uiws.CurrentDocument.FieldGetText("amountpaid"))
+	If typeCheck=False Then
+		Messagebox "Enter Amount in Figures Only",0+64,"Data Entry Error"
+		'uidoc.GotoField("amountpaid")
+	End If
+%END REM
+	
+End Sub<break/></text></item>
+<item name='$amountpaid_Log_O' sign='true'>
+<rawitemdata type='14'>
+AQAAAkxTT0IDABQIZW4AAAQACQAoAAQAAAAkAnwBAAAAAAQAwADMAAAAAAAAAAwBGAA4AP//wABU
+AAAAAAAAAAIAAAAYAGwBAAAAAGwBbAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAGAAYAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAEAAADMAMwAAAAAAMwAzAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAEABQBMb3R1cyBQcm9kdWN0AAAAVjAuMAAAAAAAAAAAAAAAAAAA
+AAAEAAAAKAAAAAAAAAAkAgAAfAEAAAAAAAAAAAAAAQAAAAAAAAABAAAAAAAAAAEAAAAAAAAAAAAA
+AAUAAABXMzJJJQMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAwCAAQAAAAAkAAkAKgAxADgAOAAxADMAOAAxADgAAABsAAMATgBFAFcAAACAAAYARABFAEwA
+RQBUAEUAAAAAAP//CgBJAE4ASQBUAEkAQQBMAEkAWgBFAAAAAAD//wkAVABFAFIATQBJAE4AQQBU
+AEUAAACIAAYATwBCAEoARQBDAFQAAAAAAPgAAAAAAAAA//8ZACgARwBMAE8AQgBBAEwAUwApAEMA
+UgBNAF8ARABSAEEARgBUAEQARQBUAEEASQBMAFMAAAAoARkAKABHAGwAbwBiAGEAbABzACkAQwBS
+AE0AXwBEAHIAYQBmAHQARABlAHQAYQBpAGwAcwAAAEQBBgBTAE8AVQBSAEMARQAAAAAAVAEKAEIA
+SQBOAEQARQBWAEUATgBUAFMAAAAAAP//CwBPAEIASgBFAEMAVABOAEEATQBFAF8AAABoAQUARgBJ
+AEUATABEAAAA//8GACUATABTAEkARABFAAAAAAD//wcARQBYAEkAVABJAE4ARwAAAAUAKAIAAAAA
+Ekq70RgAAAAAAIwAKH8zFwAAAAAAAAAACAAAAGwBAAAQAQAAAAAAAAIAAACwAFwBAAAAAAAAAAAA
+AAAAAAAAALAAsAAAAAAAAAAAAAAAAAAAAAAAAAAAAFwBXAEAAAAAAAAAAAEAAAACAAAABgAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAADAAEAXAEAACwBBggAAAAAGgAAAFgB//8AAAAAEAAAAAAAAABIAQAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMWEynt
+LmkQv10A3QERhrcAAAAAAAAAAAAAAAAAAAAAZAAAANCinm0AAAAAAAAAAAIAwAAAABQCAAAAAFwE
+AQD//wAAAwAgAAAAAAD8AAkCAADMAAgAAAAAAAAAbAEAAAAAAAABAAAABAIEAgAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAgQCAAAAAAAAAAABAAAAAAAAACQAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAwABAAAAAAD8AAkCAADMABMAAABsAQAA1wAAAAAAAAAEACwAAAAAANLEAB0AABoLAFtcAUmw
+AMrMAKYaDABHXAHL1wAAAGwBGg0AHRoeAB0CAAAAEQAYAAAAAAD//wEAAwADAAAABgAQAQgAbAEP
+AAoAAAA=
+</rawitemdata></item>
+<item name='$$DSNo' summary='false' sign='true'><text>'++LotusScript Development Environment:2:5:(Options):0:66
+
+'++LotusScript Development Environment:2:5:(Forward):0:1
+Declare Sub Exiting(Source As Field)
+
+'++LotusScript Development Environment:2:5:(Declarations):0:2
+
+'++LotusScript Development Environment:2:2:BindEvents:1:129
+Private Sub BindEvents(Byval Objectname_ As String)
+	Static Source As FIELD
+	Set Source = Bind(Objectname_)
+	On Event Exiting From Source Call Exiting
+End Sub
+
+'++LotusScript Development Environment:2:2:Exiting:1:12
+Sub Exiting(Source As Field)
+	
+	
+	'Call checkUniqueDSDDNo()
+	'Call checkUniqueDSNoBankName()
+	
+	
+End Sub<break/></text></item>
+<item name='$DSNo_O' sign='true'>
+<rawitemdata type='14'>
+AQAAAkxTT0IDABQIZW4AAAQACQAoAAQAAAAkAnwBAAAAAAQAwADMAAAAAAAkAAwBGAAAAP//wABU
+AAAAAAAAAAIAAAAYAGwBAAAAAGwBbAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAGAAYAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAEAAADMAMwAAAAAAMwAzAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAEABQBMb3R1cyBQcm9kdWN0AAAAVjAuMAAAAAAAAAAAAAAAAAAA
+AAAEAAAAKAAAAAAAAAAkAgAAfAEAAAAAAAAAAAAAAQAAAAAAAAABAAAAAAAAAAEAAAAAAAAAAAAA
+AAUAAABXMzJJJQMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAwCAAQAAAAA4AAgAKgA4ADYAOQAwADYAMQA4AAAAAABsAAMATgBFAFcAAACAAAYARABFAEwA
+RQBUAEUAAAAAAP//CgBJAE4ASQBUAEkAQQBMAEkAWgBFAAAAAAD//wkAVABFAFIATQBJAE4AQQBU
+AEUAAACIAAYATwBCAEoARQBDAFQAAAAAAPgAAAAAAAAA//8ZACgARwBMAE8AQgBBAEwAUwApAEMA
+UgBNAF8ARABSAEEARgBUAEQARQBUAEEASQBMAFMAAAAoARkAKABHAGwAbwBiAGEAbABzACkAQwBS
+AE0AXwBEAHIAYQBmAHQARABlAHQAYQBpAGwAcwAAAEQBBgBTAE8AVQBSAEMARQAAAAAAVAEKAEIA
+SQBOAEQARQBWAEUATgBUAFMAAAAAAP//CwBPAEIASgBFAEMAVABOAEEATQBFAF8AAABoAQUARgBJ
+AEUATABEAAAA//8GACUATABTAEkARABFAAAAAAD//wcARQBYAEkAVABJAE4ARwAAAAUAKAIAAAAA
+stEUwhgAAAAAAIwAMKEzFwAAAAAAAAAACAAAAGwBAAAQAQAAAAAAAAIAAACwAFwBAAAAAAAAAAAA
+AAAAAAAAALAAsAAAAAAAAAAAAAAAAAAAAAAAAAAAAFwBXAEAAAAAAAAAAAEAAAACAAAABgAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAADAAEAXAEAACwBBggAAAAAGgAAAFgB//8AAAAAEAAAAAAAAABIAQAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMWEynt
+LmkQv10A3QERhrcAAAAAAAAAAAAAAAAAAAAAZAAAANCinm0AAAAAAAAAAAIAwAAAABQCAAAAAFwE
+AQD//wAAAwAgAAAAAAD8AAkCAADMAAgAAAAAAAAAbAEAAAAAAAABAAAABAIEAgAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAgQCAAAAAAAAAAABAAAAAAAAACQAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAwABAAAAAAD8AAkCAADMABMAAABsAQAA1wAAAAAAAAAEACwAAAAAANLEAB0AABoLAFtcAUmw
+AMrMAKYaDABHXAHL1wAAAGwBGg0AHRoXAB0CAAAAEQAYAAAAAAD//wEAAwADAAAABgAQAQgAbAEP
+AAoAAAA=
+</rawitemdata></item>
+<item name='$$DD_Number' summary='false' sign='true'><text>'++LotusScript Development Environment:2:5:(Options):0:66
+
+'++LotusScript Development Environment:2:5:(Forward):0:1
+Declare Sub Exiting(Source As Field)
+
+'++LotusScript Development Environment:2:5:(Declarations):0:2
+
+'++LotusScript Development Environment:2:2:BindEvents:1:129
+Private Sub BindEvents(Byval Objectname_ As String)
+	Static Source As FIELD
+	Set Source = Bind(Objectname_)
+	On Event Exiting From Source Call Exiting
+End Sub
+
+'++LotusScript Development Environment:2:2:Exiting:1:12
+Sub Exiting(Source As Field)
+	
+	'Call checkUniqueDSDDNo()
+	'Call checkUniqueDSNoBankName()
+	
+End Sub<break/></text></item>
+<item name='$DD_Number_O' sign='true'>
+<rawitemdata type='14'>
+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
+AAoAAAA=
+</rawitemdata></item>
+<item name='$$amountpaid' summary='false' sign='true'><text>'++LotusScript Development Environment:2:5:(Options):0:66
+
+'++LotusScript Development Environment:2:5:(Forward):0:1
+Declare Sub Exiting(Source As Field)
+
+'++LotusScript Development Environment:2:5:(Declarations):0:2
+
+'++LotusScript Development Environment:2:2:BindEvents:1:129
+Private Sub BindEvents(Byval Objectname_ As String)
+	Static Source As FIELD
+	Set Source = Bind(Objectname_)
+	On Event Exiting From Source Call Exiting
+End Sub
+
+'++LotusScript Development Environment:2:2:Exiting:1:12
+Sub Exiting(Source As Field)
+%REM
+Dim uiws As New NotesUIWorkspace
+	Dim uidoc As NotesUIDocument
+	Set uidoc=uiws.CurrentDocument
+	Dim typeCheck As Variant
+	
+	typeCheck=Isnumeric(uiws.CurrentDocument.FieldGetText("amountpaid"))
+	If typeCheck=False Then
+		Messagebox "Enter Amount in Figures Only",0+64,"Data Entry Error"
+		'uidoc.GotoField("amountpaid")
+	End If
+%END REM
+	
+End Sub<break/></text></item>
+<item name='$amountpaid_O' sign='true'>
+<rawitemdata type='14'>
+AQAAAkxTT0IDABQIZW4AAAQACQAoAAQAAAAkAnwBAAAAAAQAwADMAAAAAAAkAAwBGAA4AAAAwABU
+AAAAAAAAAAIAAAAYAGwBAAAAAGwBbAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAGAAYAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAEAAADMAMwAAAAAAMwAzAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAEABQBMb3R1cyBQcm9kdWN0AAAAVjAuMAAAAAAAAAAAAAAAAAAA
+AAAEAAAAKAAAAAAAAAAkAgAAfAEAAAAAAAAAAAAAAQAAAAAAAAABAAAAAAAAAAEAAAAAAAAAAAAA
+AAUAAABXMzJJJQMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAwCAAQAAAAD//wgAKgBBAEMAMwBBAEMAMQA4AAAAAABsAAMATgBFAFcAAACAAAYARABFAEwA
+RQBUAEUAAAAAAP//CgBJAE4ASQBUAEkAQQBMAEkAWgBFAAAAAAD//wkAVABFAFIATQBJAE4AQQBU
+AEUAAACIAAYATwBCAEoARQBDAFQAAAAAAPgAAAAAAAAA//8ZACgARwBMAE8AQgBBAEwAUwApAEMA
+UgBNAF8ARABSAEEARgBUAEQARQBUAEEASQBMAFMAAAAoARkAKABHAGwAbwBiAGEAbABzACkAQwBS
+AE0AXwBEAHIAYQBmAHQARABlAHQAYQBpAGwAcwAAAEQBBgBTAE8AVQBSAEMARQAAAAAAVAEKAEIA
+SQBOAEQARQBWAEUATgBUAFMAAAAAAP//CwBPAEIASgBFAEMAVABOAEEATQBFAF8AAABoAQUARgBJ
+AEUATABEAAAA//8GACUATABTAEkARABFAAAAAAD//wcARQBYAEkAVABJAE4ARwAAAAUAKAIAAAAA
+jpCpsRgAAAAAAIwAMKEzFwAAAAAAAAAACAAAAGwBAAAQAQAAAAAAAAIAAACwAFwBAAAAAAAAAAAA
+AAAAAAAAALAAsAAAAAAAAAAAAAAAAAAAAAAAAAAAAFwBXAEAAAAAAAAAAAEAAAACAAAABgAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAADAAEAXAEAACwBBggAAAAAGgAAAFgB//8AAAAAEAAAAAAAAABIAQAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMWEynt
+LmkQv10A3QERhrcAAAAAAAAAAAAAAAAAAAAAZAAAANCinm0AAAAAAAAAAAIAwAAAABQCAAAAAFwE
+AQD//wAAAwAgAAAAAAD8AAkCAADMAAgAAAAAAAAAbAEAAAAAAAABAAAABAIEAgAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAgQCAAAAAAAAAAABAAAAAAAAACQAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAwABAAAAAAD8AAkCAADMABMAAABsAQAA1wAAAAAAAAAEACwAAAAAANLEAB0AABoLAFtcAUmw
+AMrMAKYaDABHXAHL1wAAAGwBGg0AHRoeAB0CAAAAEQAYAAAAAAD//wEAAwADAAAABgAQAQgAbAEP
+AAoAAAA=
+</rawitemdata></item>
+<item name='Untitled_Section' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='ParentDocID' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='logvalue' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='reg_No' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='FormName' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='Phase' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='UID' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='PaymentType_Log' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='AccountHeads' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='DSNo_Log' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='RefundDocumentID' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='a_PlotType' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='DS_date_Log' summary='false'>
+<rawitemdata type='400'>
+AAAAAAAAAAA=
+</rawitemdata></item>
+<item name='a_PlotSize' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='DD_Number_Log' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='a_PlotNo' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='DD_date_Log' summary='false'>
+<rawitemdata type='400'>
+AAAAAAAAAAA=
+</rawitemdata></item>
+<item name='FileClosingDate' summary='false'>
+<rawitemdata type='400'>
+AAAAAAAAAAA=
+</rawitemdata></item>
+<item name='BankName_Log' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='fl_Status' summary='false'><number>0</number></item>
+<item name='PaymentDesc_Log' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='WORKFLOWSTATUS' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='AmountDue_Log' summary='false'><number>0</number></item>
+<item name='Testprofile' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='amountpaid_Log' summary='false'><number>0</number></item>
+<item name='EntryDate' summary='false'>
+<rawitemdata type='400'>
+AAAAAAAAAAA=
+</rawitemdata></item>
+<item name='Due_Date_Log' summary='false'>
+<rawitemdata type='400'>
+AAAAAAAAAAA=
+</rawitemdata></item>
+<item name='AMOUNTAUTOADJUSTED' summary='false'><number>0</number></item>
+<item name='Installment_Number_Log' summary='false'><number>0</number></item>
+<item name='UPDATED' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='NPAPhase' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='NPASize' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='NPABatch' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='NPAType' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='Validation' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='paymentOrNot' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='FeeCharged' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='ProcessIDForFee' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='previousAmountPaid' summary='false'><number>0</number></item>
+<item name='Batch' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='AmountWaivedOff' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='subkey' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='status' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='CreatorName' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='CreationDate' summary='false'>
+<rawitemdata type='400'>
+AAAAAAAAAAA=
+</rawitemdata></item>
+<item name='RegistrationNumber' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='PaymentType' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='banks' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='BankName' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='JV' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='JVNumber' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='DSNo' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='DS_date' summary='false'>
+<rawitemdata type='400'>
+AAAAAAAAAAA=
+</rawitemdata></item>
+<item name='DD_Number' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='DD_date' summary='false'>
+<rawitemdata type='400'>
+AAAAAAAAAAA=
+</rawitemdata></item>
+<item name='PaymentDesc' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='SubHeads' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='OutStanding' summary='false'><number>0</number></item>
+<item name='OutstandingRemaining' summary='false'><number>0</number></item>
+<item name='AmountDue' summary='false'><number>0</number></item>
+<item name='AmountPaid' summary='false'><number>0</number></item>
+<item name='Due_Date' summary='false'>
+<rawitemdata type='400'>
+AAAAAAAAAAA=
+</rawitemdata></item>
+<item name='AMOUNTPAIDORIGINAL' summary='false'><number>0</number></item>
+<item name='Installment_Number' summary='false'><number>0</number></item>
+<item name='BreakUpPart' summary='false'><number>0</number></item>
+<item name='Untitled_Section2' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='Body' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='blockstatus' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='rp_createdBy' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='rp_timezone' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='rp_timezone_1' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='rp_servertime' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='rp_servertimezone' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='ASSIGNEDROLES' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='rp_macaddress' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='rp_ipaddress' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='rp_domain' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='RP_PLATFORM' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='RP_COMPUTER' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='rp_osusername' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='LotusVersion' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='rp_servername' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='rp_dblocation' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='rp_databasepath' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='rp_databasetitle' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='rp_databasereplicaid' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='Remarks1' placeholder='true'>
+<rawitemdata type='0'>
+</rawitemdata></item>
+<item name='$Fields'><textlist><text>Remarks1</text><text>rp_databasereplicaid</text><text
+>rp_databasetitle</text><text>rp_databasepath</text><text>rp_dblocation</text><text
+>rp_servername</text><text>LotusVersion</text><text>rp_osusername</text><text
+>rp_computer</text><text>rp_platform</text><text>rp_domain</text><text>rp_ipaddress</text><text
+>rp_macaddress</text><text>AssignedRoles</text><text>rp_servertimezone</text><text
+>rp_servertime</text><text>rp_timezone_1</text><text>rp_timezone</text><text
+>rp_createdBy</text><text>blockstatus</text><text>Body</text><text>Untitled_Section2</text><text
+>BreakUpPart</text><text>Installment_Number</text><text>AmountPaidOriginal</text><text
+>Due_Date</text><text>amountpaid</text><text>AmountDue</text><text>OutstandingRemaining</text><text
+>Outstanding</text><text>SubHeads</text><text>PaymentDesc</text><text>DD_date</text><text
+>DD_Number</text><text>DS_date</text><text>DSNo</text><text>JVNumber</text><text
+>JV</text><text>BankName</text><text>banks</text><text>PaymentType</text><text
+>RegistrationNumber</text><text>CreationDate</text><text>CreatorName</text><text
+>Status</text><text>subkey</text><text>AmountWaivedOff</text><text>Batch</text><text
+>PreviousAmountPaid</text><text>ProcessIDForFee</text><text>FeeCharged</text><text
+>paymentOrNot</text><text>validation</text><text>NPAType</text><text>NPABatch</text><text
+>NPASize</text><text>NPAPhase</text><text>Updated</text><text>Installment_Number_Log</text><text
+>AMOUNTAUTOADJUSTED</text><text>Due_Date_Log</text><text>EntryDate</text><text
+>amountpaid_Log</text><text>TestProfile</text><text>AmountDue_Log</text><text
+>workflowstatus</text><text>PaymentDesc_Log</text><text>fl_Status</text><text
+>BankName_Log</text><text>FileClosingDate</text><text>DD_date_Log</text><text
+>a_PlotNo</text><text>DD_Number_Log</text><text>a_PlotSize</text><text>DS_date_Log</text><text
+>a_PlotType</text><text>RefundDocumentID</text><text>DSNo_Log</text><text
+>AccountHeads</text><text>PaymentType_Log</text><text>UID</text><text>Phase</text><text
+>FormName</text><text>Reg_No</text><text>logvalue</text><text>ParentDocID</text><text
+>Untitled_Section</text></textlist></item>
+<item name='$Body' sign='true'>
+<rawitemdata type='1'>
+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
+AAD+/1YAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEIgAMAAAAA
+AAECAwIBAQIBBwQAAAAAAAAAAAAAAAAAACAgLCA6ALD/FAAAAAAAgEAAAAAAAAAAAAAAiv8wAIIA
+AAQAMAIAAAAAAAAABQAACAAAAAAAAAAADAAAAAAARHVlX0RhdGVfTG9n0ggBAAAAAADSCAkA////
+AN4GAAD3/4X/CAABAAAKpBIRAKAFDBIAAFUCEREBAQAAgQKDBA8Ahf8IAAEAAArdBgAAiv/+/1AA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAIr/NgCKAAADADACAAAAAAAAAgEAAAoAAAAAAAAAABIAAAAAAEFN
+T1VOVEFVVE9BREpVU1RFRN4GAACK/4X/CAABAAAKpBIRAQwS4h0AAFUCEREBAQAAgQKDBAgAhf8a
+AAUAAAhBTU9VTlRBVVRPQURKVVNURUSkEhEC4h0qMAAAVQIREQEBAACBAoL/WgATAAAAAAABAAAA
+8R0qMPEdAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAhokAAAAAVYcA
+AAAAAAAAAAAAAAABAAAABgAAALv/zgETAKsApRx4ZSTpwAEAAF4BBQALAFBheW1lbnREZXNjAAEA
+EgBMYW5kICYgRGV2IENoYXJnZXMKAgUACwBQYXltZW50RGVzYwABAAwAQ29zdCBPRiBMYW5kCgId
+AgUACwBQYXltZW50RGVzYwABABMARGV2ZWxvcG1lbnQgQ2hhcmdlcwAKAh0CBQALAFBheW1lbnRE
+ZXNjAAEAFgBFbGVjdGlmaWNhdGlvbiBDaGFyZ2VzCgIdAgUACwBQYXltZW50RGVzYwABAA4AU3Vp
+R2FzIENoYXJnZXMKAh0CBQALAFBheW1lbnREZXNjAAEAEQBUb3duIERldi4gQ2hhcmdlcwAKAh0C
+BQALAFBheW1lbnREZXNjAAEAEgBFc2NhbGF0aW9uIENoYXJnZXMKAh0CAQAeAEFkZGl0aW9uYWwg
+RGV2ZWxvcG1lbnQgQ2hhcmdlcx0CrwASAAgAKgCuAAoAKwCuAAQAtQMDAAcAYABaAAkyUjNTNFM1
+UzZSN1M4UzlTMTBSMTFTMTJTMTNTMTRSMTVTMTZTMTdTMThSMTlTMjBTMjFTMjJSMjRTMjVTMjZS
+MjhTMjlTMzBSMzFSMzJSUjMzUzM0UzM1U4MEEwCF/wgAAQAACt0GAAD3//f/JAABAACAAABAC/gA
+AAAAAAAAAABkAAAAAAAAAAAAAAAAAP7/VAAAAAEAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAALiwkALD/FAAAAAAA
+gEAAAAAAAAAAAAAAiv9YAIIAAAMAMAIACAAAAAACBQAACB4AAAAAAAAAFgAAAAAAHgAAABwABQAS
+AEluc3RhbGxtZW50X051bWJlcgMASW5zdGFsbG1lbnRfTnVtYmVyX0xvZ9IIAQAAAAAA0ggJAP//
+/wDeBgAA9/+F/wgAAQAACqQSEgCgBQwSAABVAhERAQEAAIECgv9aABQAAAAAAAAAAQCvBQwSrwUA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACGAQAAAABUhwAAAAAAAAAA
+AAAAAAEAAAAGAAAAgwQUAIX/CAABAAAK3QYAAIr//v9QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACK/zoA
+igAABQAwAgAAAAAAAAIBAAAKDgAAAAAAAAAHAAAAAAAOAAAADAABAAEAMAADAFVwZGF0ZWQAYg4B
+AIQAAAAAAAAAAADeBgAAiv+F/wgAAQAACqQSEgEMEuIdAABVAhERAQEAAIECgwQIAIX/DwAFAAAI
+VXBkYXRlZACkEhIC4h0qMAAAVQIREQEBAACBAoMECQCF/yEABQAACCIwIiBpcyBpdHMgZGVmYXVs
+dCB2YWx1ZS4AgQKDBAkAhf+CAAUAAAhpdCBpcyBzZXQgdG8gIjEiIHdoZW4gdGhlIFFDLkNSTyBw
+cmVzc2VzIHRoZSB1cGRhdGUgYnV0dG9uLiB0aGUgZG9jdW1lbnQgYmVjb21lcyB1bmVkaXRhYmxl
+IGFmdGVyIHRoaXMgdmFsdWUgaXMgc2V0IHRvICIxIqQSEwCgBQwSAABVAhERAQEAAIECgwQPAIX/
+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
+LgCkEhkAoAUMEgAAVQcREQEBDwCBAoL/WgAWAAAAAAAAAAAArwUMEq8FAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAhoEAAAAAVYcAAAAAAAAAAAAAAAABAAAABgAAAIME
+FgCF/wgABQAACNMIAQDAwMAApBIZAQwS4h0AAFUHEREBAQ8AgQKDBAoAhf8IAAUAAAjTCAEAwMDA
+AKQSGQLiHSowAABVAxERAQMPAIECgv9aABcAAAAAAAAAAACvBSowrwUAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACGgQAAAABVhwAAAAAAAAAAAAAAAAEAAAAGAAAAgwQX
+AIX/QgAFAAAIRmllbGRzIHJlbGF0ZWQgdG8gd29ya2Zsb3cgb2YgRmlsZSBPcGVuaW5nIGFuZCBU
+cmFuZmVycyA6LdMIAQDAwMAApBIaAKAFDBIAAFUCEREBAQAAgQKC/1oAGAAAAAAAAAAAAK8FDBKv
+BQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIYBAAAAAFWHAAAAAAAA
+AAAAAAAAAQAAAAYAAACDBBgAhf8IAAUAAAjdBgAAiv/+/1AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIr/
+PACKAAAFADACAAAAAAAAAgUAAAgOAAAAAAAAAAoAAAAAAA4AAAAMAAEAAQAwAAMARmVlQ2hhcmdl
+ZGIOAQCEAAAAAAAAAAAA3gYAAIr/hf8IAAUAAAikEhoBDBLiHQAAVQIREQEBAACBAoMECACF/xIA
+BQAACEZlZUNoYXJnZWSkEhoC4h0qMAAAVQIREQEBAACBAoMECQCF/yEABQAACCIwIiBpcyBpdCBk
+ZWZhdWx0IHZhbHVlLiAAgQKDBAkAhf8IAAUAAAiBAoMECQCF/9sABQAACHRoaXMgZmllbGQgaXMg
+dXNlZCBmb3IgRmlsZSBPcGVuaW5nL1RyYW5mZXIgcHJvY2Vzc2VzIHRvIHJlY29nbml6ZSB0aGUg
+ZmFjdCB0aGF0ICB0aGUgcGF5bWVudCBpZiBtYWRlIGZvciBhIHRyYW5mZXIgZmVlIG9mIGFueSB0
+eXBlIG9yIG9wZW5pbmcgZmVlIGhhcyBiZWVuIGNvbnN1bWVkIGluIHRoZSBmaWxlIG9wZW5pbmcg
+b3IgdHJhbmZlciBwcm9jZXNzIG9yIG5vdC4AgQKDBAkAhf8IAAUAAAiBAoMECQCF/zEABQAACCIx
+IiBtZWFucyB0aHQgaXRzIGNvbnN1bWVkIGluIHRoZSBwcm9jZXNzAKQSGwCgBQwSAABVAhERAQEA
+AIECgwQYAIX/CAAFAAAI3QYAAIr//v9QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACK/zQAigAABQAwAgAA
+AAAAAAIFAAAIAAAAAAAAAAAPAAAAAABQcm9jZXNzSURGb3JGZWUAYg4BAIQAAAAAAAAAAADeBgAA
+iv+F/wgABQAACKQSGwEMEuIdAABVAhERAQEAAIECgwQIAIX/FwAFAAAIUHJvY2Vzc0lERm9yRmVl
+AKQSGwLiHSowAABVAhERAQEAAIECgwQJAIX/CAAFAAAIpBIcAKAFDBIAAFUGEREBAQAAgQKDBBYA
+hf8IAAUAAAikEhwBDBLiHQAAVQYREQEBAACBAoMECgCF/wgABQAACKQSHALiHSowAABVAhERAQMA
+AIECgwQXAIX/CAAFAAAIpBIdAKAFDBIAAFUCEREBAQAAgQKDBBYAhf8IAAEAAAqkEh0BDBLiHQAA
+VQIREQEBAACBAoMECgCF/wgAAQAACqQSHQLiHSowAABVAhERAQEAAIECgwQJAIX/CAABAAAKpBIe
+AKAFDBIAAFUCEREBAQAAgQKDBBgAhf8IAAEAAArdBgAAiv/+/1AAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AIr/NgCKAAADADACAAAAAAAAAgEAAAoAAAAAAAAAABIAAAAAAFByZXZpb3VzQW1vdW50UGFpZN4G
+AACK/4X/CAABAAAKpBIeAQwS4h0AAFUCEREBAQAAgQKDBAgAhf8aAAEAAApwcmV2aW91c0Ftb3Vu
+dFBhaWSkEh4C4h0qMAAAVQIREQEBAACBAoMECQCF/6sAAQAACmlzIHVzZWQgd2hlbiBhbW91bnQg
+aXMgYWRqdXN0ZWQgZnJvbSB0aGlzIHBheW1lbnQgZG9jdW1lbnQuIGR1cmluZyBhbW91bnQgYWRq
+dXN0bWVudC4gYW1vdW50cGFpZCBmaWVsZCBpcyBzdWJ0cmFjdGVkIGFuZCB0aGlzIGZpZWxkIHJl
+Y29yZHMgdGhlIHByZXZpdXMgYW1vdW50IHBhaWQApBIfAKAFDBIAAFUCEREBAQAAgQKDBBgAhf8I
+AAEAAArdBgAAiv/+/1AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIr/KgCKAAAFADACAAAAAAAAAgEAAAoA
+AAAAAAAAAAUAAAAAAEJhdGNoAGIOAQCEAAAAAAAAAAAA3gYAAIr/hf8IAAEAAAqkEh8BDBLiHQAA
+VQIREQEBAACBAoL/WgAZAAAAAAAAAAAAGxLiHRsSAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAhgEAAAAAVYcAAAAAAAAAAAAAAAABAAAABgAAAIMEGQCF/w0AAQAACkJh
+dGNoAKQSHwLiHSowAABVAhERAQEAAIECgwQJAIX/CAABAAAKpBIgAKAFDBIAAFUCEREBAQAAgQKD
+BBgAhf8IAAEAAArdBgAAiv/+/1AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIr/QgCKAAAFADACAAAAAAAA
+AgEAAAoOAAAAAAAAAA8AAAAAAA4AAAAMAAEAAQAwAAMAQW1vdW50V2FpdmVkT2ZmAGIOAQCEAAAA
+AAAAAAAA3gYAAIr/hf8IAAEAAAqkEiABDBLiHQAAVQIREQEBAACBAoMECACF/xcAAQAACkFtb3Vu
+dFdhaXZlZE9mZgCkEiAC4h0qMAAAVQIREQEBAACBAoMECQCF/2sAAQAACiIwIiBpcyBpdHMgZGVm
+YXVsdCB2YWx1ZS4gaWYgc2V0IHRvICIxIiB0aGlzIG1lYW5zIHRoYXQgdGhlIHBheW1lbnQgZG9j
+dW1lbnQgaXMgYSB3YWl2ZWQgb2ZmIGFtb3VudAClBgAAAACBAoMEAQCF/wgAAQAACoECgwQCAIX/
+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
+b2t1cAUAEgBSZWdpc3RyYXRpb25OdW1iZXIAAAAAAAAAABxAgwUJAgUACQB0bXBSZXN1bHQAWgEF
+AAkAdG1wUmVzdWx0AAEAAAAKAh0CrwAiAAoAAQAAAK4AGAAFAAkAdG1wUmVzdWx0AAQArgAEALUD
+swKuABwAAQALAE91dHN0YW5kaW5nAPsBMwGuAAQAtQMDAAcAlgCQAAkwUlIyUzRTNVM2UzdTOFMy
+RTlSUjExUzEyUzEzUzE1UzE2UzE3UzE4UzE5UzIxUzIyUzIzUzI0UlIyOFMyOVMzMFMzMVMzMlMz
+M1MzNVJSMzZTMkUzN1M0MFJSNDZTNDdTNDhTNDlTNTBTNTFTNTJTNTNTNTRTNTVTNTZTNTdTNThT
+NTlSUjYxUzYyUzYzU091dHN0YW5kaW5nAN4GAACK/4X/CAABAAAK0BIGAhIbEiQAAFUCEREBAQAA
+gQKC/1oAPAAAAAAAAQAAAG0bEiRtGwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAIYJAAAAAFSEWwAAAFsAAAAAAAAAAQAAAAQAAAC7/3IBPACrAKUceGUk6WQBAAAQAQUA
+CwBQYXltZW50RGVzYwABABIATGFuZCAmIERldiBDaGFyZ2VzCgIFAAsAUGF5bWVudERlc2MAAQAM
+AENvc3QgT0YgTGFuZAoCHQIFAAsAUGF5bWVudERlc2MAAQATAERldmVsb3BtZW50IENoYXJnZXMA
+CgIdAgUACwBQYXltZW50RGVzYwABABYARWxlY3RpZmljYXRpb24gQ2hhcmdlcwoCHQIFAAsAUGF5
+bWVudERlc2MAAQAOAFN1aUdhcyBDaGFyZ2VzCgIdAgUACwBQYXltZW50RGVzYwABABEAVG93biBE
+ZXYuIENoYXJnZXMACgIdAq8AEgAIACoArgAKACsArgAEALUDAwAHAFIASwAJMlIzUzRTNVM2UjdT
+OFM5UzEwUjExUzEyUzEzUzE0UjE1UzE2UzE3UzE4UjE5UzIwUzIxUzIyUjI0UzI1UzI2UlIyN1My
+OFMyOVMAgwQ8AN0GAACF/4X/FAAFAecIRXh0cmEgQW1vdW500ggBABBBYADeBgAAhf+BAoL/WgA9
+AAAAAAAAAAEAbRsSJG0bAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+hgkAAAAAVIRbAAAAWwAAAAAAAAABAAAABAAAAIMEPQC8BjwAPQDdBgAAhf+F/xcABQLnCChhZnRl
+ciBQYXltZW50KQDSCAEAEEFgAN4GAACF/9ASBgMSJEM1AABVAhERAQEAAIECgv9aAD4AAAAAAAEA
+AQBtJEM1bSQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACGCQAAAABU
+hFsAAABbAAAAAAAAAAEAAAAEAAAAgwQ+ALwGPAA+AIX/CAABAAAK3QYAAIr//v9UAAAAAQAAAAEA
+AAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAuLCQAiv+uAIIAAAMAMAIACAAAAAACBQAACHYAAAAAAAAAFAAAAAAAdgAAAFwA
+BQAUAE91dHN0YW5kaW5nUmVtYWluaW5nAQAAAAoCrwA2ABYABQALAE91dHN0YW5kaW5nAK4AIAAF
+ABQAT3V0c3RhbmRpbmdSZW1haW5pbmeuAAQAtQMDAAcAGAARAAkyUzNTNFM1UzZTN1M4UzlTAE91
+dHN0YW5kaW5nUmVtYWluaW5n3gYAAIr/hf8IAAEAAArQEgcAvgW2DQAAVQIREQEBAACBAoL/WgA/
+AAAAAAABAAEAGQa2DRkGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+hgkAAAAAVIRbAAAAWwAAAAAAAAABAAAABAAAAIMEPwC8BhEAPwDdBgAAhf+F/xIABQHnCEFtb3Vu
+dCBEdWXSCAEAEEFgAN4GAACF/9ASBwG2DRIbAABVAhERAQEAAIECgv9aAEAAAAAAAAEAAQARDhIb
+EQ4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACGCQAAAABUhFsAAABb
+AAAAAAAAAAEAAAAEAAAAgwRAALwGEQBAAIX/CAABAAAK3QYAAIr//v+YAAAAAQAAAAEAAAAAAAAA
+AAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AEQAAAAuLCREAAAAMgAFAAYAUmVnX05vAQAIAElERS0xOTU5CgKvABIACAArAK4ACgAqAK4ABAC1
+AwMABwAQAAkACTNTNFM2UzhTAACK/0QAggAAAwAwAgAIAAAAAAIFAAAIFgAAAAAAAAAJAAAAAAAW
+AAAAFAAFAAkAQW1vdW50RHVlAAMAQW1vdW50RHVlAN4GAACK/4X/CAABAAAK0BIHAhIbEiQAAFUC
+EREBAQAAgQKC/1oAQQAAAAAAAQAAAG0bEiRtGwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAIYJAAAAAFSEWwAAAFsAAAAAAAAAAQAAAAQAAAC7/6IAQQCrAKUceGUk6ZQA
+AAB0AAUACwBQYXltZW50RGVzYwABAAYAUmVmdW5kCgIFAAsAUGF5bWVudERlc2MAAQARAFBsb3Qg
+VW5kZXIgU2l6aW5nAAoCHQIFAAsAUGF5bWVudERlc2MAAQAQAFBsb3QgT3ZlciBTaXppbmcKAh0C
+AwAHAB4AGAAJMVMyUzNTNFM1UzZTN1MyRThTOVMxMFODBEEA3QYAAIX/hf8UAAUB5whBbW91bnQg
+UGFpZCDSCAEAEEFgAN4GAACF/90GAACF/4X/CQAFAQIIKgDSCAEA/wAAAN4GAACF/4ECgv9aAEIA
+AAAAAAEAAQBtGxIkbRsAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACG
+CQAAAABUhFsAAABbAAAAAAAAAAEAAAAEAAAAu/+UAEIAqwClHHhlJOmGAAAAYAAFAAsAUGF5bWVu
+dERlc2MAAQAGAFJlZnVuZAoCBQALAFBheW1lbnREZXNjAAEAEQBQbG90IFVuZGVyIFNpemluZwAK
+Ah0CrwASAAgAKgCuAAoAKwCuAAQAtQMDAAcAJAAdAAkyUzNTNFM1UzZTN1M4UzlTMTBTMTFTMTJT
+MTNTAIMEQgDdBgAAhf+F/xkABQHnCEFtb3VudCB0byBSZWZ1bmQgANIIAQAQQWAA3gYAAIX/3QYA
+AIX/hf8JAAUBAggqANIIAQD/AAAA3gYAAIX/gQKC/1oAQwAAAAAAAQABAG0bEiRtGwAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIYJAAAAAFSEWwAAAFsAAAAAAAAAAQAA
+AAQAAAC7/2gAQwCrAKUceGUk6VoAAABAAAUACwBQYXltZW50RGVzYwABABAAUGxvdCBPdmVyIFNp
+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
+bG9wbWVudCBDaGFyZ2VzAAoCHQIFAAsAUGF5bWVudERlc2MAAQAWAEVsZWN0aWZpY2F0aW9uIENo
+YXJnZXMKAh0CBQALAFBheW1lbnREZXNjAAEADgBTdWlHYXMgQ2hhcmdlcwoCHQIFAAsAUGF5bWVu
+dERlc2MAAQARAFRvd24gRGV2LiBDaGFyZ2VzAAoCHQIFAAsAUGF5bWVudERlc2MAAQAeAEFkZGl0
+aW9uYWwgRGV2ZWxvcG1lbnQgQ2hhcmdlcwoCHQIFAAsAUGF5bWVudERlc2MAAQASAEVzY2FsYXRp
+b24gQ2hhcmdlcwoCHQKvABIACAAqAK4ACgArAK4ABAC1AwMABwBkAF0ACTJSM1M0UzVTNlI3UzhT
+OVMxMFIxMVMxMlMxM1MxNFIxNVMxNlMxN1MxOFIxOVMyMFMyMVMyMlIyNFMyNVMyNlIyOFMyOVMz
+MFIzMlMzM1IzNFJSMzVTMzZTMzdTAIMESQDdBgAAhf+F/xcABQHnCEluc3RhbGxtZW50IE5vLgDS
+CAEAEEFgAN4GAACF/9ASCQG2DRIbAAAVAhEBAQEAAIECgv9aAEoAAAAAAAEAAQARDhIbEQ4AAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACGCQAAAABUhFsAAABbAAAAAAAA
+AAEAAAAEAAAAu//kAUoAqwClHHhlJOnWAQAAcAEFAAsAUGF5bWVudERlc2MAAQASAExhbmQgJiBE
+ZXYgQ2hhcmdlcwoCBQALAFBheW1lbnREZXNjAAEADABDb3N0IE9GIExhbmQKAh0CBQALAFBheW1l
+bnREZXNjAAEAEwBEZXZlbG9wbWVudCBDaGFyZ2VzAAoCHQIFAAsAUGF5bWVudERlc2MAAQAWAEVs
+ZWN0aWZpY2F0aW9uIENoYXJnZXMKAh0CBQALAFBheW1lbnREZXNjAAEADgBTdWlHYXMgQ2hhcmdl
+cwoCHQIFAAsAUGF5bWVudERlc2MAAQARAFRvd24gRGV2LiBDaGFyZ2VzAAoCHQIFAAsAUGF5bWVu
+dERlc2MAAQAeAEFkZGl0aW9uYWwgRGV2ZWxvcG1lbnQgQ2hhcmdlcwoCHQIFAAsAUGF5bWVudERl
+c2MAAQASAEVzY2FsYXRpb24gQ2hhcmdlcwoCHQKvABIACAAqAK4ACgArAK4ABAC1AwMABwBkAF0A
+CTJSM1M0UzVTNlI3UzhTOVMxMFIxMVMxMlMxM1MxNFIxNVMxNlMxN1MxOFIxOVMyMFMyMVMyMlIy
+NFMyNVMyNlIyOFMyOVMzMFIzMlMzM1IzNFJSMzVTMzZTMzdTAIMESgCF/wgAAQAACt0GAACK//7/
+VAAAAAEAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAALiwkAIr/VACCAAADADACAAgAAAAAAgUAAAgeAAAAAAAAABIA
+AAAAAB4AAAAcAAUAEgBJbnN0YWxsbWVudF9OdW1iZXIDAEluc3RhbGxtZW50X051bWJlct4GAACK
+/90GAACF/4X/CAAFAecI0ggBABBBYADeBgAAhf/QEgkCEhsSJAAAFQIRAQEBAACBAoL/WgBLAAAA
+AAABAAEAbRsSJG0bAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAhgkA
+AAAAVIRbAAAAWwAAAAAAAAABAAAABAAAALv/OABLAKsApRx4ZSTpKgAAABwABQALAEJyZWFrVXBQ
+YXJ0AAEAAAAKAgMABwAMAAUACTFTMlMAgwRLAN0GAACF/4X/EgAFAecIQnJlYWt1cCBOb9IIAQAQ
+QWAA3gYAAIX/0BIJAxIkQzUAABUCEQEBAQAAgQKC/1oATAAAAAAAAQABAG0kQzVtJAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIYJAAAAAFSEWwAAAFsAAAAAAAAAAQAA
+AAQAAAC7/zgATACrAKUceGUk6SoAAAAcAAUACwBCcmVha1VwUGFydAABAAAACgIDAAcADAAFAAkx
+UzJTAIMETACF/wgAAQAACt0GAACK//7/UAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAsP8UAAAABCIAAAAA
+AAAAAAAAAACK/0gAiIEAAwAgAgAAAAAAAAIFAAAIGAAAAAAAAAALAAAAAAAYAAAAFgAFAAsAQnJl
+YWtVcFBhcnQAAwBCcmVha1VwUGFydADeBgAAiv/dBgAAhf+F/wgABQHnCNIIAQAQQWAA3gYAAIX/
+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
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAIr/SACCAAAFADACAAAAAAAAAgEAAAoYAAAAAAAAAAsAAAAAABgA
+AAAWAAUACwBibG9ja3N0YXR1cwADAGJsb2Nrc3RhdHVzAGIOAQCEAAAAAAAAAAAA3gYAAIr/hf8I
+AAEAAAqkEgEAoAVgNQAAAAIAAAEBAACBAoMEHgCF/wgAAQAACqUGAAAAAIECgwQBAIX/CAABAAAK
+gQKDBAEAhf8IAAEAAArdBgAArf9x/y8AAAAAAAMAGAANAAAAAAAAAAAAAAAAAAAAAAAAAAAAQ29t
+bW9uU3ViRm9ybQCt/xoADgAIAAAADgBDb21tb25TdWJGb3JtAK4C3gYAAK4Ahf8IAAEAAAqBAoL/
+WgBRAAAAAAAAAAAAeAYAAHgGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAEAAAAAlIR4BgsAeAYIAAAAAAABAAAABAAAAIMEUQCF/wgAAQAACoECgwQBAIX/CAABAAAK
+</rawitemdata></item>
+<item name='$V5ACTIONS' sign='true'>
+<rawitemdata type='1'>
+i/8oAAEABSZWZXJkYW5hAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAL0clwAAAAEAAQAAAAEAAAAA
+AAAABQAACAgAAgB5/2wAAQAMUoUAAQAAAAAAAQAAAAAAAQC1y9kAAwAbAAAAAAAAAAAAAwAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAD8/zoAAAAAAAEAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAA
+AAAAAAAAvv88AAAAAQBwAJ8BAAAFAAAAAAAAAENsb3Nl/yAAAAASAAIA/BEAAAAAAADtAQMABwAM
+AAUACTBTMEUA
+</rawitemdata></item>
+<item name='$ACTIONS' sign='true'>
+<rawitemdata type='1'>
+vRyXAAAAAQABAAAAAQAAAAAAAABcAAAICAACAL7/PAAAAAEAcACfAQAABQAAAAAAAABDbG9zZQAg
+AAAAEgACAPwRAAAAAAAA7QEDAAcADAAFAAkwUzBFAA==
+</rawitemdata></item></note>
+

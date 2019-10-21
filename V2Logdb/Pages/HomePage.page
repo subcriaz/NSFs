@@ -1,0 +1,39 @@
+<?xml version='1.0' encoding='utf-8'?>
+<note class='form' xmlns='http://www.lotus.com/dxl' version='10.0' maintenanceversion='1.0'
+ replicaid='452583FC0023B0DF'>
+<noteinfo noteid='442' unid='88BED8432A091A6645257E140033B736' sequence='6'>
+<created><datetime>20150326T142452,38+05</datetime></created>
+<modified><datetime>20190627T164215,06+05</datetime></modified>
+<revised><datetime>20180810T155827,86+05</datetime></revised>
+<lastaccessed><datetime>20190627T164215,05+05</datetime></lastaccessed>
+<addedtofile><datetime>20190627T164215,05+05</datetime></addedtofile></noteinfo>
+<updatedby><name>CN=Riaz Ul Hassan/OU=IT/O=BahriaTown/C=PK</name></updatedby>
+<wassignedby><name>CN=Riaz Ul Hassan/OU=IT/O=BahriaTown/C=PK</name></wassignedby>
+<item name='$Comment' sign='true'><text/></item>
+<item name='$HTMLCode' sign='true'>
+<rawitemdata type='1'>
+X/8QAAIADwAHAAAAAAAAAA==
+</rawitemdata></item>
+<item name='$TITLE'><text>HomePage</text></item>
+<item name='$Info' sign='true'>
+<rawitemdata type='1'>
+hhgBAIAAAAAAgAAAAQABAP///wAQAAAA
+</rawitemdata></item>
+<item name='$Flags'><text>C34WQ</text></item>
+<item name='$DesignerVersion'><text>8.5.3</text></item>
+<item name='$$ScriptName' summary='false' sign='true'><text>HomePage</text></item>
+<item name='$Body' sign='true'>
+<rawitemdata type='1'>
+gQKC/1oAAQAAAAAAAAAAAKAFAACgBQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAABAAAAAJSHAAAAAAAAAAAAAAAAAQAAAAQAAAC7/zIAAQAUAGWMzG6UBSQAAAAWAOcA
+AQAGAFtWaWV3XUcCHgEDAAcADAAFAAkwUzBFAIMEAQCF/wgAAQAACoECgwQBAIX/CAABAAAKgQKD
+BAEAhf8IAAEAAAqBAoMEAQDdBgAAhf+F/wkAAQACCiAA0ggBAP8AAADeBgAAhf/dBgAArf+p/3QA
+AQAYAAQAaABoAAEALgAEAHRlbXABAAYAW1ZpZXdd5wB0Aq8AEgAIACoArgAKACsArgAEALUDAwAH
+ABoAFAAJMVMyUzNTNFI3UzExUzEzUjE0UgAAEADnAAEAAQB+AIYCAwAHAA4ACAAJMFJSMlM0U4X/
+CAABAAAKqgLeBgAArgDdBgAAhf+F/wgAAQACCtIIAQD/AAAA3gYAAIX/gQKDBAEA3QYAAIX/hf8I
+AAEAAgrSCAEA/wAAAN4GAACF/4ECgwQBAN0GAACF/4X/CAABAAIK0ggBAP8AAADeBgAAhf+BAoME
+AQDdBgAAhf+F/wgAAQACCtIIAQD/AAAA3gYAAIX/gQKDBAEA3QYAAIX/hf8IAAEAAgrSCAEA/wAA
+AN4GAACF/4ECgwQBAN0GAACF/4X/CAABAAIK0ggBAP8AAADeBgAAhf+BAoMEAQDdBgAAhf+F/wgA
+AQACCtIIAQD/AAAA3gYAAIX/
+</rawitemdata></item></note>
+

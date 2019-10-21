@@ -1,0 +1,38 @@
+<?xml version='1.0' encoding='utf-8'?>
+<note class='form' xmlns='http://www.lotus.com/dxl' version='10.0' maintenanceversion='1.0'
+ replicaid='452583FC0023B0DF'>
+<noteinfo noteid='42e' unid='DF06FB7D14922C43452581C40033A3B9' sequence='8'>
+<created><datetime>20171025T142402,49+05</datetime></created>
+<modified><datetime>20190627T164214,95+05</datetime></modified>
+<revised><datetime>20180726T141536,19+05</datetime></revised>
+<lastaccessed><datetime>20190627T164214,94+05</datetime></lastaccessed>
+<addedtofile><datetime>20190627T164214,94+05</datetime></addedtofile></noteinfo>
+<updatedby><name>CN=Riaz UL Hassan/OU=DevTeam/O=BahriaTown</name></updatedby>
+<wassignedby><name>CN=Riaz UL Hassan/OU=DevTeam/O=BahriaTown</name></wassignedby>
+<item name='$Comment' sign='true'><text/></item>
+<item name='$HTMLCode' sign='true'>
+<rawitemdata type='1'>
+X/8QAAIADwAHAAAAAAAAAA==
+</rawitemdata></item>
+<item name='$TITLE'><text>HeaderPage1</text></item>
+<item name='$Info' sign='true'>
+<rawitemdata type='1'>
+hhgBAIAAAAAAgAAAXwABANLS0gAQAAAA
+</rawitemdata></item>
+<item name='$Flags'><text>C34WQ</text></item>
+<item name='$DesignerVersion'><text>8.5.3</text></item>
+<item name='$Fonts'>
+<rawitemdata type='1'>
+i/8oAAEABSZWZXJkYW5hAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==
+</rawitemdata></item>
+<item name='$$ScriptName' summary='false' sign='true'><text>HeaderPage1</text></item>
+<item name='$Body' sign='true'>
+<rawitemdata type='1'>
+gQKC/1oAAQADAAAAAAAAAKAFAACgBQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAABAAAAAJSHAAAAAAAAAAAAAAAAAQAAAAQAAACDBAEAhf8IAAEBAAqBAoMEAQCF/xUA
+BQEAEkxvZyBTeXN0ZW0gVjIAgQKDBAEAhf8IAAUBAArdBgAArf+p/xYAAQAYAAQACgAKAAAACACc
+AAMAhf8IAAUBAAqqAt4GAACuAIX/CQAFAQAKIACBAoL/WgACAAAAAAAAAAAAoAUAAKAFAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAlIcAAAAAAAAAAAAAAAAB
+AAAABAAAAIMEAgCF/wgAAQAACg==
+</rawitemdata></item></note>
+

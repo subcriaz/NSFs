@@ -1,0 +1,41 @@
+<?xml version='1.0' encoding='utf-8'?>
+<note class='form' xmlns='http://www.lotus.com/dxl' version='10.0' maintenanceversion='1.0'
+ replicaid='452583FC0023B0DF'>
+<noteinfo noteid='4ce' unid='0CAB8211BB47173C4525835100254B81' sequence='4'>
+<created><datetime>20181126T114721,61+05</datetime></created>
+<modified><datetime>20190627T164215,81+05</datetime></modified>
+<revised><datetime>20181126T144100,53+05</datetime></revised>
+<lastaccessed><datetime>20190627T164215,80+05</datetime></lastaccessed>
+<addedtofile><datetime>20190627T164215,80+05</datetime></addedtofile></noteinfo>
+<updatedby><name>CN=Attiya Waqar/OU=IT/O=BahriaTown/C=PK</name></updatedby>
+<wassignedby><name>CN=Attiya Waqar/OU=IT/O=BahriaTown/C=PK</name></wassignedby>
+<item name='$BackgroundRepeat'><text>5</text></item>
+<item name='$BackgroundR5'>
+<rawitemdata type='1'>
+3QYBAJkAmQAcAAAAUjXBLwAAAAAAAAAAAAAAAAAAAQAAAH0AHAAAAAMAjgMvAwAAAAAAAAAAAAAA
+AAAAAABSFAQAAAAAAAAAAAAAAAAAAAAAAPb/NAAAAAAAAwATABIAAAAAAAAAAAAAAAAAAAAAAAAA
+AABSaWdodFBhbjEgY29weS5wbmfeBgEAmQA=
+</rawitemdata></item>
+<item name='$HTMLCode' sign='true'>
+<rawitemdata type='1'>
+X/8QAAIADwAHAAAAAAAAAA==
+</rawitemdata></item>
+<item name='$TITLE'><text>pgMiddle</text></item>
+<item name='$Info' sign='true'>
+<rawitemdata type='1'>
+hhgBAIAAAAAAAAAALwABAPLy/gCQAAAA
+</rawitemdata></item>
+<item name='$WindowTitle' sign='true'><formula>"Design Wing System V2.0 "</formula></item>
+<item name='$Flags'><text>C34WQ</text></item>
+<item name='$DesignerVersion'><text>8.5.3</text></item>
+<item name='$$ScriptName' summary='false' sign='true'><text>pgMiddle</text></item>
+<item name='$Body' sign='true'>
+<rawitemdata type='1'>
+gQKC/1oAAQAAAAAAAAAAAOAQAADgEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAABAAAAAJSE4BAIAOAQCAAAAAAAAQAAAAQAAACDBAEAhf8IAAEAAAqBAoMEAQCF/wgA
+AQAACoECgwQBAIX/CAABAAAKgQKDBAEAhf8IAAEAAAqBAoMEAQCF/wgAAQAACoECgwQBAIX/CAAB
+AAAKgQKDBAEAhf8IAAEAAAqBAoMEAQCF/wgAAQAACoECgwQBAIX/CwABAAAKCQkJAIECgwQBAIX/
+CAABAAAKgQKDBAEAhf8IAAEAAAqBAoMEAQCF/wgAAQAACoECgwQBAIX/CAABAAAKgQKDBAEAhf8I
+AAEAAAqBAoMEAQCF/wgAAQAACg==
+</rawitemdata></item></note>
+

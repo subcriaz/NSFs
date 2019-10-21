@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?><note class="form" maintenanceversion="1.0" replicaid="452583FC0023B0DF" version="10.0" xmlns="http://www.lotus.com/dxl">
+<noteinfo noteid="462" sequence="5" unid="28575DA3C232595E4525835100265AB2">
+<created><datetime>20181126T115855,86+05</datetime></created>
+<modified><datetime>20190627T164215,22+05</datetime></modified>
+<revised><datetime>20181130T091336,73+05</datetime></revised>
+<lastaccessed><datetime>20190627T164215,21+05</datetime></lastaccessed>
+<addedtofile><datetime>20190627T164215,21+05</datetime></addedtofile></noteinfo>
+<updatedby><name>CN=Attiya Waqar/OU=IT/O=BahriaTown/C=PK</name><name>CN=Samiullah Arshed/OU=IT/O=BahriaTown/C=PK</name><name>CN=Riaz Ul Hassan/OU=IT/O=BahriaTown/C=PK</name><name>CN=Samiullah Arshed/OU=IT/O=BahriaTown/C=PK</name></updatedby>
+<wassignedby><name>CN=Samiullah Arshed/OU=IT/O=BahriaTown/C=PK</name></wassignedby>
+<item name="$TITLE"><text>LeftPan1.png</text></item>
+<item name="$FlagsExt"><text>D</text></item>
+<item name="$ImagesWide" sign="true"><number>1</number></item>
+<item name="$ImagesHigh" sign="true"><number>1</number></item>
+<item name="$ImagesColorize" sign="true"><number>0</number></item>
+
+
+
+
+
+<item name="$MimeType" sign="true"><text>image/png</text></item>
+<item name="$FileModDT" sign="true"><datetime>20170817T123125,77+05</datetime></item>
+<item name="$ImageNames" sign="true"><text>LeftPan1.png</text></item>
+<item name="$DesignerVersion"><text>8.5.3</text></item>
+<item name="$Flags"><text>34CiQ$</text></item>
+<item name="$EditFilePath"><text>C:\Users\SaMi\AppData\Local\Temp\notes1B744C\~LeftPan12.png</text></item></note>

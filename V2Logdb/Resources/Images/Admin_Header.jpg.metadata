@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?><note class="form" maintenanceversion="1.0" replicaid="452583FC0023B0DF" version="10.0" xmlns="http://www.lotus.com/dxl">
+<noteinfo noteid="192" sequence="7" unid="F6EAADD59400F44E45257FB3003473BF">
+<created><datetime>20160514T143255,03+05</datetime></created>
+<modified><datetime>20190627T164212,11+05</datetime></modified>
+<revised><datetime>20181130T120558,83+05</datetime></revised>
+<lastaccessed><datetime>20190627T164212,10+05</datetime></lastaccessed>
+<addedtofile><datetime>20190627T164212,10+05</datetime></addedtofile></noteinfo>
+<updatedby><name>CN=Arshad Mubarik/OU=IT/O=BahriaTown/C=PK</name><name>CN=Administrator/O=BTLotusDevelopment</name><name>CN=Muhammad Waqas/O=BTLotusDevelopment</name><name>CN=Rehan Farooq/O=BTLotusDevelopment</name><name>CN=Umer Farooq Khan/OU=IT/O=BahriaTown/C=PK</name><name>CN=Raja Saqib/OU=IT/O=BahriaTown/C=PK</name><name>CN=Shahid Ghauri/OU=IT/O=BahriaTown/C=PK</name><name>CN=Muhammad Anum/OU=IT/O=BahriaTown/C=PK</name><name>CN=Madiha Nasrullah/OU=IT/O=BahriaTown/C=PK</name><name>CN=Umer Farooq Khan/OU=IT/O=BahriaTown/C=PK</name><name>CN=DevAdmin/O=BahriaTown</name><name>CN=Riaz UL Hassan/OU=DevTeam/O=BahriaTown</name><name>CN=Samiullah Arshed/OU=IT/O=BahriaTown/C=PK</name></updatedby>
+<wassignedby><name>CN=Samiullah Arshed/OU=IT/O=BahriaTown/C=PK</name></wassignedby>
+<item name="$FlagsExt" sign="true"><text>D</text></item>
+<item name="$ImagesWide" sign="true"><number>1</number></item>
+<item name="$ImagesHigh" sign="true"><number>1</number></item>
+<item name="$ImagesColorize" sign="true"><number>0</number></item>
+
+
+<item name="$MimeType" sign="true"><text>image/jpeg</text></item>
+<item name="$FileModDT" sign="true"><datetime>20080724T151156,42+05</datetime></item>
+<item name="$ImageNames" sign="true"><text>admin.jpg</text></item>
+<item name="$TITLE" sign="true"><text>Admin_Header.jpg</text></item>
+<item name="$DesignerVersion" sign="true"><text>7</text></item>
+<item name="$Flags"><text>34CiQ$</text></item>
+<item name="$EditFilePath"><text>C:\Users\SaMi\AppData\Local\Temp\notes1B744C\~admin.jpg</text></item></note>
