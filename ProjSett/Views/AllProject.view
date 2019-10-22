@@ -1,16 +1,15 @@
 <?xml version='1.0' encoding='utf-8'?>
 <note class='view' xmlns='http://www.lotus.com/dxl' version='10.0' maintenanceversion='1.0'
  replicaid='452583F400274E82'>
-<noteinfo noteid='5fe' unid='46ABC2754261428F4525848D00229FA0' sequence='1'>
+<noteinfo noteid='5fe' unid='46ABC2754261428F4525848D00229FA0' sequence='3'>
 <created><datetime>20191008T111810,88+05</datetime></created>
-<modified><datetime>20191008T111811,91+05</datetime></modified>
-<revised><datetime>20191008T111811,90+05</datetime></revised>
-<lastaccessed><datetime>20191008T111811,90+05</datetime></lastaccessed>
+<modified><datetime>20191022T160144,00+05</datetime></modified>
+<revised><datetime>20191022T160143,99+05</datetime></revised>
+<lastaccessed><datetime>20191022T160143,99+05</datetime></lastaccessed>
 <addedtofile><datetime>20191008T111811,90+05</datetime></addedtofile></noteinfo>
 <updatedby><name>CN=Riaz Ul Hassan/OU=IT/O=BahriaTown/C=PK</name></updatedby>
 <wassignedby><name>CN=Riaz Ul Hassan/OU=IT/O=BahriaTown/C=PK</name></wassignedby>
 <item name='$FormulaClass' sign='true'><text>1</text></item>
-<item name='$TITLE' sign='true'><text>AllProject|AllProject</text></item>
 <item name='$Index' sign='true'><text/></item>
 <item name='$Formula' summary='true' sign='true'><formula compiled='true'>
 agAFADgAMwAEAA8ACwAJAAQAUHJvamVjdExvY2F0aW9uUHJvamVjdE5hbWUkQ29uZmxpY3QkUkVG
@@ -31,11 +30,10 @@ AAAAAAABAP///wABAODx/wAAAAEAAAAAAAEAAAAAAAEAAAAAAAAACAAAAAAAAQBYQwEIgAIAAAAA
 AAECAwIBAQIBBwQDAAEAAAAAAAAgICwgOllDAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
 AAAAAAAAAAAAAAAAAAAAAAAAAAAA
 </rawitemdata></item>
-<item name='$Fonts' sign='true'><textlist><text>5</text><text>38</text><text
->Verdana</text><text>6</text><text>38</text><text>Verdana</text><text>7</text><text
->38</text><text>Verdana</text><text>8</text><text>38</text><text>Verdana</text></textlist></item>
+<item name='$Fonts'><textlist><text>5</text><text>38</text><text>Verdana</text><text
+>6</text><text>38</text><text>Verdana</text><text>7</text><text>38</text><text
+>Verdana</text><text>8</text><text>38</text><text>Verdana</text></textlist></item>
 <item name='$Comment' sign='true'><text/></item>
-<item name='$DesignerVersion'><text>8.5.3</text></item>
 <item name='$V5ACTIONS' sign='true'>
 <rawitemdata type='1'>
 i/8oAAEABSZWZXJkYW5hAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAL0cJwAAAAEAAQAAACUAAAAA
@@ -60,5 +58,7 @@ UHJvamVjdAAsAAAAHgACAOgDAAAAAAAAAQAHAFByb2plY3QA7QIDAAcADAAFAAkwUzBFAL7/VAAA
 AAEAigCfAQAADwAAAAAAAABOZXcgU3ViIFByb2plY3SVLgAAACAAAgDoAwAAAAAAAAEACgBTdWJQ
 cm9qZWN07QIDAAcADAAFAAkwUzBFAA==
 </rawitemdata></item>
-<item name='$Flags'><text>Y</text></item></note>
+<item name='$Flags'><text>Y</text></item>
+<item name='$TITLE' sign='true'><text>AllProject</text></item>
+<item name='$DesignerVersion' sign='true'><text>8.5.3</text></item></note>
 

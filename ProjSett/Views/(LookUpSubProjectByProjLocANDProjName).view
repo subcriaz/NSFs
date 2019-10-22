@@ -1,11 +1,11 @@
 <?xml version='1.0' encoding='utf-8'?>
 <note class='view' xmlns='http://www.lotus.com/dxl' version='10.0' maintenanceversion='1.0'
  replicaid='452583F400274E82'>
-<noteinfo noteid='5e2' unid='EA6FAD7FFC5AB2654525848D00229F99' sequence='1'>
+<noteinfo noteid='5e2' unid='EA6FAD7FFC5AB2654525848D00229F99' sequence='3'>
 <created><datetime>20191008T111810,81+05</datetime></created>
-<modified><datetime>20191008T111811,47+05</datetime></modified>
-<revised><datetime>20191008T111811,46+05</datetime></revised>
-<lastaccessed><datetime>20191014T122046,62+05</datetime></lastaccessed>
+<modified><datetime>20191022T160106,86+05</datetime></modified>
+<revised><datetime>20191022T160106,85+05</datetime></revised>
+<lastaccessed><datetime>20191022T160106,85+05</datetime></lastaccessed>
 <addedtofile><datetime>20191008T111811,46+05</datetime></addedtofile></noteinfo>
 <updatedby><name>CN=Riaz Ul Hassan/OU=IT/O=BahriaTown/C=PK</name></updatedby>
 <wassignedby><name>CN=Riaz Ul Hassan/OU=IT/O=BahriaTown/C=PK</name></wassignedby>
@@ -65,6 +65,6 @@ UHJvamVjdAAsAAAAHgACAOgDAAAAAAAAAQAHAFByb2plY3QA7QIDAAcADAAFAAkwUzBFAL7/VAAA
 AAEAigCfAQAADwAAAAAAAABOZXcgU3ViIFByb2plY3QALgAAACAAAgDoAwAAAAAAAAEACgBTdWJQ
 cm9qZWN07QIDAAcADAAFAAkwUzBFAA==
 </rawitemdata></item>
-<item name='$TITLE' sign='true'><text>(LookUpSubProjectByProjLocANDProjName)|LookUpSubProjectByProjLocANDProjName</text></item>
+<item name='$TITLE' sign='true'><text>(LookUpSubProjectByProjLocANDProjName)</text></item>
 <item name='$DesignerVersion' sign='true'><text>8.5.3</text></item></note>
 

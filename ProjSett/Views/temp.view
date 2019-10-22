@@ -1,11 +1,11 @@
 <?xml version='1.0' encoding='utf-8'?>
 <note class='view' xmlns='http://www.lotus.com/dxl' version='10.0' maintenanceversion='1.0'
  replicaid='452583F400274E82'>
-<noteinfo noteid='63e' unid='4B37E747041124624525848D00229FB0' sequence='1'>
+<noteinfo noteid='63e' unid='4B37E747041124624525848D00229FB0' sequence='3'>
 <created><datetime>20191008T111811,04+05</datetime></created>
-<modified><datetime>20191008T111813,28+05</datetime></modified>
-<revised><datetime>20191008T111813,27+05</datetime></revised>
-<lastaccessed><datetime>20191008T111813,27+05</datetime></lastaccessed>
+<modified><datetime>20191022T162316,06+05</datetime></modified>
+<revised><datetime>20191022T162316,05+05</datetime></revised>
+<lastaccessed><datetime>20191022T162316,05+05</datetime></lastaccessed>
 <addedtofile><datetime>20191008T111813,27+05</datetime></addedtofile></noteinfo>
 <updatedby><name>CN=Riaz Ul Hassan/OU=IT/O=BahriaTown/C=PK</name></updatedby>
 <wassignedby><name>CN=Riaz Ul Hassan/OU=IT/O=BahriaTown/C=PK</name></wassignedby>
@@ -17,21 +17,22 @@ AQBuanB/WSfpCoNjOQAbeCVF
 <item name='$TITLE' sign='true'><text>temp</text></item>
 <item name='$Index' sign='true'><text/></item>
 <item name='$Formula' summary='true' sign='true'><formula compiled='true'>
-SAACAAwAAgAkM2kAAwAFACQAHwAEAAQAAgAJAAQARm9ybSQzJENvbmZsaWN0JFJFRgAEAAQAAAAI
-AGYAAwAHAAoABAAJTDFT
+WAACAAwAAgAkNGkAAwACAAwAAgAkM2kAAwAFACgAIwAFAAIABAACAAkABAAkNEZvcm0kMyRDb25m
+bGljdCRSRUYABAAEAAAACABmAAMABwAKAAQACUwxUw==
 </formula></item>
 <item name='$Collation' summary='true'>
 <rawitemdata type='2'>
-EQABAABEyGYHAAAEAEZvcm0=
+GgACAABEgWYAAAACAMhmBwIABAAkNEZvcm0=
 </rawitemdata></item>
 <item name='$ViewFormat' summary='true' sign='true'>
 <rawitemdata type='5'>
-AQACAAQACAQAAFZDgwAEAAQAAAAAADIABQAACgABAAAAAAAAAAICAAAAVkMAAAIAAAAOAAAAywAB
-AAAKAAAAAAAAAAAAAgIAAABGb3JtRm9ybSQzDgACAAwAAgAkM2kAAwAmAAEAAAABAQAJAQAACgEB
-DgoAAAEArSsBAAEAAQAAAAAAAAAAAFdDBgEACQAAAAAAAAAAAAAAAAAAAAAAAAYAAAAAAP//AAAA
-AAAAAAAAAAAAAABXQwEBAAkAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAD//wAAAAAAAAAAAAAAAAAA
-QgABAAAAAQD///8ABQD///8AAQAAAAAAAAAAAAAAAAABAP///wABAP///wAAAAEAAAAAAAEAAAAA
-AAEAAAAAAAAACAAAAAAAAQA=
+AQADAAUACAQAAFZDBQACAAAADgAAAIEAAQAACgAAAAAAAAAAAAICAAAAVkODBAQABAAAAAAAMgAF
+AAAKAAEAAAAAAAAAAgIAAABWQwAAAgAAAA4AAADLAAEAAAoAAAAAAAAAAAACAgAAACQ0DgACAAwA
+AgAkNGkAAwBGb3JtRm9ybSQzDgACAAwAAgAkM2kAAwAmAAEAAAABAQAJAQAACgEBDgoAAAEArSsB
+AAEAAQAAAAAAAAAAAFdDAQEACQAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAP//AAAAAAAAAAAAAAAA
+AABXQwYBAAkAAAAAAAAAAAAAAAAAAAAAAAAGAAAAAAD//wAAAAAAAAAAAAAAAAAAV0MBAQAJAAAA
+AAAAAAAAAAAAAAAAAAAABAAAAAAA//8AAAAAAAAAAAAAAAAAAEIAAQAAAAEA////AAUA////AAEA
+AAAAAAAAAAAAAAAAAQD///8AAQD///8AAAABAAAAAAABAAAAAAABAAAAAAAAAAgAAAAAAAEA
 </rawitemdata></item>
 <item name='$Fonts' sign='true'><textlist><text>5</text><text>38</text><text
 >Verdana</text><text>6</text><text>0</text><text>Verdena</text></textlist></item>

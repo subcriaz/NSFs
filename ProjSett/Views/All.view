@@ -1,16 +1,15 @@
 <?xml version='1.0' encoding='utf-8'?>
 <note class='view' xmlns='http://www.lotus.com/dxl' version='10.0' maintenanceversion='1.0'
  replicaid='452583F400274E82'>
-<noteinfo noteid='5fa' unid='0F9C2949D46E0E904525848D00229F9F' sequence='1'>
+<noteinfo noteid='5fa' unid='0F9C2949D46E0E904525848D00229F9F' sequence='3'>
 <created><datetime>20191008T111810,87+05</datetime></created>
-<modified><datetime>20191008T111811,84+05</datetime></modified>
-<revised><datetime>20191008T111811,83+05</datetime></revised>
-<lastaccessed><datetime>20191008T111811,83+05</datetime></lastaccessed>
+<modified><datetime>20191022T160139,04+05</datetime></modified>
+<revised><datetime>20191022T160139,02+05</datetime></revised>
+<lastaccessed><datetime>20191022T160139,02+05</datetime></lastaccessed>
 <addedtofile><datetime>20191008T111811,83+05</datetime></addedtofile></noteinfo>
 <updatedby><name>CN=Riaz Ul Hassan/OU=IT/O=BahriaTown/C=PK</name></updatedby>
 <wassignedby><name>CN=Riaz Ul Hassan/OU=IT/O=BahriaTown/C=PK</name></wassignedby>
 <item name='$FormulaClass' sign='true'><text>1</text></item>
-<item name='$TITLE' sign='true'><text>All|All</text></item>
 <item name='$Index' sign='true'><text/></item>
 <item name='$Formula' summary='true' sign='true'><formula compiled='true'>
 HAEFAOoA5QAQAA8ACwAKAAsADQAWAAsAEAAPAA0AAwARAA0ACgAJAAQAUHJvamVjdExvY2F0aW9u
@@ -25,7 +24,6 @@ LgACAABEiGYAAAAPAIhmAA8ACwBQcm9qZWN0TG9jYXRpb25Qcm9qZWN0TmFtZQ==
 </rawitemdata></item>
 <item name='$Comment' sign='true'><text/></item>
 <item name='$Flags'><text>Y</text></item>
-<item name='$DesignerVersion'><text>8.5.3</text></item>
 <item name='$ViewScript' summary='false' sign='true'><text>'++LotusScript Development Environment:2:5:(Options):0:66
 
 '++LotusScript Development Environment:2:5:(Forward):0:1
@@ -158,5 +156,7 @@ AAAAABEAEAUAAAAAsAEJAqgEAAAAAAAAAAAAAAAAAAAAAAAAAADsAhEAEAQAAAAAEAIGAOkDAAAA
 AAAAAAAAAAAAAAAAAAAAAAAAAAQAXQAAAAAAHQAAGgsAW0gBSZwAyrgAphoMAEdIAcvaAAAAWAEa
 DQAdGhEAXtwCKxwCJKYaEwBesANL3AIt2AMjphoUAH3UAZuOQEuwAy38AyObBgcaFQBdAAKDpRoW
 AB0CAAAAEQAYAAAAAAD//wEAAwADAAAABgC4AAgAIAEPAAoAAAA=
-</rawitemdata></item></note>
+</rawitemdata></item>
+<item name='$TITLE' sign='true'><text>All</text></item>
+<item name='$DesignerVersion' sign='true'><text>8.5.3</text></item></note>
 

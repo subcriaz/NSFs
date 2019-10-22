@@ -1,11 +1,11 @@
 <?xml version='1.0' encoding='utf-8'?>
 <note class='view' xmlns='http://www.lotus.com/dxl' version='10.0' maintenanceversion='1.0'
  replicaid='452583F400274E82'>
-<noteinfo noteid='646' unid='4F1EC2A96FAE0C9E4525848D00229FB2' sequence='1'>
+<noteinfo noteid='646' unid='4F1EC2A96FAE0C9E4525848D00229FB2' sequence='3'>
 <created><datetime>20191008T111811,06+05</datetime></created>
-<modified><datetime>20191008T111813,47+05</datetime></modified>
-<revised><datetime>20191008T111813,46+05</datetime></revised>
-<lastaccessed><datetime>20191008T111813,46+05</datetime></lastaccessed>
+<modified><datetime>20191022T160219,32+05</datetime></modified>
+<revised><datetime>20191022T160219,31+05</datetime></revised>
+<lastaccessed><datetime>20191022T160219,31+05</datetime></lastaccessed>
 <addedtofile><datetime>20191008T111813,46+05</datetime></addedtofile></noteinfo>
 <updatedby><name>CN=Riaz Ul Hassan/OU=IT/O=BahriaTown/C=PK</name></updatedby>
 <wassignedby><name>CN=Riaz Ul Hassan/OU=IT/O=BahriaTown/C=PK</name></wassignedby>
@@ -55,6 +55,6 @@ AABFeHBhbmQgQWxsIAAAABIAAgCKEwAAAAAAAO0BAwAHAAwABQAJMFMwRQC+/0wAAAABAIoAnwEA
 AAoAAAAAAAAAQ3JlYXRlIE5ldywAAAAeAAIA6AMAAAAAAAABAAcAUHJvamVjdADtAgMABwAMAAUA
 CTBTMEUA
 </rawitemdata></item>
-<item name='$TITLE' sign='true'><text>xLookupSettings|xLookupSettings</text></item>
+<item name='$TITLE' sign='true'><text>xLookupSettings</text></item>
 <item name='$DesignerVersion' sign='true'><text>8.5.3</text></item></note>
 

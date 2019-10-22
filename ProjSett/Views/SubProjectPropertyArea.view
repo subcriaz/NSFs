@@ -1,16 +1,15 @@
 <?xml version='1.0' encoding='utf-8'?>
 <note class='view' xmlns='http://www.lotus.com/dxl' version='10.0' maintenanceversion='1.0'
  replicaid='452583F400274E82'>
-<noteinfo noteid='62e' unid='EA4C4226D66555DE4525848D00229FAC' sequence='1'>
+<noteinfo noteid='62e' unid='EA4C4226D66555DE4525848D00229FAC' sequence='3'>
 <created><datetime>20191008T111811,00+05</datetime></created>
-<modified><datetime>20191008T111812,92+05</datetime></modified>
-<revised><datetime>20191008T111812,91+05</datetime></revised>
-<lastaccessed><datetime>20191009T112004,11+05</datetime></lastaccessed>
+<modified><datetime>20191022T160159,87+05</datetime></modified>
+<revised><datetime>20191022T160159,86+05</datetime></revised>
+<lastaccessed><datetime>20191022T160159,86+05</datetime></lastaccessed>
 <addedtofile><datetime>20191008T111812,91+05</datetime></addedtofile></noteinfo>
 <updatedby><name>CN=Riaz Ul Hassan/OU=IT/O=BahriaTown/C=PK</name></updatedby>
 <wassignedby><name>CN=Riaz Ul Hassan/OU=IT/O=BahriaTown/C=PK</name></wassignedby>
 <item name='$FormulaClass' sign='true'><text>1</text></item>
-<item name='$TITLE' sign='true'><text>SubProjectPropertyArea|SubProjectPropertyArea</text></item>
 <item name='$Index' sign='true'><text/></item>
 <item name='$Formula' summary='true' sign='true'><formula compiled='true'>
 lgAFAFYAUQAGAA8ACwAOAAwACQAEAFByb2plY3RMb2NhdGlvblByb2plY3ROYW1lU3ViUHJvamVj
@@ -35,15 +34,14 @@ AAAA//8AAAAAAAAAAAAAAAAAAFdDDAEACAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAP//AAAAAAAA
 AAAAAAAAAABCAAEAAAABAP///wABAPf39wABAMLv/wAAAAAAAAAAAAEA////AAEA4PH/AAAAAQAA
 AAAAAQAAAAAAAQAAAAAAAAAIAAAAAAABAA==
 </rawitemdata></item>
-<item name='$Fonts' sign='true'><textlist><text>5</text><text>38</text><text
->Verdana</text><text>6</text><text>38</text><text>Verdana</text><text>7</text><text
->38</text><text>Verdana</text><text>8</text><text>38</text><text>Verdana</text><text
->9</text><text>38</text><text>Verdana</text><text>10</text><text>38</text><text
->Verdana</text><text>11</text><text>38</text><text>Verdana</text><text>12</text><text
->38</text><text>Verdana</text></textlist></item>
+<item name='$Fonts'><textlist><text>5</text><text>38</text><text>Verdana</text><text
+>6</text><text>38</text><text>Verdana</text><text>7</text><text>38</text><text
+>Verdana</text><text>8</text><text>38</text><text>Verdana</text><text>9</text><text
+>38</text><text>Verdana</text><text>10</text><text>38</text><text>Verdana</text><text
+>11</text><text>38</text><text>Verdana</text><text>12</text><text>38</text><text
+>Verdana</text></textlist></item>
 <item name='$Comment' sign='true'><text/></item>
 <item name='$Flags'><text>Y</text></item>
-<item name='$DesignerVersion'><text>8.5.3</text></item>
 <item name='$V5ACTIONS' sign='true'>
 <rawitemdata type='1'>
 i/8oAAEABSZWZXJkYW5hAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAL0cJwAAAAEAAQAAACUAAAAA
@@ -60,5 +58,7 @@ AAkwUzBFAA==
 vRwnAAAAAQABAAAAJQAAAAAAAABbAAEICAACAL7/QgAAAAEAmwCfAQAADAAAAAMAAABDb2xsYXBz
 ZSBBbGwgAAAAEgACAIkTAAAAAAAA7QEDAAcADAAFAAkwUzBFAL7/QAAAAAEAmgCfAQAACgAAAAQA
 AABFeHBhbmQgQWxsIAAAABIAAgCKEwAAAAAAAO0BAwAHAAwABQAJMFMwRQA=
-</rawitemdata></item></note>
+</rawitemdata></item>
+<item name='$TITLE' sign='true'><text>SubProjectPropertyArea</text></item>
+<item name='$DesignerVersion' sign='true'><text>8.5.3</text></item></note>
 

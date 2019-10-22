@@ -1,11 +1,11 @@
 <?xml version='1.0' encoding='utf-8'?>
 <note class='view' xmlns='http://www.lotus.com/dxl' version='10.0' maintenanceversion='1.0'
  replicaid='452583F400274E82'>
-<noteinfo noteid='5e6' unid='EF2EF900F0A8135A4525848D00229F9A' sequence='1'>
+<noteinfo noteid='5e6' unid='EF2EF900F0A8135A4525848D00229F9A' sequence='3'>
 <created><datetime>20191008T111810,82+05</datetime></created>
-<modified><datetime>20191008T111811,53+05</datetime></modified>
-<revised><datetime>20191008T111811,52+05</datetime></revised>
-<lastaccessed><datetime>20191009T111930,55+05</datetime></lastaccessed>
+<modified><datetime>20191022T160112,17+05</datetime></modified>
+<revised><datetime>20191022T160112,16+05</datetime></revised>
+<lastaccessed><datetime>20191022T160112,16+05</datetime></lastaccessed>
 <addedtofile><datetime>20191008T111811,52+05</datetime></addedtofile></noteinfo>
 <updatedby><name>CN=Riaz Ul Hassan/OU=IT/O=BahriaTown/C=PK</name></updatedby>
 <wassignedby><name>CN=Riaz Ul Hassan/OU=IT/O=BahriaTown/C=PK</name></wassignedby>
@@ -14,7 +14,6 @@
 AQB+Pd1FjyI4C+QXGwCtfiVF
 </rawitemdata></item>
 <item name='$FormulaClass' sign='true'><text>1</text></item>
-<item name='$TITLE' sign='true'><text>(LookupSubProjectDuplication)|LookupSubProjectDuplication</text></item>
 <item name='$Index' sign='true'><text/></item>
 <item name='$Formula' summary='true' sign='true'><formula compiled='true'>
 pAACAFQAAgAkMQUADwBQcm9qZWN0TG9jYXRpb24AAQABAH4AIgIFAAsAUHJvamVjdE5hbWUAIgIB
@@ -36,7 +35,6 @@ AQAAAAAAAQAAAAAAAQAAAAAAAAAIAAAAAAABAA==
 </rawitemdata></item>
 <item name='$Comment' sign='true'><text/></item>
 <item name='$Flags'><text>PY</text></item>
-<item name='$DesignerVersion'><text>8.5.3</text></item>
 <item name='$V5ACTIONS' sign='true'>
 <rawitemdata type='1'>
 vRw/AAAAAQABAAAAAQAAAAAAAAAAAAAACAACAHn/bAABAPDw8AABAAAAAAAJAAAAAAABAPDw8AAA
@@ -55,5 +53,7 @@ AABDX3V0DQC+fL7/IAAAAAUAAACdAQAABQAAAAAAAABfQ29weW8OAM58vv8wAAAABQAAAJ0BAAAW
 AAAAAAAAAENvcHkgYXMgRG9jdW1lbnQgX0xpbmsPAN58vv8oAAAABQAAAJ0BAAAOAAAAAAAAAENv
 cHkgYXMgX1RhYmxlEADufL7/IAAAAAUAAACdAQAABgAAAAAAAABQX2FzdGURAP58vv8gAAAABQAA
 AJ0BAAAFAAAAAAAAAF9PcGVuABIADn2+/yIAAAAFAAAAnQEAAAgAAAAAAAAAQm9va21hcmsTAB59
-</rawitemdata></item></note>
+</rawitemdata></item>
+<item name='$TITLE' sign='true'><text>(LookupSubProjectDuplication)</text></item>
+<item name='$DesignerVersion' sign='true'><text>8.5.3</text></item></note>
 
