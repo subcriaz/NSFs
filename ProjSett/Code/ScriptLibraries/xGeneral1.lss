@@ -1,0 +1,410 @@
+'++LotusScript Development Environment:2:5:(Options):0:74
+%REM
+	Library General
+	Created Oct 17, 2015 by Sumera Mushfiq/IT/BahriaTown/PK
+	Description: Comments for Library
+%END REM
+
+Option Public
+UseLSX "*javacon"
+
+
+
+'++LotusScript Development Environment:2:5:(Forward):0:1
+Declare Sub Initialize
+Declare Sub appendInChangeLogWithSysInfo( strAction As String )
+Declare Sub getUserDetails(user List As Variant)
+Declare Function getProfileDoc() As NotesDocument
+Declare Function CreateDocumentDelete_Log(docSource As NotesDocument, docTarget As NotesDocument, reason1 As String)
+Declare Function MembersAgainstProjectInCRM(uidoc1 As NotesUIDocument)
+Declare Function getDBCRM() As NotesDatabase
+Declare Function CheckDeletionRights() As Boolean
+Declare Function getDBLog() As NotesDatabase
+Declare Function getDBSize(db As NotesDatabase) As Boolean
+Declare Function CheckCRMDBAccess() As Boolean
+Declare Function CheckLogDBAccess() As Boolean
+
+'++LotusScript Development Environment:2:5:(Declarations):0:10
+Dim session As NotesSession 
+Dim db2 As NotesDatabase
+Dim crmdb As NotesDatabase
+Dim logdb As NotesDatabase
+Dim db As NotesDatabase
+Dim nam As NotesName
+Dim jSession As JavaSession
+Dim jClass As JavaClass
+Dim jObject As JavaObject
+Dim jMethod As JavaMethod
+Dim uiDoc As NotesUIDocument
+Dim doc As NotesDocument
+Dim docProfile As NotesDocument
+Dim groupdoc As NotesDocument
+Dim platform As Variant
+Dim userDetails List As Variant
+Dim itemAction As NotesItem
+Dim itemPerformedBy As NotesItem
+Dim itemActionDate As NotesItem
+Dim dc As NotesDocumentCollection
+Dim NABgroupsview As NotesView
+Dim view As NotesView
+Dim acl As NotesACL
+Dim ACLEntry As NotesACLEntry
+Dim groupname As String
+Dim GroupsWithin As String
+Dim getIPAddress As String
+Dim userip As String
+Dim computerName As String
+Dim MacAddress As String
+Dim username As String
+Dim level As Integer
+Dim size As Double
+
+
+'++LotusScript Development Environment:2:2:Initialize:1:10
+Sub Initialize
+    Set session = New NotesSession
+	Set db2 = session.CurrentDatabase 
+End Sub
+
+'++LotusScript Development Environment:2:2:appendInChangeLogWithSysInfo:1:8
+Sub appendInChangeLogWithSysInfo( strAction As String )
+	
+	Dim ws As New NotesUIWorkspace
+	Set uiDoc = ws.CurrentDocument
+	Set doc = uiDoc.Document
+	
+	Call getUserDetails(userDetails)			' getting user details
+
+	Set itemAction = doc.GetFirstItem("Action")
+	Call itemAction.AppendToTextList( strAction )
+	
+	Set itemPerformedBy = doc.GetFirstItem("PerformedBy")
+	Call itemPerformedBy.AppendToTextList(userDetails(3))
+	
+	Set itemActionDate = doc.GetFirstItem("ActDate")
+	Call itemActionDate.AppendToTextList( Format(CStr(Now),"mmm dd, yyyy hh:mm:ss AM/PM" ) )
+	
+	Set itemActionDate = doc.GetFirstItem("IPAddress")
+	Call itemActionDate.AppendToTextList( userDetails(1) )
+	
+	Call uiDoc.Document.Save( True , True )
+	
+End Sub
+
+
+'++LotusScript Development Environment:2:2:getUserDetails:1:8
+Sub getUserDetails(user List As Variant)
+	' getting user login details and the system in use.
+
+	platform = Split(session.Platform, "/",2)
+	Set nam = session.Createname(session.Username,)
+	username = nam.Abbreviated
+	Set jSession = New JavaSession()
+	Set jClass = jSession.GetClass("java/net/InetAddress")
+	Set jMethod = jClass.GetMethod("getLocalHost","()Ljava/net/InetAddress;")
+	Set jObject = jMethod.Invoke()
+
+	' Java functions
+	userip = CStr(jObject.getHostAddress())'getting IP
+	computerName = CStr(jObject.getHostName())'getting computer name
+	
+	If platform(0) = "Windows"  Then
+	
+		'Getting the System Mac Address for windows
+		
+		Set WSHNetwork = CreateObject("WScript.Network")
+		Set IPConfigSet = GetObject( "winmgmts:{impersonationLevel=impersonate}" ).ExecQuery( _
+		"select * from Win32_NetworkAdapterConfiguration where IPEnabled=TRUE" )
+		ForAll IPConfig In IPConfigSet
+			If Not IsNull(IPConfig.MacAddress) Then
+				MacAddress = CStr(IPConfig.MacAddress(i))
+			End If
+		End ForAll
+		
+	ElseIf platform(0) = "Macintosh" Then  
+		
+		'MacAddress
+		'domain	
+	End If
+
+	'Getting the Date Time
+	Dim timezone As String
+	timezone = CStr(Format(Now, "Long Date"))+ " " + CStr(Format(Now, "Long Time"))
+	
+	' Assigning Values to Array
+	user(1) = userip
+	user(2) = MacAddress
+	user(3) = username
+	user(4) = computerName
+	user(5) = timezone
+	user(6) = platform(0)
+
+End Sub
+	
+
+'++LotusScript Development Environment:2:1:getProfileDoc:1:8
+Function getProfileDoc() As NotesDocument
+	'the method returns the profile document of the database
+	
+	Set docProfile = db2.GetProfileDocument( "Settings" )
+	Set getProfileDoc = docProfile
+		
+End Function
+
+'++LotusScript Development Environment:2:1:CreateDocumentDelete_Log:1:8
+Function CreateDocumentDelete_Log(docSource As NotesDocument, docTarget As NotesDocument, reason1 As String)
+	'creating log document on record deletion
+
+	Call docSource.Copyallitems(docTarget, True)
+	docTarget.UniversalID = docSource.UniversalID
+	Call getUserDetails(userDetails)			' getting user details deleting the record.
+	docTarget.ipaddress1   = userDetails(1)
+	docTarget.macaddress  = userDetails(2)
+	docTarget.username    = userDetails(3)
+	docTarget.computer    = userDetails(4)
+	docTarget.timezone    = userDetails(5)
+	docTarget.platform    = userDetails(6)
+	docTarget.reason = reason1
+	docTarget.deletedBy = userDetails(3)
+	docTarget.deletionDate=CStr(Format(Now,"Long Date")) +" - "+ CStr(Format(Now,"Long Time"))	
+	Call docTarget.save(True, False)
+	
+End Function
+
+
+'++LotusScript Development Environment:2:1:MembersAgainstProjectInCRM:1:8
+Function MembersAgainstProjectInCRM(uidoc1 As NotesUIDocument)
+
+	MembersAgainstProjectInCRM=True
+	
+	''' checking user access rights to CRM database
+	If CheckCRMDBAccess()= False Then
+		MembersAgainstProjectInCRM=False
+		Exit Function
+	End If 
+	
+	Set crmdb = getDBCRM() '' getting crm database
+	'''''existance of member view in CRM database
+	
+	Set view = crmdb.Getview("All")
+	If view Is Nothing Then
+		MsgBox "Member view(ALL) not found in CRM database.Please contact CRM Administrator",94,db2.Title
+		MembersAgainstProjectInCRM=False
+		Exit Function
+	End If
+	
+	'' checking if the members exist in CRM against the project selected
+	key =Trim( uidoc1.FieldGetText("ProjectName_log"))
+	Set dc = view.Getalldocumentsbykey(key, True)
+	
+	If dc.Count >0 Then
+		MsgBox "Members exist against project "+ key+" in CRM. You can not modify the project name.",94,db2.Title
+		Call uidoc1.FieldSetText("ProjectName",uidoc1.FieldGetText("ProjectName_log")	)	
+		Call uidoc1.FieldSetText("ProjectPrefix",uidoc1.FieldGetText("ProjectPrefix_log"))	
+		MembersAgainstProjectInCRM=False
+	End If
+	
+End Function
+
+'++LotusScript Development Environment:2:1:getDBCRM:1:8
+Function getDBCRM() As NotesDatabase
+
+	'Dependencies:	returns the CRM database by fetching its path from the profile document
+
+	On Error GoTo handler
+	
+	Set db2 = session.CurrentDatabase
+	Set docProfile = getProfileDoc()
+	
+	'return nothing if the project profile does not exist
+	If Not docProfile Is Nothing Then
+		
+		'return nothing if the path is empty
+		If docProfile.CRMDBPath(  0 ) <> "" Then
+			
+			Set getDBCRM = session.GetDatabase( db2.Server , docProfile.CRMDBPath( 0 ) )
+			Exit Function
+			
+		Else ' as path was not found
+			
+			Set getDBCRM = Nothing
+			Exit Function
+			
+		'end if docProfile.HRDatabase(  0 ) <> "" Then
+		End If
+		
+	Else 'if the profile document is not found
+		
+		Set getDBCRM = Nothing
+		Exit Function
+		
+	'end if Not docProfile Is Nothing Then
+	End If
+	
+	Set getDBCRM = Nothing
+	
+handler:
+	MsgBox "You are not authorized to access Log Database.Please contact CRM Administrator.",94,db2.Title
+	Set getDBCRM = Nothing
+	Exit Function
+End Function
+
+
+
+
+'++LotusScript Development Environment:2:1:CheckDeletionRights:1:8
+Function CheckDeletionRights() As Boolean
+	On Error GoTo handler
+	Dim workspace As New NotesUIWorkspace
+	Dim NABdb As New NotesDatabase( session.CurrentDatabase.Server, "names.nsf" )
+	
+     	CheckDeletionRights = False	
+	
+		Set uidoc = workspace.CurrentDocument
+		Set db = session.CurrentDatabase
+		Set acl = db.ACL		
+		
+	Set ACLEntry = acl.Getentry(session.UserName)   ' single user entry exist in acl
+	If(Not ACLEntry Is Nothing ) Then
+		If ACLEntry.IsPerson And ACLEntry.CanDeleteDocuments= True Then ''checking if the user can delete the document
+				CheckDeletionRights = True
+				Exit Function			
+		Else
+			CheckDeletionRights = False
+			Exit Function
+		End If	
+		
+	Else  '' if user entry in group
+
+		Set ACLEntry = acl.GetFirstEntry
+		
+		While Not ( ACLEntry Is Nothing ) ''loop to go through all the acl entries
+			Set NABgroupsview = NABdb.GetView( "($VIMGroups)" ) ''view containing all the groups
+			Set groupdoc = NABgroupsview.GetDocumentByKey ( ACLEntry.Name , False )
+			If Not ( groupDoc Is Nothing ) Then
+				' Now that we have found the group document we need to search the members item for the
+				' current user.
+		    	ForAll entry In groupdoc.Members
+					If entry = session.UserName Then
+					   '' if the user is found in any group
+						If aclentry.IsGroup Then			
+						   If ACLEntry.CanDeleteDocuments= True Then  '' checking if the user can delete the document
+							CheckDeletionRights = True
+							Exit Function
+						   End If
+					    End If
+					End If
+				End ForAll
+			End If
+			Set ACLentry = acl.GetNextEntry( ACLentry )
+		Wend
+	End If
+	Exit Function
+
+handler:
+	MsgBox "You are not authorized to delete record(s).",94,db2.Title
+	CheckDeletionRights=False
+
+End Function
+
+'++LotusScript Development Environment:2:1:getDBLog:1:8
+Function getDBLog() As NotesDatabase
+	On Error GoTo handler
+	
+	Set db2 = session.CurrentDatabase
+	Set docProfile = getProfileDoc()
+	'return nothing if the project profile does not exist
+	If Not docProfile Is Nothing Then
+		'return nothing if the path is empty
+		If docProfile.LogDBPath(  0 ) <> "" Then
+			Set getDBLog = session.GetDatabase( db2.Server , docProfile.LogDBPath( 0 ) )
+			Exit Function
+		Else ' as path was not found
+			Set getDBLog = Nothing
+			MsgBox "You are not authorized to access Log Database (log db path). Please contact CRM Administrator.",94,db2.Title
+			Exit Function
+		End If
+		
+	Else 'if the profile document is not found
+		
+		Set getDBLog = Nothing
+		MsgBox "You are not authorized to access Log Database (profile doc not found). Please contact CRM Administrator.",94,db2.Title
+		Exit Function
+		'end if Not docProfile Is Nothing Then
+	End If
+	
+	Set getDBLog = Nothing
+'	MsgBox "You are not authorized to access Log Database. Please contact CRM Administrator.",94,db2.Title
+	Exit Function
+	
+handler:
+	MsgBox "You are not authorized to access Log Database. Please contact CRM Administrator.",94,db2.Title
+	Set getDBLog = Nothing
+	Exit Function
+End Function
+
+'++LotusScript Development Environment:2:1:getDBSize:1:8
+Function getDBSize(db As NotesDatabase) As Boolean
+
+	size = db.Size
+	getDBsize = size
+End Function
+
+'++LotusScript Development Environment:2:1:CheckCRMDBAccess:1:8
+Function CheckCRMDBAccess() As Boolean
+	On Error GoTo handler
+
+	Set crmdb = getDBCRM()
+	If crmdb Is Nothing Then
+		CheckCRMDBAccess=False
+		Exit Function
+	End If
+	
+	If Not crmdb.Isopen Then
+		MsgBox "You are not authorized to access CRM database. Please contact the CRM Administrator",64,crmdb.Title
+		CheckCRMDBAccess=False
+		Exit Function
+	End If
+	
+	CheckCRMDBAccess = True
+	Exit Function
+	
+	
+handler:
+	MsgBox "You are not authorized to access CRM Database.Please contact CRM Administrator.",94,crmdb.Title
+	CheckCRMDBAccess=False
+	Exit Function
+End Function
+
+'++LotusScript Development Environment:2:1:CheckLogDBAccess:1:8
+Function CheckLogDBAccess() As Boolean
+	On Error GoTo handler
+	
+	Set logdb = getDBLog()
+	If logdb Is Nothing Then ''checking if the log db exist
+		CheckLogDBAccess=False
+		Exit Function
+	End If
+	
+	If Not logdb.Isopen Then ''checking if the log db opens
+		MsgBox "You are not authorized to access log database. Please contact the CRM Administrator",64,logdb.Title
+		CheckLogDBAccess=False
+		Exit Function
+	End If
+	
+	
+	level = logdb.CurrentAccessLevel
+'	If level < ACLLEVEL_Depositor then 
+'		MessageBox "You are not authorized to access log database. Please contact the CRM Administrator",64,logdb.Title
+'		CheckLogDBAccess=False
+'		Exit Function
+'   End If  
+	CheckLogDBAccess = True
+	Exit Function
+
+handler:
+	MsgBox "You are not authorized to access Log Database.Please contact CRM Administrator.",94,logdb.Title
+	CheckLogDBAccess=False
+	Exit Function
+	
+End Function

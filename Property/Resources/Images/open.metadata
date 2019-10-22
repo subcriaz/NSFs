@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?><note class="form" maintenanceversion="1.0" replicaid="452583F40026D464" version="10.0" xmlns="http://www.lotus.com/dxl">
+<noteinfo noteid="1a2" sequence="2" unid="EB9A358FAC917F76452580DE00401B79">
+<created><datetime>20170309T164013,37+05</datetime></created>
+<modified><datetime>20190508T120408,07+05</datetime></modified>
+<revised><datetime>20180219T150533,78+05</datetime></revised>
+<lastaccessed><datetime>20190508T120408,06+05</datetime></lastaccessed>
+<addedtofile><datetime>20190508T120408,06+05</datetime></addedtofile></noteinfo>
+<updatedby><name>CN=Lotus Notes Template Development/O=Lotus Notes</name><name>CN=Ali Ahmad/OU=IT/O=LotusCert/C=Pk</name><name>CN=Administrator/O=BahriaTown/C=PK</name><name>CN=Administrator/O=ERP/C=PK</name><name>CN=Umer Farooq Khan/OU=IT/O=BahriaTown/C=PK</name><name>CN=Irfan Riaz/OU=IT/O=BahriaTown/C=PK</name><name>CN=Super Admin/O=BahriaTown/C=PK</name></updatedby>
+<item name="$FlagsExt" sign="true"><text>D</text></item>
+<item name="$ImagesHigh" sign="true"><number>1</number></item>
+<item name="$ImagesColorize" sign="true"><number>0</number></item>
+<item name="$WebBrowserCompatible" sign="true"><number>1</number></item>
+<item name="$ImagesWide" sign="true"><number>2</number></item>
+<item name="$PublicAccess" sign="true"><text>1</text></item>
+<item name="$LANGUAGE" sign="true"><text>en</text></item>
+
+
+
+
+<item name="$MimeType" sign="true"><text>image/gif</text></item>
+<item name="$FileModDT" sign="true"><datetime dst="true">20020417T081630,00-04</datetime></item>
+<item name="$Flags"><text>34CiQv</text></item>
+<item name="$ImageNames" sign="true"><text>Cal Entry - Refresh.gif</text></item>
+<item name="$TITLE" sign="true"><text>open</text></item>
+<item name="$DesignerVersion" sign="true"><text>6.5</text></item></note>

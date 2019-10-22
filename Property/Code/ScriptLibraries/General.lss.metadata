@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?><note class="filter" maintenanceversion="1.0" replicaid="452583F40026D464" version="10.0" xmlns="http://www.lotus.com/dxl">
+<noteinfo noteid="14e" sequence="70" unid="53E9748E4BDA89A345257FF5001B13A2">
+<created><datetime>20160719T095544,98+05</datetime></created>
+<modified><datetime>20190701T152403,03+05</datetime></modified>
+<revised><datetime>20190701T152403,01+05</datetime></revised>
+<lastaccessed><datetime>20190701T152403,01+05</datetime></lastaccessed>
+<addedtofile><datetime>20190508T120407,86+05</datetime></addedtofile></noteinfo>
+<updatedby><name>CN=Riaz Ul Hassan/OU=IT/O=BahriaTown/C=PK</name></updatedby>
+<wassignedby><name>CN=Riaz Ul Hassan/OU=IT/O=BahriaTown/C=PK</name></wassignedby>
+<item name="$Flags"><text>s34Q</text></item>
+<item name="$PublicAccess" sign="true"><text>1</text></item>
+<item name="$TITLE" sign="true"><text>General</text></item>
+<item name="$DesignerVersion" sign="true"><text>8.5.3</text></item>
+
+
+<item name="$Comment"><text>all new functions dumped here (in use)</text></item></note>

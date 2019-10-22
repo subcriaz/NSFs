@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?><note class="filter" maintenanceversion="1.0" replicaid="452583F400273992" version="10.0" xmlns="http://www.lotus.com/dxl">
+<noteinfo noteid="4a6" sequence="85" unid="E3502DB02E3D040C4525846A0041F47B">
+<created><datetime>20190903T170024,27+05</datetime></created>
+<modified><datetime>20191022T095937,97+05</datetime></modified>
+<revised><datetime>20191022T095937,95+05</datetime></revised>
+<lastaccessed><datetime>20191022T095937,95+05</datetime></lastaccessed>
+<addedtofile><datetime>20190903T170024,32+05</datetime></addedtofile></noteinfo>
+<updatedby><name>CN=Riaz Ul Hassan/OU=IT/O=BahriaTown/C=PK</name><name>CN=Babur Mansoor/OU=IT/O=BahriaTown/C=PK</name><name>CN=Riaz Ul Hassan/OU=IT/O=BahriaTown/C=PK</name><name>CN=Babur Mansoor/OU=IT/O=BahriaTown/C=PK</name><name>CN=Samiullah Arshed/OU=IT/O=BahriaTown/C=PK</name><name>CN=Shoaib Farooq/OU=IT/O=BahriaTown/C=PK</name><name>CN=Riaz Ul Hassan/OU=IT/O=BahriaTown/C=PK</name><name>CN=Samiullah Arshed/OU=IT/O=BahriaTown/C=PK</name><name>CN=Waseem Hassan/OU=IT/O=BahriaTown/C=PK</name><name>CN=Sohail Ahmed/OU=IT/O=BahriaTown/C=PK</name><name>CN=Riaz Ul Hassan/OU=IT/O=BahriaTown/C=PK</name><name>CN=Sohail Ahmed/OU=IT/O=BahriaTown/C=PK</name></updatedby>
+<wassignedby><name>CN=Sohail Ahmed/OU=IT/O=BahriaTown/C=PK</name></wassignedby>
+<item name="$Flags"><text>s34Q</text></item>
+<item name="$PublicAccess" sign="true"><text>1</text></item>
+<item name="$TITLE" sign="true"><text>ApplicationMessages</text></item>
+<item name="$DesignerVersion" sign="true"><text>8.5.3</text></item>
+
+
+<item name="$Comment"><text>This class handles application wide messages.</text></item></note>

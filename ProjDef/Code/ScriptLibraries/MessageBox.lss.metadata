@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?><note class="filter" maintenanceversion="1.0" replicaid="452583F400273992" version="10.0" xmlns="http://www.lotus.com/dxl">
+<noteinfo noteid="5c2" sequence="1" unid="30C2C044696C8EBA45258474003BA0BA">
+<created><datetime>20190913T155117,70+05</datetime></created>
+<modified><datetime>20190913T155117,74+05</datetime></modified>
+<revised><datetime>20190913T155117,73+05</datetime></revised>
+<lastaccessed><datetime>20190913T155117,73+05</datetime></lastaccessed>
+<addedtofile><datetime>20190913T155117,73+05</datetime></addedtofile></noteinfo>
+<updatedby><name>CN=Mujahid Ur Rehman/O=ERP/C=PK</name><name>CN=Umer Farooq Khan/OU=IT/O=BahriaTown/C=PK</name><name>CN=Rizwan Saleem/OU=IT/O=BahriaTown/C=PK</name><name>CN=Khalid Jameel/OU=IT/O=BahriaTown/C=PK</name><name>CN=Umer Farooq Khan/OU=IT/O=BahriaTown/C=PK</name><name>CN=Samiullah Arshed/OU=IT/O=BahriaTown/C=PK</name></updatedby>
+<wassignedby><name>CN=Samiullah Arshed/OU=IT/O=BahriaTown/C=PK</name></wassignedby>
+<item name="$TITLE" sign="true"><text>MessageBox</text></item>
+<item name="$Flags"><text>s34Q</text></item>
+<item name="$PublicAccess" sign="true"><text>1</text></item>
+<item name="$Comment" sign="true"><text>Used for constants in msgbox function</text></item>
+
+
+<item name="$POID"><datetime>20171220T142814,73+05</datetime></item></note>

@@ -1,0 +1,208 @@
+'++LotusScript Development Environment:2:5:(Options):0:74
+Option Public
+
+'++LotusScript Development Environment:2:5:(Forward):0:1
+Declare Public Class Attachment
+Declare Sub Initialize	
+
+'++LotusScript Development Environment:2:5:(Declarations):0:10
+Public Class Attachment
+	attachDB As NotesDatabase
+	pdoc As NotesDocument
+	srdoc As NotesDocument
+	attachSrcIDFldName As String
+	attachSrcDescFldName As String
+	
+	Sub new(srd As NotesDocument,attSrIDFld As String,attSrDescFld As String,pd As NotesDocument,attachDBPathFld As String)
+		Dim s As New NotesSession
+		Set srdoc= srd
+		If (srdoc.GetFirstItem(attSrIDFld) Is Nothing) Then
+			Msgbox "Can not find the specified field for setting document ID, please recheck the field name",64,s.CurrentDatabase.Title
+			Exit Sub
+		Else
+			attachSrcIDFldName=attSrIDFld
+		End If
+		If (srdoc.GetFirstItem(attSrDescFld) Is Nothing) Then
+			Msgbox "Can not find the specified field for setting up attachment description, please recheck the field name",64,s.CurrentDatabase.Title
+			Exit Sub
+		Else
+			attachSrcDescFldName= attSrDescFld
+		End If		
+		Set pdoc=pd		
+		Set attachDB= s.CurrentDatabase 'New NotesDatabase(s.CurrentDatabase.Server,pdoc.GetItemValue(attachDBPath)(0))
+		'If attachDB.IsOpen=False Then
+			'Call attachDB.Open(s.CurrentDatabase.Server,pdoc.AttachmentDBPath(0))
+		'End If		
+	End Sub
+	
+	Sub createAttachment
+		Dim attachDoc As NotesDocument
+		Dim ws As New NotesUIWorkspace
+		Dim s As New NotesSession
+		Dim db As NotesDatabase
+		Dim uidoc As NotesUIDocument
+		
+		Set uidoc= ws.CurrentDocument
+		Set db= s.CurrentDatabase
+		
+		If uidoc.IsNewDoc Then
+			Msgbox "Please save the document before making attachment",64,db.Title
+			Exit Sub
+		Elseif uidoc.EditMode=False Then
+			Msgbox "Current document must be in Edit Mode before making any attachment",64,db.Title
+			Exit Sub
+		Elseif srdoc Is Nothing Then
+			Exit Sub
+		Elseif attachDB Is Nothing Then 
+			Exit Sub			
+		End If
+		
+		Set attachdoc= attachDB.CreateDocument
+		attachdoc.SrDB_fl = db.Title
+		attachdoc.srFormName_fl= srdoc.form
+		attachDoc.srDocID_fl= srdoc.DocID
+		
+		If srdoc.GetItemValue(attachSrcIDFldName)(0) <> "" Then
+			Msgbox "The field you have given has already an attachment, please remove it first and then proceed.",64,db.Title
+			Exit Sub
+		End If		
+		flag= ws.DialogBox("Attachment_Form",True,True,True,False,False,False,"Attachment",attachdoc,True,True,False)
+		If flag=True Then
+			Call srDoc.ReplaceItemValue(attachSrcIDFldName,attachDoc.UniversalID)
+			Call srDoc.ReplaceItemValue(attachSrcDescFldName,attachDoc.AttachmentTitle_fl(0) & "(" & "Created at: " & attachDoc.Created & " By: " & s.CommonUserName & ")")
+			Call uidoc.Refresh
+		End If
+	End Sub
+	
+	Sub openAttachment()
+		Dim s As New NotesSession
+		Dim db As NotesDatabase
+		Dim ws As New NotesUIWorkspace
+		Dim doc As NotesDocument
+		Dim attachDoc As NotesDocument
+		Dim pdoc As NotesDocument
+		
+		
+		Set doc= ws.CurrentDocument.Document
+		
+		If srdoc Is Nothing Then
+			Exit Sub
+		Elseif attachDB Is Nothing Then 
+			Exit Sub			
+		End If
+		
+		If srdoc.GetItemValue(attachSrcIDFldName)(0) <> "" Then
+			Set attachDoc= attachDB.GetDocumentByUNID(srdoc.GetItemValue(attachSrcIDFldName)(0) )
+			If Not attachDoc Is Nothing Then
+				Call ws.EditDocument(False,attachDoc)
+			End If
+		End If
+	End Sub
+	
+	Sub editAttachment
+		Dim s As New NotesSession
+		Dim db As NotesDatabase
+		Dim ws As New NotesUIWorkspace
+		Dim attachDoc As NotesDocument
+		Dim pdoc As NotesDocument
+		Dim uidoc As NotesUIDocument
+		
+		Set uidoc= ws.CurrentDocument
+		Set db= s.CurrentDatabase
+		
+		If srdoc Is Nothing Then
+			Exit Sub
+		Elseif attachDB Is Nothing Then 
+			Exit Sub			
+		End If
+		
+		If uidoc.EditMode=False Then
+			Msgbox "Please edit current document before editing the attachment",64,db.Title
+		Else
+			If srdoc.GetItemValue(attachSrcIDFldName)(0) <> "" Then
+				Set attachDoc= attachDB.GetDocumentByUNID(srdoc.GetItemValue(attachSrcIDFldName)(0) )
+				If Not attachDoc Is Nothing Then
+					flag= ws.DialogBox("Attachment_Form",True,True,True,False,False,False,"Edit Attachment",attachDoc,True,True,False)
+					If flag=True Then
+						Call srDoc.ReplaceItemValue(attachSrcIDFldName,attachDoc.UniversalID)
+						Call srDoc.ReplaceItemValue(attachSrcDescFldName,attachDoc.AttachmentTitle_fl(0) & "(" & "Created at: " & attachDoc.Created & " By: " & s.CommonUserName & ")")
+						Call uidoc.Refresh
+					End If
+					
+				End If
+			End If
+		End If		
+	End Sub
+	Sub deleteAttachment()
+		Dim s As New NotesSession
+		Dim db As NotesDatabase
+		Dim ws As New NotesUIWorkspace
+		Dim attachDoc As NotesDocument
+		Dim pdoc As NotesDocument
+		Dim uidoc As NotesUIDocument
+		
+		Set uidoc= ws.CurrentDocument
+		Set db= s.CurrentDatabase
+		
+		If srdoc Is Nothing Then
+			Exit Sub
+		Elseif attachDB Is Nothing Then 
+			Exit Sub			
+		End If
+		
+		If uidoc.EditMode=False Then
+			Msgbox "Please edit current document before deleting the attachment",64,db.Title
+		Else
+			If srdoc.GetItemValue(attachSrcIDFldName)(0) <> "" Then
+				Set attachDoc= attachDB.GetDocumentByUNID(srdoc.GetItemValue(attachSrcIDFldName)(0) )
+				If Not attachDoc Is Nothing Then
+					If ws.Prompt(PROMPT_YESNO,"Attachment Deletion?","Are you sure you want to delete this attachment, operation can't be undone?") Then
+						Call attachDoc.Remove(True)
+						Call srdoc.ReplaceItemValue(attachSrcIDFldName,"")
+						Call srdoc.ReplaceItemValue(attachSrcDescFldName,"")
+						Msgbox "Attachment is deleted",64,db.Title
+						Call uidoc.Refresh
+						uidoc.Document.Save True,False
+					End If
+				End If
+			End If
+		End If		
+	End Sub	
+	
+	'/////////////////////////////////////////////////////////////////////////////////   Open All Attachments
+	Sub OpenAllAttachments
+		Dim s As New NotesSession
+		Dim db As NotesDatabase
+		Dim ws As New NotesUIWorkspace
+		Dim attachDoc As NotesDocument
+		Dim pdoc As NotesDocument
+		Dim uidoc As NotesUIDocument
+		
+		Set uidoc= ws.CurrentDocument
+		Set db= s.CurrentDatabase
+		
+		If srdoc Is Nothing Then
+			Exit Sub
+		Elseif attachDB Is Nothing Then 
+			Exit Sub			
+		End If
+		
+		
+		If srdoc.GetItemValue(attachSrcIDFldName)(0) <> "" Then
+			Set attachDoc= attachDB.GetDocumentByUNID(srdoc.GetItemValue(attachSrcIDFldName)(0) )
+			If Not attachDoc Is Nothing Then
+				flag= ws.DialogBox("Open_Attachment_Form",True,True,True,False,True,False,"Open Attachment",attachDoc,True,True,False)
+				
+				
+				
+			End If
+		End If
+		
+	End Sub
+	'/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	
+End Class
+'++LotusScript Development Environment:2:2:Initialize:1:10
+Sub Initialize	
+End Sub
+

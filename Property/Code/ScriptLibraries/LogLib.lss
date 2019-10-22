@@ -1,0 +1,650 @@
+'++LotusScript Development Environment:2:5:(Options):0:74
+Option Public
+UseLSX "*javacon"
+
+
+
+
+
+'++LotusScript Development Environment:2:5:(Forward):0:1
+Declare Sub Initialize
+Declare Sub Terminate
+Declare Sub getUserDetails(user List As Variant)
+Declare Sub getUserDetails_New(user List As Variant)
+Declare Function CaptureSave (source As NotesUIDocument)
+Declare Function CheckDeletionRights() As Boolean
+Declare Function Edit_Log(docSource As NotesDocument, OldVals List As Variant)
+Declare Function getDBLog() As NotesDatabase
+Declare Function Create_DeletionLog(docSource As NotesDocument, docTarget As NotesDocument, reason1 As String)
+Declare Function getProfileDocument_Log() As NotesDocument
+Declare Function HasFieldChanged( doc As NotesDocument, strFieldName As String)
+Declare Function CaptureModeChange(Source As NotesUIDocument)
+Declare Function CheckLogDBAccess() As Boolean
+
+'++LotusScript Development Environment:2:5:(Declarations):0:10
+Dim aFieldsToCheck List As Variant
+
+'++LotusScript Development Environment:2:2:Initialize:1:10
+Sub Initialize
+	
+End Sub
+
+
+'++LotusScript Development Environment:2:2:Terminate:1:10
+Sub Terminate
+	
+End Sub
+
+
+'++LotusScript Development Environment:2:1:CheckLogDatabaseExist:0:8
+%REM
+	
+Function CheckLogDatabaseExist(currentdoc As NotesDocument, db As NotesDatabase) 
+
+	On Error GoTo handler
+	Dim session As New NotesSession
+	CheckLogDatabaseExist=True
+	If(currentdoc.LogDBPath(0)<>"" ) Then
+		Set logdb=session.GetDatabase(db.Server,currentdoc.LogDBPath(0))
+		If(logdb.isopen)Then
+			CheckLogDatabaseExist=True
+			Exit Function
+			Else
+				MsgBox "You are not authorized to access Log Database.Please contact CRM Administrator.",94,db.Title
+				CheckLogDatabaseExist=False
+				Exit Function
+		    End If
+    Else
+	    MsgBox "Log Datbase path not exist in Profile. Please contact CRM Administrator.",94,db.Title
+		CheckLogDatabaseExist=False
+		Exit Function
+	End If
+Exit Function
+handler:
+	MsgBox "You are not authorized to access Log Database.Please contact CRM Administrator.",94,db.Title
+	CheckLogDatabaseExist=False
+	Exit Function
+
+End Function
+
+%END REM
+
+'++LotusScript Development Environment:2:2:getUserDetails:1:8
+Sub getUserDetails(user List As Variant)
+	
+	Dim session As New NotesSession
+	Dim platform As Variant
+	platform = Split(session.Platform, "/",2)
+	Dim username As String
+	Dim roles As String
+	Dim db As NotesDatabase	
+	Set db = session.CurrentDatabase
+	Dim newDoc As New NotesDocument(db)
+	Dim jSession As JavaSession
+	Dim jClass As JavaClass
+	Dim jObject As JavaObject
+	Dim jMethod As JavaMethod
+	Dim getIPAddress As String
+	Set jSession = New JavaSession()
+	Set jClass = jSession.GetClass("java/net/InetAddress")
+	Set jMethod = jClass.GetMethod("getLocalHost","()Ljava/net/InetAddress;")
+	Set jObject = jMethod.Invoke()
+	Dim userip As String
+	Dim computerName As String
+	' Java functions
+	userip = CStr(jObject.getHostAddress())'getByInetAddress(172.16.19.64)
+	computerName = CStr(jObject.getHostName())
+	domain= session.InternetDomainName
+	userRoles = Evaluate("@UserRoles")
+	ForAll r In userRoles
+		roles = roles + r
+	End ForAll
+	
+	If platform(0) = "Windows"  Then
+		'Getting the System Mac Address for windows
+		Set WSHNetwork = CreateObject("WScript.Network")
+		Set IPConfigSet = GetObject( "winmgmts:{impersonationLevel=impersonate}" ).ExecQuery( _
+		"select * from Win32_NetworkAdapterConfiguration where IPEnabled=TRUE" )
+		ForAll IPConfig In IPConfigSet
+			If Not IsNull(IPConfig.MacAddress) Then
+				MacAddress = CStr(IPConfig.MacAddress(i))
+			End If
+		End ForAll
+	'ElseIf platform(0) = "Macintosh" Then  
+	Else
+		MacAddress = "Not Specified"
+	End If
+	Dim timezone As String
+	timezone = CStr(Format(Now, "Long Date"))+ " " + CStr(Format(Now, "Long Time"))
+	Dim SDateTime As New NotesDateTime(newDoc.Created) 'server datetime object
+	Dim CDateTime As New NotesDateTime(Now) 'Client datetime object
+	
+	' Assigning Values to Array
+	user(1) = userip
+	user(2) = MacAddress
+	user(3) = Environ$("USERDOMAIN")'domain
+	user(4) = Environ$("USERNAME") 
+	user(5) = computerName
+	user(6) = CStr((CDateTime.Timezone)*(-1))  'Client Machine TimeZone
+	user(7) = Environ$("COMPUTERNAME")
+	user(8) = CStr(newDoc.Created)  'Live Server Current DateTime
+	user(9) = CStr((SDateTime.Timezone)*(-1))  'Live Server TimeZone
+	user(10)= platform(0)
+	user(11) = roles
+	
+	If (session.Currentdatabase.Server = "") Then
+		user(12) = "Local"
+		user(13) = ""
+	Else 
+		user(12) = "Server"
+		user(13) = session.Currentdatabase.Server
+	End If 
+	
+	Dim version As String	
+	version = 	session.NotesVersion
+	user(14) = version
+	'MsgBox CStr(newDoc.Created)
+	
+End Sub
+
+
+'++LotusScript Development Environment:2:2:getUserDetails_New:1:8
+Sub getUserDetails_New(user List As Variant)
+	
+	Dim WSHNetwork As Variant
+	Dim domain As String
+	Dim MacAddress As String
+	Dim ipconfigset As Variant
+	' Notes Variables
+	Dim session As New NotesSession
+	
+	Dim db As NotesDatabase
+	Set db = session.Currentdatabase
+	Dim platform As Variant
+	platform = Split(session.Platform, "/",2)
+	Dim version As String	
+	version = 	session.NotesVersion
+	Dim username As String
+	Dim userRoles As Variant
+	Dim nam As NotesName
+	Set nam = session.Createname(session.Username,)
+	Dim roles As String
+	username = nam.Abbreviated
+	userRoles = Evaluate("@UserRoles")
+	ForAll r In userRoles
+		roles = roles + r
+	End ForAll
+	
+	'userRoles = CStr(Evaluate("@UserRoles"))
+	' Getting the System IP Address using java
+	Dim jSession As JavaSession
+	Dim jClass As JavaClass
+	Dim jObject As JavaObject
+	Dim jMethod As JavaMethod
+	Dim getIPAddress As String
+	Set jSession = New JavaSession()
+	Set jClass = jSession.GetClass("java/net/InetAddress")
+	Set jMethod = jClass.GetMethod("getLocalHost","()Ljava/net/InetAddress;")
+	Set jObject = jMethod.Invoke()
+	
+	Dim userip As String
+	Dim computerName As String
+	
+	' Java functions
+	userip = CStr(jObject.getHostAddress())'getByInetAddress(172.16.19.64)
+	computerName = CStr(jObject.getHostName())
+	domain = Environ("userdomain") 
+	If platform(0) = "Windows"  Then
+		'Getting the System Mac Address for windows
+		Set WSHNetwork = CreateObject("WScript.Network")
+		Set IPConfigSet = GetObject( "winmgmts:{impersonationLevel=impersonate}" ).ExecQuery( _
+		"select * from Win32_NetworkAdapterConfiguration where IPEnabled=TRUE" )
+		ForAll IPConfig In IPConfigSet
+			If Not IsNull(IPConfig.MacAddress) Then
+				MacAddress = CStr(IPConfig.MacAddress)
+			End If
+		End ForAll
+		
+	ElseIf platform(0) = "Macintosh" Then  
+		'Dim winun As String
+		'winun = Environ("username") 
+		
+		'domain
+	ElseIf platform(0) = "Linux" Then  
+		
+	End If
+	
+	'Getting the Date Time
+	Dim timezone As String
+	timezone = CStr(Format(Now, "Long Date"))+ " " + CStr(Format(Now, "Long Time"))
+	Dim dateTime As New NotesDateTime( timezone )
+	'MessageBox( dateTime.Zonetime )
+	' Assigning Values to Array
+	user(1) = userip
+	user(2) = MacAddress
+	user(3) = domain
+	user(4) = username
+	user(5) = computerName
+	user(6) = dateTime.Zonetime
+	user(7) = platform(0)
+	user(8) = roles
+	user(9) = version
+	
+	If (session.Currentdatabase.Server = "") Then
+		user(10) = "Local"
+		user(11) = ""
+	Else 
+		user(10) = "Server"
+		user(11) = session.Currentdatabase.Server
+	End If 
+	
+	Dim userACL As Integer
+	userACL = Session.Currentdatabase.Currentaccesslevel
+	
+	If userACL=0 Then
+		user(12)	="No Access"
+	ElseIf userACL=1 Then
+		user(12) = "Depositor"
+	ElseIf userACL=2 Then
+		user(12) = "Reader"
+	ElseIf userACL=3 Then
+		user(12) = "Author"
+	ElseIf userACL=4 Then
+		user(12) = "Editor"
+	ElseIf userACL=5 Then
+		user(12) = "Designer"
+	ElseIf userACL=6 Then
+		user(12) = "Manager"
+	End If
+	
+	Dim varACL As NotesACL
+	Set varACL = db.Acl
+	
+	
+	
+	Dim varACLEntry As NotesACLEntry
+	Set varACLEntry = varACL.Getentry(username)
+	'******checking user type*******'
+	Dim userType As Integer
+	userType = varACLEntry.Usertype
+	If userType=0 Then
+		user(13) = "Unspecified"
+	ElseIf userType=1 Then
+		user(13) = "Person"
+	ElseIf userType=2 Then
+		user(13) = "Server"
+	ElseIf userType=3 Then
+		user(13) = "Mixed Group"
+	ElseIf userType=4 Then
+		user(13) = "Person Group"
+	ElseIf userType=5 Then
+		user(13) = "Server Group"
+	End If
+	'*************--------------***********'
+	user(14) = CStr(varACLEntry.Candeletedocuments)
+	'MsgBox (user(14))
+End Sub
+
+
+'++LotusScript Development Environment:2:1:CaptureSave:5:8
+%REM
+	Function CaptureSave
+	Description: Comments for Function
+%END REM
+Function CaptureSave (source As NotesUIDocument)
+	ForAll Field In aFieldsToCheck
+		'Msgbox Listtag(field)
+		If HasFieldChanged ( source.document, ListTag( Field ) ) Then
+			' do your required action
+			'MsgBox ListTag(Field) 
+			Call Edit_Log(source.Document, aFieldsToCheck)
+			Exit ForAll
+		End If
+	End ForAll
+End Function
+
+
+
+
+
+'++LotusScript Development Environment:2:1:getCurrentDBServer:0:8
+%REM
+	
+Function getCurrentDBServer() As string	
+	On Error GoTo handler
+	Dim session As New NotesSession
+	Dim servername As string
+	getCurrentDBServer=True
+	servername = session.currentDatabase.server
+Exit Function
+
+handler:
+	MsgBox "Current DB server not found.Please contact CRM Administrator.",94,db.Title
+	getCurrentDBServer=False
+	Exit Function
+
+End Function
+
+%END REM
+
+'++LotusScript Development Environment:2:1:CheckDeletionRights:1:8
+Function CheckDeletionRights() As Boolean
+	On Error GoTo handler
+	Dim session As New NotesSession
+	Dim db As NotesDatabase
+	Dim dc As NotesDocumentCollection
+	Dim workspace As New NotesUIWorkspace
+	Dim uidoc As NotesUIDocument
+	Dim acl As NotesACL
+	Dim username As NotesName
+	Dim accPrv As long
+	CheckDeletionRights = False	
+		Set uidoc = workspace.CurrentDocument
+		Set db = session.CurrentDatabase
+	accPrv = db.Queryaccessprivileges(session.Username)
+	If (accPrv And DBACL_DELETE_DOCUMENTS) > 0 Then
+		CheckDeletionRights = True
+		Exit Function		
+	Else
+		CheckDeletionRights = False
+		Exit Function			
+	End If
+	
+handler:
+	MsgBox "You are not authorized to delete record(s).",94,db2.Title
+	CheckDeletionRights=False
+
+End Function
+
+'++LotusScript Development Environment:2:1:Edit_Log:1:8
+Function Edit_Log(docSource As NotesDocument, OldVals List As Variant)
+	Dim session As NotesSession
+	Dim workspace As NotesUIWorkspace
+	Dim notesuidb As NotesUIDatabase
+	Dim db As NotesDatabase
+	Dim profiledoc As NotesDocument
+	Dim logdb As NotesDatabase
+	
+	
+	Set session =  New NotesSession	
+	Set workspace = New NotesUIWorkspace
+	Set notesuidb = workspace.CurrentDatabase
+	'Set collection = notesuidb.documents
+	Set db=session.CurrentDatabase	
+	Set profiledoc=db.GetProfileDocument("Profile")
+	Set logdb = session.GetDatabase(db.Server,profiledoc.LogDBPath(0))
+	Dim docTarget As NotesDocument
+	Set docTarget= logdb.CreateDocument					
+	'Call docSource.Copyallitems(docTarget, True)
+	'docTarget.UniversalID = docSource.UniversalID
+	Call docSource.Copyallitems(DocTarget,  True)
+	Dim userDetails List As Variant
+	ForAll Field In OldVals
+		
+		
+		'Call docTarget.ReplaceItemValue( ListTag(Field), docSource.GetItemValue(ListTag(Field)))
+		Call docTarget.ReplaceItemValue( ListTag(Field)+"_old", Field )
+		
+	End ForAll
+	
+	docTarget.Form = docSource.Form(0) + "_modified"
+	
+	Call getUserDetails_New(userDetails)
+	Dim winun As String
+	winun = Environ("username") 
+	
+	If userDetails(7) = "Macintosh" Then
+		winun = Environ("USER")
+	End If
+	
+	
+	docTarget.rp_ipaddress   = userDetails(1)
+	docTarget.rp_macaddress  = userDetails(2)
+	docTarget.rp_domain      = userDetails(3)
+	docTarget.rp_modifyby    = userDetails(4)
+	docTarget.rp_computer    = userDetails(5)
+	docTarget.rp_timezone    = userDetails(6)
+	docTarget.rp_platform    = userDetails(7)
+	docTarget.AssignedRoles = userDetails(8)
+	docTarget.LotusVersion = userDetails(9)
+	docTarget.rp_dblocation = userDetails(10)
+	docTarget.rp_osusername = winun
+	docTarget.rp_servername = userDetails(11)
+	docTarget.rp_servertime = Evaluate({@Now([SERVERTIME])})
+	
+	Dim sdatetim As New NotesDateTime(docTarget.LastModified)
+	
+	docTarget.rp_servertimezone = Evaluate({@TimeZoneToText(rp_servertime)})
+	docTarget.rp_timezone_1 = Evaluate({@TimeZoneToText(@Text(@Now))})
+	
+	Call docTarget.ReplaceItemValue("$KeepPrivate","1")
+	Call docTarget.save(True, False)
+	
+End Function
+
+'++LotusScript Development Environment:2:1:getDBLog:1:8
+Function getDBLog() As NotesDatabase
+	
+	On Error GoTo handler
+	Dim session As New NotesSession
+	Dim db2 As NotesDatabase
+	Set db2 = session.CurrentDatabase
+	Dim docProfile As NotesDocument
+	Set docProfile = getProfileDocument_Log()
+
+	'return nothing if the project profile does not exist
+	If Not docProfile Is Nothing Then
+		'return nothing if the path is empty
+		If Not docProfile.HasItem( "LogDBPath" ) Then
+			MsgBox "Log field does not exist in profile document. Please contact CRM Administrator.",94,db2.Title
+			Set getDBLog = Nothing
+			Exit Function
+		End If
+		If docProfile.LogDBPath(  0 ) <> "" Then
+			Set getDBLog = session.GetDatabase( db2.server , docProfile.LogDBPath(0),false )
+			'		If getDBLog Is Nothing Then
+			'			MsgBox "Log database not found. Please contact the CRM Administrator",64,"Alert"
+			'			Set getDBLog = Nothing
+			'			Exit Function
+			'		End If
+			Exit Function
+			
+		Else ' as path was not found
+			Set getDBLog = Nothing
+			MsgBox "Log database not found (log db path). Please contact CRM Administrator.",94,db2.Title
+			Exit Function
+		End If
+		
+	Else 'if the profile document is not found
+		
+		Set getDBLog = Nothing
+		MsgBox "Profile document not found. Please contact CRM Administrator.",94,db2.Title
+		Exit Function
+		'end if Not docProfile Is Nothing Then
+	End If
+	
+	Set getDBLog = Nothing
+	Exit Function
+	
+handler:
+	MsgBox "Log database not found. Please contact CRM Administrator.",94,db2.Title
+	Set getDBLog = Nothing
+	Exit Function
+End Function
+
+'++LotusScript Development Environment:2:1:getLogServer:0:8
+%REM
+	Function getLogServer
+	Description: Comments for Function
+%END REM
+%REM
+	
+
+Function getLogServer() As string
+	On Error GoTo handler
+	Dim session As New NotesSession
+	Dim db2 As NotesDatabase
+	Set db2 = session.CurrentDatabase
+	Dim docProfile As NotesDocument
+	Set docProfile = getProfileDocument()
+	'return nothing if the project profile does not exist
+	If Not docProfile Is Nothing Then
+		'return nothing if the path is empty
+		If docProfile.LogDBServer(  0 ) <> "" Then
+			getLogServer = docProfile.LogDBServer( 0 )
+			'MsgBox getLogServer
+			Exit Function
+		Else ' as path was not found
+			getLogServer = ""
+			'	MsgBox "You are not authorized to access Log Database Server (log db server path). Please contact CRM Administrator.",94,db2.Title
+			Exit Function
+		End If
+		
+	Else 'if the profile document is not found
+		
+		getLogServer = ""
+		MsgBox "You are not authorized to access Log Database Server (profile doc not found). Please contact CRM Administrator.",94,db2.Title
+		Exit Function
+		'end if Not docProfile Is Nothing Then
+	End If
+	
+	getLogServer = ""
+	'	MsgBox "You are not authorized to access Log Database. Please contact CRM Administrator.",94,db2.Title
+	Exit Function
+	
+handler:
+	MsgBox "You are not authorized to access Log Database. Please contact CRM Administrator.",94,db2.Title
+	getLogServer = ""
+	Exit Function
+End Function
+%END REM
+
+'++LotusScript Development Environment:2:1:Create_DeletionLog:1:8
+Function Create_DeletionLog(docSource As NotesDocument, docTarget As NotesDocument, reason1 As String)
+	Dim userDetails List As Variant
+	Dim session As New NotesSession
+	Dim nam As NotesName
+	Set nam = session.Createname(session.Username,)
+	username = nam.Abbreviated
+	Call docSource.Copyallitems(docTarget, True)
+	docTarget.Form = docSource.form(0) & "_DeletionLog" 
+	Call getUserDetails(userDetails)
+	docTarget.Deletion_reason  = reason1
+	docTarget.Deletion_IPaddress  = userDetails(1)
+	docTarget.Deletion_MACAddress  = userDetails(2)
+	docTarget.Deletion_DomainName  = userDetails(3)
+	docTarget.Deletion_ComputerUserName  = userDetails(4)
+	docTarget.Deletion_ComputerName  = userDetails(5)
+	docTarget.Deletion_OSTimeZone  = userDetails(6)
+	docTarget.Deletion_ComputerName= userDetails(7)
+	docTarget.Deletion_ServerDateTime= userDetails(8)
+	docTarget.Deletion_ServeTimeZone  = userDetails(9)
+	docTarget.Deletion_OSName  = userDetails(10)
+
+	docTarget.Deletion_by=username  'Abbrivated UserName
+	docTarget.Deletion_date=CStr(Format(Now,"Long Date")) +Chr$(10)+ CStr(Format(Now,"Long Time"))
+	docTarget.Deletion_AssignedRoles = userDetails(11)
+	docTarget.Deletion_NotesVersion = userDetails (14)
+	docTarget.Deletion_DbLocation = userDetails(12)
+	docTarget.Deletion_ServerName = userDetails(13)
+	Call docTarget.save(True, False)
+	
+End Function
+
+'++LotusScript Development Environment:2:1:getProfileDocument_Log:1:8
+Function getProfileDocument_Log() As NotesDocument
+	
+	Dim session As New NotesSession
+	Dim db2 As NotesDatabase
+	Set db2 = session.CurrentDatabase
+	Dim docProfile As NotesDocument
+	Dim form As NotesForm
+	Set form = db2.GetForm("Settings")
+	If form Is Nothing Then
+		Set getProfileDocument_Log = Nothing
+		Exit Function
+	Else
+		Set docProfile = db2.GetProfileDocument( "Settings" )
+		Set getProfileDocument_Log = docProfile
+	End If
+	
+End Function
+
+'++LotusScript Development Environment:2:1:HasFieldChanged:1:8
+Function HasFieldChanged( doc As NotesDocument, strFieldName As String)
+	HasFieldChanged = False 
+	
+	Dim item1 As NotesItem
+	Dim val1 As Variant
+	Dim val2 As Variant
+	Set item1 = doc.GetFirstItem(strFieldName)
+	
+	If (Not InStr(strFieldName,"$") > 0) And (Not item1 Is Nothing) Then
+		val1= doc.GetitemValue( strFieldName )(0)
+		val2 = aFieldsToCheck(strFieldName)
+		
+		
+		If Not IsNull(val2) And item1.Type <> 1 Then
+			If  val1 <> val2(0) Then
+				'Msgbox strFieldName + Chr(13) + Cstr(val1) + Chr(13) + val2(0)
+				HasFieldChanged = True
+			End If		
+		End If
+	End If
+	
+	
+	
+End Function
+
+
+
+
+
+
+'++LotusScript Development Environment:2:1:CaptureModeChange:5:8
+%REM
+	Function CaptureModeChange
+	Description: Comments for Function
+%END REM
+Function CaptureModeChange(Source As NotesUIDocument)
+		ForAll Field In Source.Document.Items
+			aFieldsToCheck(field.Name) = field.Values
+		End ForAll
+End Function
+
+
+
+'++LotusScript Development Environment:2:1:CheckLogDBAccess:1:8
+Function CheckLogDBAccess() As Boolean
+	
+	On Error GoTo handler
+	Dim session As New NotesSession
+	Dim logdb As NotesDatabase
+	Dim level As Integer
+	
+	Set logdb = getDBLog()
+	
+	If logdb Is Nothing Then ''checking if the log db exist
+		CheckLogDBAccess=False
+		Exit Function
+	End If
+	If Not logdb.Isopen Then ''checking if the log db opens
+		MsgBox "You are not authorized to access log database. Please contact the CRM Administrator",64,logdb.Title
+		CheckLogDBAccess=False
+		Exit Function
+	End If
+	level = logdb.CurrentAccessLevel
+	If level < ACLLEVEL_Depositor or (level = ACLLEVEL_Reader) then
+		MessageBox "You are not authorized to access log database. Please contact the CRM Administrator",64,logdb.Title
+		CheckLogDBAccess=False
+		Exit Function
+   End If
+	CheckLogDBAccess = True
+	Exit Function
+
+handler:
+	MsgBox "You are not authorized to access Log Database.Please contact CRM Administrator.",94,logdb.Title
+	CheckLogDBAccess=False
+	Exit Function
+	
+End Function

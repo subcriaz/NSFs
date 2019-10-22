@@ -1,0 +1,44 @@
+<?xml version='1.0' encoding='utf-8'?>
+<note class='form' xmlns='http://www.lotus.com/dxl' version='10.0' maintenanceversion='1.0'
+ replicaid='452583F400273992'>
+<noteinfo noteid='16e' unid='2AED19F130DA859C45257DA900377089' sequence='8'>
+<created><datetime>20141209T150532,89+05</datetime></created>
+<modified><datetime>20190822T150526,22+05</datetime></modified>
+<revised><datetime>20190822T150526,21+05</datetime></revised>
+<lastaccessed><datetime>20190822T150526,21+05</datetime></lastaccessed>
+<addedtofile><datetime>20190508T120826,79+05</datetime></addedtofile></noteinfo>
+<updatedby><name>CN=Samiullah Arshed/OU=IT/O=BahriaTown/C=PK</name></updatedby>
+<wassignedby><name>CN=Samiullah Arshed/OU=IT/O=BahriaTown/C=PK</name></wassignedby>
+<item name='$Comment' sign='true'><text/></item>
+<item name='$BackgroundR5'>
+<rawitemdata type='1'>
+3QYBAJkAmQAcAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAH0AHAAAAAIABAGrAgAAAAAAAAAAAAAA
+AAAAAAD2/y8AAAAAAAMAEwANAAAAAAAAAAAAAAAAAAAAAAAAAAAAbGVmdF9tYWluLmpwZwDeBgEA
+mQA=
+</rawitemdata></item>
+<item name='$HTMLCode' sign='true'>
+<rawitemdata type='1'>
+X/8QAAIADwAHAAAAAAAAAA==
+</rawitemdata></item>
+<item name='$TITLE'><text>OutlinePage</text></item>
+<item name='$Info' sign='true'>
+<rawitemdata type='1'>
+hhgBAIAAAAAAAAAAAQABAP///wAQAAAA
+</rawitemdata></item>
+<item name='$Flags'><text>C34WQ</text></item>
+<item name='$DesignerVersion'><text>8.5.3</text></item>
+<item name='$$ScriptName' summary='false' sign='true'><text>OutlinePage</text></item>
+<item name='$Body' sign='true'>
+<rawitemdata type='1'>
+gQKC/1oAAQAAAAAAAAAAAKAFAACgBQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAABAAAAAJSHAAAAAAAAAAAAAAAAAQAAAAQAAACDBAEAhf8IAAEAAAqBAoMEAQCF/wgA
+AQAACoECgwQBAIX/CAABAAAK3QYAAK3/cf8uAAAAAAADABYADAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AE1haW5PdXRsaW5lAK3/GAAbAAgAAAAMAE1haW5PdXRsaW5lAOr/PgAbAAmEAABkAJAGAQAACwAA
+AAAAAAAAAQAACgEAAAoAAAUA////AAEAAAAAAAAAAAAAAAAAAAAAAAAA7P8aASAGBAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAJAAAAAAAJAAIAEAAAsAAAABAAAKAQAACgEAAAoBAAAKAQAACgEA
+AAoAAAAAAAAAACABIAEAAAAAAAAFAP///wAFAP///wAFAP///wAFAP///wAFAP///wAFAP///wAF
+AP///wAFAP///wAFAP///wAFAP///wABAAAAAAABAAAA/wABAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAQAAAAAAAQAAAAAAAQAAAAAAAQAAAP8AAQAA
+AAAAAAAPAAAAAAAAAAAAAAAAAAAAAAAAAAAATWFpbm91dGxpbmUArgLeBgAArgCF/wgAAQAACg==
+</rawitemdata></item></note>
+

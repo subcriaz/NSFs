@@ -1,0 +1,51 @@
+<?xml version='1.0' encoding='utf-8'?>
+<note class='view' xmlns='http://www.lotus.com/dxl' version='10.0' maintenanceversion='1.0'
+ replicaid='452583F40026D464'>
+<noteinfo noteid='156' unid='445D97B2CA514C4C45257FF5001BBA15' sequence='26'>
+<created><datetime>20160719T100251,09+05</datetime></created>
+<modified><datetime>20190708T121611,69+05</datetime></modified>
+<revised><datetime>20190708T121611,67+05</datetime></revised>
+<lastaccessed><datetime>20190708T121611,67+05</datetime></lastaccessed>
+<addedtofile><datetime>20190508T120407,88+05</datetime></addedtofile></noteinfo>
+<updatedby><name>CN=Samiullah Arshed/OU=IT/O=BahriaTown/C=PK</name></updatedby>
+<wassignedby><name>CN=Samiullah Arshed/OU=IT/O=BahriaTown/C=PK</name></wassignedby>
+<item name='$FormatNote' summary='true' sign='true'>
+<rawitemdata type='4'>
+AQB+Pd1FjyI4C+QXGwCtfiVF
+</rawitemdata></item>
+<item name='$FormulaClass' sign='true'><text>1</text></item>
+<item name='$TITLE' sign='true'><text>(LookupViewPropertyDuplication)</text></item>
+<item name='$Index' sign='true'><text/></item>
+<item name='$Formula' summary='true' sign='true'><formula compiled='true'>
+CgECALwAAgAkMQUACwBQcm9qZWN0TmFtZQBeAQUACgBTdWJQcm9qZWN0XgEiAgUADgBQcm9wZXJ0
+eVNlY3Rvcl4BIgIFAA4AUHJvcGVydHlTdHJlZXReASICBQAKAFByb3BlcnR5Tm9eASICBQALAFBy
+b3BlcnR5VXNlAF4BIgIFAAwAUHJvcGVydHlTaXplXgEiAgUACgBCdWlsZGluZ05vXgEiAgUADQBC
+dWlsZGluZ0Zsb29yAF4BIgIDAAUAHgAZAAMAAgAJAAQAJDEkQ29uZmxpY3QkUkVGAAQABAAAABwA
+BQAEAEZvcm0BAAgAUHJvcGVydHkKAgMABwAOAAgACUwxUzJTM1M=
+</formula></item>
+<item name='$Collation' summary='true'>
+<rawitemdata type='2'>
+DwABAABEAGYAAAACACQx
+</rawitemdata></item>
+<item name='$ViewFormat' summary='true' sign='true'>
+<rawitemdata type='5'>
+AQABAAIACAAAAFZDAQACAAMAygAAACACAQAACgAAAAAAAAAAAAICAAAAJDFLZXnKAAIAvAACACQx
+BQALAFByb2plY3ROYW1lAF4BBQAKAFN1YlByb2plY3ReASICBQAOAFByb3BlcnR5U2VjdG9yXgEi
+AgUADgBQcm9wZXJ0eVN0cmVldF4BIgIFAAoAUHJvcGVydHlOb14BIgIFAAsAUHJvcGVydHlVc2UA
+XgEiAgUADABQcm9wZXJ0eVNpemVeASICBQAKAEJ1aWxkaW5nTm9eASICBQANAEJ1aWxkaW5nRmxv
+b3IAXgEiAgMABwAMAAUACTBTMEUAJgABAAAAAQEACQEAAAoBAQ4KAAABAK0rAQABAAEAAAAAAAAA
+AABXQwEBAAkAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD//wAAAAAAAAAAAAAAAAAAQgAQAAAAAQD/
+//8ABQD///8AAQAAAAAAAAAAAAAAAAABAP///wABAP///wAAAAEAAAAAAAEAAAAAAAEAAAAAAAAA
+CAAAAAAAAQA=
+</rawitemdata></item>
+<item name='$Comment' sign='true'><text/></item>
+<item name='$Flags'><text>PY</text></item>
+<item name='$DesignerVersion'><text>8.5.3</text></item>
+<item name='$V5ACTIONS' sign='true'>
+<rawitemdata type='1'>
+vRw/AAAAAQABAAAAAQAAAAAAAAAAAAAACAACAHn/bAABAPDw8AABAAAAAAAJAAAAAAABAPDw8AAA
+AB8AAAAAAAAAAAADAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAPz/OgAAAAAAAQAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAEAAAAAAAAAAAAAAAAAAAA=
+</rawitemdata></item></note>
+

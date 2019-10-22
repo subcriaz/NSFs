@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?><note class="filter" maintenanceversion="1.0" replicaid="452583F40026D464" version="10.0" xmlns="http://www.lotus.com/dxl">
+<noteinfo noteid="216" sequence="220" unid="D271335744EF0A634525840100237732">
+<created><datetime>20190521T112722,74+05</datetime></created>
+<modified><datetime>20191014T120417,76+05</datetime></modified>
+<revised><datetime>20191014T120417,75+05</datetime></revised>
+<lastaccessed><datetime>20191014T120417,75+05</datetime></lastaccessed>
+<addedtofile><datetime>20190521T112722,81+05</datetime></addedtofile></noteinfo>
+<updatedby><name>CN=Waseem Hassan/OU=IT/O=BahriaTown/C=PK</name></updatedby>
+<wassignedby><name>CN=Waseem Hassan/OU=IT/O=BahriaTown/C=PK</name></wassignedby>
+<item name="$Flags"><text>s34Q</text></item>
+<item name="$PublicAccess" sign="true"><text>1</text></item>
+
+
+<item name="$Comment" sign="true"><text>This class handles application wide messages.</text></item>
+<item name="$TITLE" sign="true"><text>xApplicationMessages</text></item>
+<item name="$DesignerVersion" sign="true"><text>8.5.3</text></item></note>

@@ -1,0 +1,42 @@
+<?xml version='1.0' encoding='utf-8'?>
+<note class='view' xmlns='http://www.lotus.com/dxl' version='10.0' maintenanceversion='1.0'
+ replicaid='452583F400273992'>
+<noteinfo noteid='19a' unid='F8D6584FA75CB3C845257EAD00223F75' sequence='9'>
+<created><datetime>20150826T111404,69+05</datetime></created>
+<modified><datetime>20190508T120826,91+05</datetime></modified>
+<revised><datetime>20180219T150533,16+05</datetime></revised>
+<lastaccessed><datetime>20191014T113909,29+05</datetime></lastaccessed>
+<addedtofile><datetime>20190508T120826,90+05</datetime></addedtofile></noteinfo>
+<updatedby><name>CN=Sumera Mushfiq/OU=IT/O=BahriaTown/C=PK</name><name>CN=Super Admin/O=BahriaTown/C=PK</name></updatedby>
+<item name='$FormulaClass' sign='true'><text>1</text></item>
+<item name='$TITLE' sign='true'><text>(LookupProjectName)</text></item>
+<item name='$Index' sign='true'><text/></item>
+<item name='$Formula' summary='true' sign='true'><formula compiled='true'>
+ZgAFADAAKwAEAAsABwAJAAQAUHJvamVjdE5hbWVQcmVmaXgxJENvbmZsaWN0JFJFRgAEAAQAAAAm
+AAUABABmT1JNAQARAFByb2plY3REZWZpbml0aW9uAAoCAwAHAAoABAAJTDFT
+</formula></item>
+<item name='$Collation' summary='true'>
+<rawitemdata type='2'>
+GAABAABECGYHAAALAFByb2plY3ROYW1l
+</rawitemdata></item>
+<item name='$ViewFormat' summary='true' sign='true'>
+<rawitemdata type='5'>
+AQACAAUACAAAAFZDAwALAAwAAAAAACcBAQAACgABAAAAAAAAAAICAAAAVkMAAAcAAAAAAAAAUAAB
+AAAKAAAAAAAAAAAAAgIAAABQcm9qZWN0TmFtZVByb2plY3QgTmFtZVByZWZpeDEmAAEAAAABAQAJ
+AQAACgEBDgoAAAEArSsBAAEAAQAAAAAAAAAAAFdDAQAACQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AP//AAAAAAAAAAAAAAAAAABXQwEBAAkAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAD//wAAAAAAAAAA
+AAAAAAAAQgABAAAAAQD///8ABQD///8AAQAAAAAAAAAAAAAAAAABAP///wABAP///wAAAAEAAAAA
+AAEAAAAAAAEAAAAAAAAACAAAAAAAAQA=
+</rawitemdata></item>
+<item name='$Comment' sign='true'><text/></item>
+<item name='$Flags'><text>PY</text></item>
+<item name='$DesignerVersion'><text>8.5.3</text></item>
+<item name='$V5ACTIONS' sign='true'>
+<rawitemdata type='1'>
+vRw/AAAAAQABAAAAAQAAAAAAAAAAAAAACAACAHn/bAABAPDw8AABAAAAAAAJAAAAAAABAPDw8AAA
+AB8AAAAAAAAAAAADAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAPz/OgAAAAAAAQAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAEAAAAAAAAAAAAAAAAAAAC+/1gAAAABAAAAnwEAAAsAAAAAAAAAQWRkIFByb2plY3QA
+NgAAACgAAgDoAwAAAAAAAAEAEQBQcm9qZWN0RGVmaW5hdGlvbgDtAgMABwAMAAUACTBTMEUA
+</rawitemdata></item></note>
+

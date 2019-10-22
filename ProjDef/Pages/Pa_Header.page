@@ -1,0 +1,47 @@
+<?xml version='1.0' encoding='utf-8'?>
+<note class='form' xmlns='http://www.lotus.com/dxl' version='10.0' maintenanceversion='1.0'
+ replicaid='452583F400273992'>
+<noteinfo noteid='32e' unid='E6A8356714601DEA4525845F001E8072' sequence='34'>
+<created><datetime>20190823T103309,62+05</datetime></created>
+<modified><datetime>20190906T153836,10+05</datetime></modified>
+<revised><datetime>20190906T153836,08+05</datetime></revised>
+<lastaccessed><datetime>20190906T153836,08+05</datetime></lastaccessed>
+<addedtofile><datetime>20190823T103309,63+05</datetime></addedtofile></noteinfo>
+<updatedby><name>CN=Samiullah Arshed/OU=IT/O=BahriaTown/C=PK</name></updatedby>
+<wassignedby><name>CN=Samiullah Arshed/OU=IT/O=BahriaTown/C=PK</name></wassignedby>
+<item name='$Fonts'>
+<rawitemdata type='1'>
+i/8oAAEABSZWZXJkYW5hAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==
+</rawitemdata></item>
+<item name='$BackgroundRepeat'><text>6</text></item>
+<item name='$BackgroundR5'>
+<rawitemdata type='1'>
+3QYBAJkAmQAcAAAA3AXcBQAAAAAAAAAAAAAAAAAAAQAAAH0AHAAAAAEAZABkAAAAAAAAAAAAAAAA
+AAAAAAD2/ywAAAAAAAMAEwAKAAAAAAAAAAAAAAAAAAAAAAAAAAAAbG9nby0xLmdpZt4GAQCZAA==
+</rawitemdata></item>
+<item name='$HTMLCode' sign='true'>
+<rawitemdata type='1'>
+X/8QAAIADwAHAAAAAAAAAA==
+</rawitemdata></item>
+<item name='$TITLE'><text>Pa_Header</text></item>
+<item name='$Info' sign='true'>
+<rawitemdata type='1'>
+hhgMAIAAAAAAAAAAHQABAPj29wAQAAAA
+</rawitemdata></item>
+<item name='$WindowTitle' sign='true'><formula>"Bahria Town's Procurement Management System"</formula></item>
+<item name='$Flags'><text>C34WQ</text></item>
+<item name='$DesignerVersion'><text>8.5.3</text></item>
+<item name='$$ScriptName' summary='false' sign='true'><text>Pa_Header</text></item>
+<item name='$Body' sign='true'>
+<rawitemdata type='1'>
+gQKC/1oAAQADAAAAAAAAADgEAAA4BAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAABAAAAAJSEOAQPADgEDwAAAAAAAQAAAAQAAACDBAEAhf8JAAEAAAoJAIECgwQBAIX/
+CAABAAAKgQKDBAEAhf8IAAEAAAqBAoMEAQCF/wgAAQAACoECgwQBAIX/CAABAAAKgQKDBAEAhf8I
+AAEAAAqBAoMEAQCF/wgAAQAACoECgwQBAIX/CAABAAAKgQKDBAEAhf8IAAEAAAqBAoMEAQCF/wgA
+AQAACoECgwQBAIX/DwABAAAKICAgICAgIADdBgAArf+p/zQAAQAYAAQAKAAoAAoABAAAABYAAgAF
+AAAAAAAAAPsARQG0AgMABwAMAAUACTBTMEUAhf8IAAEAAAiqAt4GAACuAIX/CAABAAAKgQKDBAEA
+hf8PAAEAAAogICAgICAgAN0GAACt/6n/PgABABgABAAyADIAAAAiAAIABQAAAAAAAACLALQCAAAA
+AAAAAADwPxABawIDAAcADgAHAAkyUzhTOVMAhf8IAAEAAAeqAt4GAACuAIX/CAABAAAKgQKDBAEA
+hf8IAAEAAAo=
+</rawitemdata></item></note>
+

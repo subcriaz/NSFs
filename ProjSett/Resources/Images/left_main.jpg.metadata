@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?><note class="form" maintenanceversion="1.0" replicaid="452583F400274E82" version="10.0" xmlns="http://www.lotus.com/dxl">
+<noteinfo noteid="6a6" sequence="1" unid="9CA22F1B0F14031B4525848D0022D32D">
+<created><datetime>20191008T112022,85+05</datetime></created>
+<modified><datetime>20191008T112023,24+05</datetime></modified>
+<revised><datetime>20191008T112023,23+05</datetime></revised>
+<lastaccessed><datetime>20191008T112023,23+05</datetime></lastaccessed>
+<addedtofile><datetime>20191008T112023,23+05</datetime></addedtofile></noteinfo>
+<updatedby><name>CN=Riaz Ul Hassan/OU=IT/O=BahriaTown/C=PK</name></updatedby>
+<wassignedby><name>CN=Riaz Ul Hassan/OU=IT/O=BahriaTown/C=PK</name></wassignedby>
+<item name="$TITLE"><text>left_main.jpg</text></item>
+<item name="$FlagsExt"><text>D</text></item>
+<item name="$ImagesWide" sign="true"><number>1</number></item>
+<item name="$ImagesHigh" sign="true"><number>1</number></item>
+<item name="$ImagesColorize" sign="true"><number>0</number></item>
+<item name="$FileModDT" sign="true"><datetime>20040603T123202,00+05</datetime></item>
+<item name="$ImageNames" sign="true"><text>left_main.jpg</text></item>
+<item name="$Flags"><text>D34CiQ$</text></item>
+<item name="$EditFilePath"><text>C:\Users\Riaz\AppData\Local\Temp\notes1B744C\~left_main3.jpg</text></item>
+<item name="$DesignerVersion"><text>8.5.3</text></item>
+
+</note>

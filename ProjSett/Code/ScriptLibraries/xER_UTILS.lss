@@ -1,0 +1,1947 @@
+'++LotusScript Development Environment:2:5:(Options):0:74
+Option Public
+UseLSX "*javacon"
+
+
+
+
+
+'++LotusScript Development Environment:2:5:(Forward):0:1
+Declare Sub Initialize
+Declare Function getProfileDocLogo() As NotesDocument
+Declare Function getNamesByRoleString( theRole As String ) As String
+Declare Sub editDoc_View
+Declare Function getNamesByRole(theRole As String) As Variant
+Declare Function isDocUnique ( doc As NotesDocument, fieldName As String , fieldValue As Variant ) As Boolean 
+Declare Sub closeDoc
+Declare Function areFieldsNumeric (source As notesuidocument, fieldlist As String, fieldlabels As String ) As Boolean 
+Declare Function areFieldsEmpty (source As notesuidocument, fieldlist As String, fieldlabels As String ) As Boolean 
+Declare Function getDBPayments() As NotesDatabase
+Declare Function getDuplicateDoc( doc As NotesDocument, fieldName As String , fieldValue As Variant) As NotesDocument 
+Declare Function getDocByKeyDB( db2 As NotesDatabase , formname As String, field As String, value As Variant )_
+As NotesDocument 
+Declare Function getDocByKey ( formname As String, field As String, value As Variant )_
+As NotesDocument 
+Declare Function isNameValid( nameToCheck As String ) As Boolean
+Declare Function getAllDocsBy2Keys ( formname As String , field1 As String, value1 As Variant, _
+field2 As String, value2 As Variant ) As NotesDocumentCollection 
+Declare Function getAllDocsBy3Keys( db2 As NotesDatabase ,   formname As String , field1 As String, value1 As Variant, _
+field2 As String, value2 As Variant , field3 As String, value3 As Variant  )As notesdocumentcollection
+Declare Function areFieldsEmptyExpandSection (source As notesuidocument, fieldlist As String, fieldlabels As String ) As Boolean 
+Declare Function currentUserHasRole ( rolename As String ) As Boolean 
+Declare Function ExplodeString (txtstring As String, delimiter As String) As Variant
+Declare Sub sendMail2 ( sendToInfo As Variant, ccInfo As Variant, bccInfo As Variant , _ 
+subject As String, strBody As String, _ 
+strDescription1 As String , doc1 As NotesDocument , _ 
+strDescription2 As String , doc2 As NotesDocument, _ 
+bAuto As Boolean  )
+Declare Sub sendMail3( sendToInfo As Variant, ccInfo As Variant, bccInfo As Variant , _ 
+subject As String, strBody As String, _ 
+strDescription1 As String , _  
+bAuto As Boolean  )
+Declare Function getDBPLOT()As NotesDatabase
+Declare Function getDBPossession() As NotesDatabase
+Declare Function setField ( fieldName As String, fieldValue As Variant ) As Boolean 
+Declare Function CheckLogDBAccess() As Boolean
+Declare Sub getUserDetails(user List As Variant)
+Declare Function getField ( fieldName As String) As String
+Declare Function getProfileDoc() As NotesDocument
+Declare Function CreateDocumentDelete_Log(docSource As NotesDocument, docTarget As NotesDocument, reason1 As String)
+Declare Sub alertUser ( message As String ) 
+Declare Function CheckDeletionRights() As Boolean
+Declare Sub editDoc
+Declare Function getDBLog() As NotesDatabase
+Declare Sub informUser ( message As String ) 
+Declare Function CheckCRMDBAccess() As Boolean
+Declare Sub refreshDoc
+Declare Function getHRDB() As NotesDatabase
+Declare Function getDBTransfer() As NotesDatabase
+Declare Sub sendMail( sendToInfo As Variant, ccInfo As Variant, bccInfo As Variant , _ 
+subject As String, strBody As String, _ 
+strDescription1 As String , doc1 As NotesDocument , _  
+bAuto As Boolean  )
+Declare Function getField_View ( fieldName As String) As String 
+Declare Function getAllDocsByKeyDB( db2 As NotesDatabase , formname As String, field As String, value As Variant )_
+As NotesDocumentCollection 
+Declare Sub appendInChangeLogWithSysInfo( strAction As String )
+Declare Function isFieldUnique ( formname As String , fieldName As String , fieldValue As Variant ) As Boolean 
+Declare Function getAllDocsByKey ( formname As String, field As String, value As Variant )_
+As NotesDocumentCollection 
+Declare Function getDBOpening() As NotesDatabase
+Declare Function askUser ( message As String ) As Boolean 
+Declare Function getEmployeeProfile( strEmpName As String ) As NotesDocument
+Declare Function getAllDocsBy2KeysDB ( db2 As NotesDatabase , formname As String, field1 As String, value1 As Variant, _ 
+field2 As String , value2 As Variant ) As NotesDocumentCollection 
+Declare Function getDBCRM() As NotesDatabase
+Declare Function setField_View ( fieldName As String, fieldValue As Variant ) As Boolean 
+Declare Function getDBRefund() As NotesDatabase
+Declare Function getDBSize(db As notesdatabase) As boolean
+Declare Function deleteReminderDocument() As Boolean 
+Declare Function getDBNDC() As NotesDatabase
+Declare Sub saveDoc 
+Declare Function getAllDocsByKey2Forms( formname As String, formName2 As String , field As String, value As Variant  ) As NotesDocumentCollection
+
+'++LotusScript Development Environment:2:5:(Declarations):0:10
+Dim dbHR As NotesDatabase	
+Dim docEmployeeProfile1 As NotesDocument
+Dim db2 As NotesDatabase
+Dim strHRPath As NotesDatabase
+Dim docProfile As NotesDocument
+
+'++LotusScript Development Environment:2:2:Initialize:1:10
+Sub Initialize
+	
+	
+	
+	
+	
+End Sub
+
+'++LotusScript Development Environment:2:1:getProfileDocLogo:1:8
+Function getProfileDocLogo() As NotesDocument
+	
+	
+	'Project: 	Benedict Engineering	
+	'Module: Pre Hiring
+	'Library: ER Utils 
+	'Author: Mujahid ur Rehman
+	'Date: Aug 04, 2005
+	'Dependencies:	returns the profile document of the Pre Hiring Database
+	
+	'Modification Date:
+	'Modification Description:
+	'Modification Source:
+	'____________________________________________________________________
+	
+	'the method returns the profile document of the database
+	
+	Dim session As New NotesSession
+	Dim db2 As NotesDatabase
+	Set db2 = session.CurrentDatabase
+	
+	Dim docProfile As NotesDocument
+	Set docProfile = db2.GetProfileDocument( "ProfileLogo" )
+	
+	Set getProfileDocLogo = docProfile
+	
+	
+End Function
+
+'++LotusScript Development Environment:2:1:getNamesByRoleString:1:8
+Function getNamesByRoleString( theRole As String ) As String
+	
+	Dim acl As NotesACL
+	Dim ACLEntry As NotesACLEntry
+	
+	Dim NameItem As NotesItem
+	Dim i As Integer
+	
+	Dim session As New NotesSession
+	Dim db2 As NotesDatabase
+	Set db2 = Session.CurrentDatabase
+	
+	Set acl = db2.ACL
+	Set ACLEntry = acl.GetFirstEntry
+	
+	Dim nameRole As NotesName
+	Dim mUsers As String
+	mUsers = ""
+	
+	
+	While Not(ACLEntry Is Nothing)
+		
+		If ( ACLEntry.IsRoleEnabled( theRole ) And (	ACLEntry.UserType = ACLTYPE_PERSON Or ACLEntry.UserType = ACLTYPE_PERSON_GROUP ) ) Then
+			
+			Set nameRole = New NotesName( ACLEntry.Name )
+			If mUsers = "" Then
+				mUsers =  Cstr( nameRole.Common )
+			Else
+				mUsers = mUsers + "," + Cstr( nameRole.Common	)
+			End If
+			
+			
+		End If
+		Set ACLEntry = acl.GetNextEntry( ACLEntry )
+	Wend
+	
+	getNamesByRoleString = mUsers
+	
+End Function
+
+'++LotusScript Development Environment:2:2:editDoc_View:1:8
+Sub editDoc_View
+	
+	Dim ws As New NotesUIWorkspace 
+	Dim doc As NotesDocument 
+	Dim uiview As NotesUIView 
+	
+	Set uiview = ws.CurrentView 
+	Set doc = uiview.Documents.GetFirstDocument 	
+	'ws.CurrentDocument.EditMode = True
+	
+End Sub
+
+'++LotusScript Development Environment:2:1:getNamesByRole:1:8
+Function getNamesByRole(theRole As String) As Variant
+	
+	Dim session As New NotesSession 
+	Dim db2 As NotesDatabase 
+	
+	Dim acl As NotesACL
+	Dim ACLEntry As NotesACLEntry
+	
+	Dim NameItem As NotesItem
+	Dim i As Integer
+	
+	Set db2 = Session.CurrentDatabase
+	
+	Set acl = db2.ACL
+	Set ACLEntry = acl.GetFirstEntry
+	
+	Dim mUsers() As Variant
+	
+	i = 0
+	
+	While Not(ACLEntry Is Nothing)
+		
+		If ( ACLEntry.IsRoleEnabled( theRole ) And (	ACLEntry.UserType = ACLTYPE_PERSON Or ACLEntry.UserType = ACLTYPE_PERSON_GROUP ) ) Then
+			Redim Preserve mUsers( i ) As Variant 			
+			mUsers(i) = ACLEntry.Name
+			i = i + 1
+		End If
+		Set ACLEntry = acl.GetNextEntry( ACLEntry )
+	Wend
+	
+	getNamesByRole = mUsers
+	
+End Function
+
+'++LotusScript Development Environment:2:1:isDocUnique:1:8
+Function isDocUnique ( doc As NotesDocument, fieldName As String , fieldValue As Variant ) As Boolean 
+	''Author: Adeel Qureshi
+	''Warning: Make sure that you have a "Form" field in the document 
+	'' 		 to make this function work for checking new documents too
+	
+	
+	Dim dcDuplicates As NotesDocumentCollection 
+	Dim docDuplicate As NotesDocument 
+	Set dcDuplicates = getAllDocsByKey(doc.Form(0), fieldName, fieldValue)
+	
+	count = dcDuplicates.Count 
+	
+	Select Case count
+		
+	Case 0
+		isDocUnique = True
+		Exit Function
+		
+	Case 1
+		Set docDuplicate = dcDuplicates.GetFirstDocument 
+		If Cstr(docDuplicate.UniversalID) = (doc.UniversalID) Then
+			isDocUnique = True		
+			Exit Function		
+		Else
+			isDocUnique = False
+			Exit Function
+			
+		End If		
+		
+	Case Is >  1
+		isDocUnique = False
+		Exit Function
+		
+		
+	End Select
+	
+End Function
+
+
+
+
+
+'++LotusScript Development Environment:2:2:closeDoc:1:8
+Sub closeDoc
+	Dim ws As New NotesUIWorkspace 
+	Dim doc As NotesDocument 
+	Set doc = ws.CurrentDocument.Document 
+	If ws.CurrentDocument Is Nothing Then
+		Msgbox "Could not find current document" 		
+		Exit Sub
+	End If
+	
+	ws.CurrentDocument.Close 
+End Sub
+
+
+'++LotusScript Development Environment:2:1:areFieldsNumeric:1:8
+Function areFieldsNumeric (source As notesuidocument, fieldlist As String, fieldlabels As String ) As Boolean 
+	'''''	
+	checkNumericFields = True
+	
+	Dim requiredfields As Variant 
+	Dim requiredlabels As Variant 
+	Dim badfields As String 
+	Dim errortext As String 
+	Dim firstfield As String
+	
+	areFieldsNumeric = True
+''field list and field labels are semi-colon seperated values	
+	
+'call a separate string-handling function to convert the strings to arrays , this function defined in same
+' script library
+	requiredfields = explodestring(fieldlist,";") 
+	requiredlabels = explodestring(fieldlabels,";")
+	
+	Dim i,z As Integer
+	i=0
+	z=Ubound(requiredfields)
+	Forall fields In requiredfields
+		tmpval=Isnumeric(source.fieldgettext(requiredfields(i)))		
+		If tmpval <> "True" Then
+			If badfields = "" Then
+'build a string of friendly field labels for the validation error 
+				badfields = requiredlabels(i) 				
+'grab the actual field where we will place the cursor if there is an error 
+				firstfield = requiredfields(i) 
+			Else 
+				badfields = badfields & Chr(13) & requiredlabels(i) 
+			End If 
+		End If
+		i=i+1
+	End Forall
+	
+'if any field raises an error, return a validation error listing fields to be completed 
+	If badfields <> "" Then 
+		Dim warning As String 
+		areFieldsNumeric = False
+		warning = "The following fields have to be numeric to save this document:" & Chr(13) & badfields
+		Messagebox warning , MB_ICONSTOP, source.Document.ParentDatabase.Title 
+		Call source.gotofield(firstfield)
+	End If
+	
+End Function
+
+
+'++LotusScript Development Environment:2:1:areFieldsEmpty:1:8
+Function areFieldsEmpty (source As notesuidocument, fieldlist As String, fieldlabels As String ) As Boolean 
+	
+	Dim requiredfields As Variant 
+	Dim requiredlabels As Variant 
+	Dim badfields As String 
+	Dim errortext As String 
+	Dim firstfield As String
+	
+	areFieldsEmpty = False
+''field list and field labels are semi-colon seperated values	
+	
+'call a separate string-handling function to convert the strings to arrays , this function defined in same
+' script library
+	requiredfields = explodestring(fieldlist,";") 
+	requiredlabels = explodestring(fieldlabels,";")
+	
+	Dim i,z As Integer
+	i=0
+	z=Ubound(requiredfields)
+	Forall fields In requiredfields
+		tmpval = source.fieldgettext(requiredfields(i))
+		If tmpval = "" Then
+			If badfields = "" Then
+'build a string of friendly field labels for the validation error 
+				badfields = requiredlabels(i) 				
+'grab the actual field where we will place the cursor if there is an error 
+				firstfield = requiredfields(i) 
+			Else 
+				badfields = badfields & Chr(13) & requiredlabels(i) 
+			End If 
+		End If
+		i=i+1
+	End Forall
+	
+'if any field raises an error, return a validation error listing fields to be completed 
+	If badfields <> "" Then 
+		Dim warning As String 
+		areFieldsEmpty = True
+		warning = "The following required fields must be completed before you can send this document:" & Chr(13) & badfields
+		Messagebox warning , MB_ICONSTOP, source.Document.ParentDatabase.Title 
+		Call source.gotofield(firstfield)		
+	End If
+End Function
+
+'++LotusScript Development Environment:2:1:getDBPayments:1:8
+Function getDBPayments() As NotesDatabase
+	
+	'Project: 	Bahria Town
+	'Module: CRM
+	'Author: Mujahid ur Rehman
+	'Date: 06 Dec, 2005
+	'Dependencies:	returns the payments database by fetching its path from the profile document
+	
+	'Modification Date:
+	'Modification Description:
+	'Modification Source:
+	'____________________________________________________________________
+	
+	Dim session As New NotesSession
+	Dim db2 As NotesDatabase
+	Set db2 = session.CurrentDatabase
+	
+	Dim strHRPath As NotesDatabase
+	Dim docProfile As NotesDocument
+	
+	Set docProfile = getProfileDoc()
+	
+	'return nothing if the project profile does not exist
+	If Not docProfile Is Nothing Then
+		
+		'return nothing if the path is empty
+		If docProfile.paymentpath(  0 ) <> "" Then
+			
+			Set getDBPayments = session.GetDatabase( db2.Server , docProfile.paymentpath( 0 ) )
+			Exit Function
+			
+		Else ' as path was not found
+			
+			Set getDBPayments = Nothing
+			Exit Function
+			
+		'end if docProfile.HRDatabase(  0 ) <> "" Then
+		End If
+		
+	Else 'if the profile document is not found
+		
+		Set getDBPayments = Nothing
+		Exit Function
+		
+	'end if Not docProfile Is Nothing Then
+	End If
+	
+	Set getDBPayments = Nothing
+	
+End Function
+
+'++LotusScript Development Environment:2:1:getDuplicateDoc:1:8
+Function getDuplicateDoc( doc As NotesDocument, fieldName As String , fieldValue As Variant) As NotesDocument 
+	
+	Dim dcDuplicates As NotesDocumentCollection 
+	Dim docDuplicate As NotesDocument 
+	Set dcDuplicates = getAllDocsByKey(doc.Form(0), fieldName, fieldValue)	
+	
+	count = dcDuplicates.Count 
+	
+	Select Case count
+		
+	Case 0
+		Set getDuplicateDoc = Nothing
+		Exit Function		
+	Case 1
+		Set docDuplicate = dcDuplicates.GetFirstDocument 
+		If Cstr(docDuplicate.UniversalID) = (doc.UniversalID) Then
+			Set getDuplicateDoc = Nothing
+			Exit Function			
+			
+		Else			
+			Set getDuplicateDoc = docDuplicate
+			Exit Function						
+			
+		End If				
+	Case Is >  1
+		Set docDuplicate = dcDuplicates.GetFirstDocument 
+		Set getDuplicateDoc = docDuplicate
+		Exit Function	
+		
+	End Select
+	
+End Function
+
+'++LotusScript Development Environment:2:1:getDocByKeyDB:2:8
+Function getDocByKeyDB( db2 As NotesDatabase , formname As String, field As String, value As Variant )_
+As NotesDocument 
+	
+	''Author : Adeel Qureshi
+	'' This function is slight modification of getDocsByKey
+	Dim searchString As String 
+	
+	searchString = { Form ="}& formname & {" & }& field &{ = "}& value & {" }
+	
+	Dim doc As NotesDocument 
+	Dim dc As NotesDocumentCollection 
+	
+	
+	Set dc = db2.Search(searchString,Nothing,0)
+	
+	If Not dc.GetFirstDocument Is Nothing Then
+		Set doc = dc.GetFirstDocument 
+		Set getDocByKeyDB = doc
+		Exit Function
+	End If
+	
+	Set getDocByKeyDB = Nothing
+	
+End Function
+
+'++LotusScript Development Environment:2:1:getDocByKey:2:8
+Function getDocByKey ( formname As String, field As String, value As Variant )_
+As NotesDocument 
+	''Author : Adeel Qureshi
+	'' This function is slight modification of getDocsByKey
+	Dim searchString As String 
+	searchString = { Form ="}& formname & {" & }& field &{ = "}& value & {" }
+	
+	
+	Dim doc As NotesDocument 
+	Dim dc As NotesDocumentCollection 
+	Dim session As New NotesSession 
+	Dim db2 As NotesDatabase 
+	
+	Set db2 = session.CurrentDatabase 
+	Set dc = db2.Search(searchString,Nothing,0)
+	
+	If Not dc Is Nothing Then
+		Set doc = dc.GetFirstDocument 
+		Set getDocByKey = doc
+		Exit Function
+	End If
+	
+	Set doc = Nothing
+	
+End Function
+
+'++LotusScript Development Environment:2:1:isNameValid:1:8
+Function isNameValid( nameToCheck As String ) As Boolean
+	
+	'Purpose: the purpose of this code to verify the name of the person from the domino dirsctory
+	'this code assumes that "$VIMPeople" lies in the names.nsf database. as this is a default forlder 
+	'created by notes. it returns false it the name is not found or if there is some sort of erro in the 
+	'code
+	Dim session As New NotesSession 
+	
+	Dim dbName As New NotesDatabase(session.CurrentDatabase.Server,"names.nsf")
+	Dim viewPeople As NotesView 
+	Set viewPeople = dbName.GetView("($VIMPeople)")
+	
+	Dim nameAbbName As NotesName 
+	
+	If Not viewPeople Is Nothing Then
+		Dim docName As NotesDocument
+		
+		
+		Set nameAbbName = session.CreateName( nameToCheck )
+		
+	'	Msgbox Cstr( nameAbbName.Abbreviated )
+		
+			'now  going to check the name of the person from the domino directory			
+		Set docName = viewPeople.GetDocumentByKey(nameAbbName.Abbreviated ,True )
+		
+			'if the name is found
+		If docName Is Nothing Then
+			isNameValid = False
+			Exit Function
+		Else
+			isNameValid = True			
+			Exit Function
+			'end if  Not docName Is Nothing Then
+		End If
+	End If	
+	
+	isNameValid = False
+End Function
+
+'++LotusScript Development Environment:2:1:getAllDocsBy2Keys:2:8
+Function getAllDocsBy2Keys ( formname As String , field1 As String, value1 As Variant, _
+field2 As String, value2 As Variant ) As NotesDocumentCollection 
+	''Author : Adeel Qureshi
+	'' This function is used as a replacement of getAlldocumentsbykey to remove_ 
+	' dependency on the view, it takes form name, field name and value and returns all 
+	' documents that match the search criteria, 
+	''Advantage: No need to define view, database etc.
+	
+	Dim searchString As String 
+	searchString = { Form ="}& formname & {" & @text(}& field1 &{) = "}& value1 & {" & @text(}& field2 &{) = "} & value2 & {"}
+	
+	
+	Dim dc As NotesDocumentCollection 
+	
+	Dim session As New NotesSession 
+	Dim db2 As NotesDatabase  
+	Set db2 = session.CurrentDatabase 
+	
+	Set dc = db2.Search(searchString,Nothing,0)
+	Set getAllDocsBy2Keys = dc		
+	
+End Function
+
+'++LotusScript Development Environment:2:1:getAllDocsBy3Keys:2:8
+Function getAllDocsBy3Keys( db2 As NotesDatabase ,   formname As String , field1 As String, value1 As Variant, _
+field2 As String, value2 As Variant , field3 As String, value3 As Variant  )As notesdocumentcollection
+	
+	
+	''Author : Adeel Qureshi
+	'' This function is used as a replacement of getAlldocumentsbykey to remove_ 
+	' dependency on the view, it takes form name, field name and value and returns all 
+	' documents that match the search criteria, 
+	''Advantage: No need to define view, database etc.
+	
+	Dim searchString As String 
+	searchString = { Form ="}& formname & {" & @text(}& field1 &{) = "}& value1 & {" & @text(}& field2 &{) = "} & value2 &  {" & @text(}& field3 &{) = "}& value3 &  {"}
+	
+	Dim dc As NotesDocumentCollection 	
+	Set dc = db2.Search(searchString,Nothing,0)
+	Set getAllDocsBy3Keys = dc		
+	
+End Function
+
+'++LotusScript Development Environment:2:1:areFieldsEmptyExpandSection:1:8
+Function areFieldsEmptyExpandSection (source As notesuidocument, fieldlist As String, fieldlabels As String ) As Boolean 
+	
+	Dim requiredfields As Variant 
+	Dim requiredlabels As Variant 
+	Dim badfields As String 
+	Dim errortext As String 
+	Dim firstfield As String
+	
+	areFieldsEmptyExpandSection = False
+''field list and field labels are semi-colon seperated values	
+	
+'call a separate string-handling function to convert the strings to arrays , this function defined in same
+' script library
+	requiredfields = explodestring(fieldlist,";") 
+	requiredlabels = explodestring(fieldlabels,";")
+	
+	Dim i,z As Integer
+	i=0
+	z=Ubound(requiredfields)
+	Forall fields In requiredfields
+		tmpval = source.fieldgettext(requiredfields(i))
+		If tmpval = "" Then
+			If badfields = "" Then
+'build a string of friendly field labels for the validation error 
+				badfields = requiredlabels(i) 				
+'grab the actual field where we will place the cursor if there is an error 
+				firstfield = requiredfields(i) 
+			Else 
+				badfields = badfields & Chr(13) & requiredlabels(i) 
+			End If 
+		End If
+		i=i+1
+	End Forall
+	
+'if any field raises an error, return a validation error listing fields to be completed 
+	If badfields <> "" Then 
+		Dim warning As String 
+		areFieldsEmptyExpandSection = True
+		warning = "The following required fields must be completed before you can save this document:" & Chr(13) & badfields
+		Messagebox warning , MB_ICONSTOP, source.Document.ParentDatabase.Title 
+		Call source.ExpandAllSections 
+		Call source.gotofield(firstfield)		
+	End If
+End Function
+
+'++LotusScript Development Environment:2:1:currentUserHasRole:1:8
+Function currentUserHasRole ( rolename As String ) As Boolean 
+	
+	Dim session As New NotesSession 
+	Dim db2 As NotesDatabase 
+	Set db2 = session.CurrentDatabase 
+	
+	Dim nm As NotesName 
+	Set nm = session.CreateName(session.UserName)
+	abbname = nm.Abbreviated 
+	
+	Dim acl As NotesACL 
+	Dim entry As NotesACLEntry 
+	
+	Set acl = db2.ACL 
+	Set entry = acl.GetEntry(abbname)
+	
+	If entry Is Nothing Then
+		''check if default has the role enabled		
+		Set entry = acl.GetEntry("-Default-")
+		If entry.IsRoleEnabled(rolename) Then
+			currentUserHasRole = True
+			Exit Function
+		Else
+			currentUserHasRole = False
+			Exit Function
+		End If	
+		
+	Else  '' entry is not empty
+		
+		If entry.IsRoleEnabled(rolename) Then
+			currentUserHasRole = True
+			Exit Function
+		Else
+			currentUserHasRole = False
+			Exit Function
+		End If
+		
+	End If
+	
+End Function
+
+'++LotusScript Development Environment:2:1:ExplodeString:1:8
+Function ExplodeString (txtstring As String, delimiter As String) As Variant
+	''This function is used in "areFieldsEmpty" and "areFieldsNumeric" function in the same library
+	Dim reqfields() As String
+	Dim fieldname As String
+	Dim pos As Integer
+	Dim i As Integer
+	
+	pos=Instr(txtstring, delimiter)
+	
+	i=0
+	Redim reqfields(i)
+	While pos > 0
+		fieldname = Left(txtstring, pos-1)
+		Redim Preserve reqfields(i)
+		reqfields(i)=fieldname
+		txtstring=Right(txtstring, Len(txtstring)-pos)
+		pos=Instr(txtstring,delimiter)
+		i=i+1
+	Wend
+'add the last remaining value of txtstring to the array
+	Redim Preserve reqfields(i)
+	reqfields(i) = txtstring
+	explodestring = reqfields
+End Function
+
+'++LotusScript Development Environment:2:2:sendMail2:5:8
+Sub sendMail2 ( sendToInfo As Variant, ccInfo As Variant, bccInfo As Variant , _ 
+subject As String, strBody As String, _ 
+strDescription1 As String , doc1 As NotesDocument , _ 
+strDescription2 As String , doc2 As NotesDocument, _ 
+bAuto As Boolean  )
+	
+	
+	Dim notificationMemo As NotesDocument
+	Dim rtItem As NotesRichTextItem 
+	Dim db2 As NotesDatabase 
+	Dim session As New NotesSession 
+	
+	Set db2 = session.CurrentDatabase
+	Set notificationMemo = New NotesDocument( db2 )
+	
+	Set rtitem = New NotesRichTextItem( notificationMemo, "Body" )
+	
+	notificationMemo.Form = "Memo"
+	notificationMemo.SendTo = sendToInfo
+	notificationMemo.CopyTo = ccInfo
+	notificationMemo.BlindCopyTo = bccInfo
+	notificationMemo.Subject = subject	
+	
+	Call rtitem.AddNewLine( 2 )
+	Call rtitem.AppendText( strBody )
+	
+	If Not doc1 Is Nothing Then
+		Call rtitem.AppendText(strDescription1)	
+		Call rtitem.AppendDocLink( doc1,strDescription1)		
+	End If
+	
+	If Not doc2 Is Nothing Then
+		Call rtitem.AddNewline(2)
+		Call rtitem.AppendText(strDescription2)	
+		Call rtitem.AppendDocLink( doc2,strDescription1)		
+	End If
+	
+	
+	If bAuto Then
+		Call rtitem.AddNewline(2)
+		Dim style As NotesRichTextStyle
+		Set style = session.CreateRichTextStyle
+		style.NotesColor = COLOR_GRAY
+		style.Underline = True
+		style.Italic = True
+		rtitem.AppendStyle style
+		Call rtitem.AddNewLine(5)
+		Call rtitem.AppendText( "Note:" ) ' put Note in underlined syle
+		style.Underline = False
+		rtitem.AppendStyle style
+		Call rtitem.AppendText( "This is an auto-generated email. Please do not reply." )
+	End If
+	
+	Call notificationMemo.Send( False )
+	
+	
+End Sub
+
+'++LotusScript Development Environment:2:2:sendMail3:4:8
+Sub sendMail3( sendToInfo As Variant, ccInfo As Variant, bccInfo As Variant , _ 
+subject As String, strBody As String, _ 
+strDescription1 As String , _  
+bAuto As Boolean  )
+	
+	Dim notificationMemo As NotesDocument
+	Dim rtItem As NotesRichTextItem 
+	Dim db As NotesDatabase 
+	Dim session As New NotesSession 
+	
+	Set db = session.CurrentDatabase
+	Set notificationMemo = New NotesDocument( db )
+	
+	Set rtitem = New NotesRichTextItem( notificationMemo, "Body" )
+	
+	notificationMemo.Form = "Memo"
+	notificationMemo.SendTo = sendToInfo
+	notificationMemo.CopyTo = ccInfo
+	notificationMemo.BlindCopyTo = bccInfo
+	notificationMemo.Subject = subject	
+	
+	Call rtitem.AddNewLine( 2 )
+	Call rtitem.AppendText( strBody )
+	
+%REM
+	If Not doc1 Is Nothing Then
+		Call rtitem.AddNewLine( 2 )
+		Call rtitem.AppendText(strDescription1)	
+		Call rtitem.AppendDocLink( doc1,strDescription1)		
+	End If
+%END REM
+	
+	
+	If bAuto Then
+		Call rtitem.AddNewline(2)
+		Dim style As NotesRichTextStyle 
+		Set style = session.CreateRichTextStyle 
+		style.NotesColor = COLOR_GRAY
+		style.Underline = True
+		'style.Italic = True
+		style.NotesFont = rtitem.GetNotesFont("Default Sans Serif")
+	'	style.FontSize = 10
+		rtitem.AppendStyle style
+		Call rtitem.AddNewLine( 5)
+		Call rtitem.AppendText( "Note:" ) ' put Note in underlined syle
+		style.Underline = False
+		rtitem.AppendStyle style
+		Call rtitem.AppendText( "This is an auto-generated email. You do not need to reply." )	
+	End If
+	
+	Call notificationMemo.Send( False )
+	
+	
+	
+End Sub
+
+'++LotusScript Development Environment:2:1:getDBPLOT:1:8
+Function getDBPLOT()As NotesDatabase
+	
+	'Project: 	Bahria Town
+	'Module: Payments
+	'Author: Mujahid ur Rehman
+	'Date: 06 Dec, 2005
+	'Dependencies:	returns the plot  database by fetching its path from the profile document
+	
+	'Modification Date:
+	'Modification Description:
+	'Modification Source:
+	'____________________________________________________________________
+	
+	Dim session As New NotesSession
+	Dim db2 As NotesDatabase
+	Set db2 = session.CurrentDatabase
+	
+	Dim strHRPath As NotesDatabase
+	Dim docProfile As NotesDocument
+	
+	Set docProfile = getProfileDoc()
+	
+	'return nothing if the project profile does not exist
+	If Not docProfile Is Nothing Then
+		
+		'return nothing if the path is empty
+		If docProfile.proppath(  0 ) <> "" Then
+			
+			Set getDBPLOT = session.GetDatabase( db2.Server , docProfile.proppath( 0 ) )
+			Exit Function
+			
+		Else ' as path was not found
+			
+			Set getDBPLOT = Nothing
+			Exit Function
+			
+		'end if docProfile.HRDatabase(  0 ) <> "" Then
+		End If
+		
+	Else 'if the profile document is not found
+		
+		Set getDBPLOT = Nothing
+		Exit Function
+		
+	'end if Not docProfile Is Nothing Then
+	End If
+	
+	Set getDBPLOT = Nothing
+	
+End Function
+
+'++LotusScript Development Environment:2:1:getDBPossession:1:8
+Function getDBPossession() As NotesDatabase
+	Dim session As New NotesSession
+	Dim db2 As NotesDatabase
+	Set db2 = session.CurrentDatabase
+	
+	Dim strHRPath As NotesDatabase
+	Dim docProfile As NotesDocument
+	
+	Set docProfile = getProfileDoc()
+	
+	'return nothing if the project profile does not exist
+	If Not docProfile Is Nothing Then
+		
+		'return nothing if the path is empty
+		If docProfile.proppath(  0 ) <> "" Then
+			
+			Set getDBPossession = session.GetDatabase( db2.Server , docProfile.PossessionDBPath( 0 ) )
+			Exit Function
+			
+		Else ' as path was not found
+			
+			Set getDBPossession = Nothing
+			Exit Function
+			
+			'end if docProfile.HRDatabase(  0 ) <> "" Then
+		End If
+		
+	Else 'if the profile document is not found
+		
+		Set getDBPossession = Nothing
+		Exit Function
+		
+		'end if Not docProfile Is Nothing Then
+	End If
+	
+	Set getDBPossession = Nothing
+End Function
+
+'++LotusScript Development Environment:2:1:setField:1:8
+Function setField ( fieldName As String, fieldValue As Variant ) As Boolean 
+	''This function is written to imitate the @setField formula function
+	'' for ease of use, it sets a field value in current document
+	Dim ws As New NotesUIWorkspace 
+	Dim doc As NotesDocument 
+	Set doc = ws.CurrentDocument.Document 
+	
+	If ws.CurrentDocument Is Nothing Then
+		Msgbox "Could not find current document" 
+		setField = False
+		Exit Function
+	End If
+	
+	
+	Call doc.ReplaceItemValue(fieldName,fieldValue)
+	setField = True	
+	
+End Function
+
+
+
+
+
+
+'++LotusScript Development Environment:2:1:CheckLogDBAccess:1:8
+Function CheckLogDBAccess() As Boolean
+	On Error GoTo handler
+	Dim session As New notessession
+	Dim logdb As NotesDatabase
+	Dim level As Integer
+	Set logdb = getDBLog()
+	If logdb Is Nothing Then ''checking if the log db exist
+		CheckLogDBAccess=False
+		Exit Function
+	End If
+	
+	If Not logdb.Isopen Then ''checking if the log db opens
+		MessageBox "You are not authorized to access log database. Please contact the CRM Administrator",64,logdb.Title
+		CheckLogDBAccess=False
+		Exit Function
+	End If
+	level = logdb.CurrentAccessLevel
+'	If level < ACLLEVEL_Depositor then
+'		MessageBox "You are not authorized to access log database. Please contact the CRM Administrator",64,logdb.Title
+'		CheckLogDBAccess=False
+'		Exit Function
+'   End If
+    
+	CheckLogDBAccess = True
+	Exit Function
+
+handler:
+	MsgBox "You are not authorized to access Log Database.Please contact CRM Administrator.",94,logdb.Title
+	CheckLogDBAccess=False
+	Exit Function
+	
+End Function
+
+'++LotusScript Development Environment:2:2:getUserDetails:1:8
+Sub getUserDetails(user List As Variant)
+	' getting user login details and the system in use.
+	Dim session As New NotesSession
+	Dim platform As Variant
+	Dim username As String
+	Dim nam As NotesName
+	Dim userip As String
+	Dim computerName As String
+	Dim MacAddress As String
+	Dim jSession As JavaSession
+	Dim jClass As JavaClass
+	Dim jObject As JavaObject
+	Dim jMethod As JavaMethod
+	Dim getIPAddress As String
+	platform = Split(session.Platform, "/",2)
+	Set nam = session.Createname(session.Username,)
+	username = nam.Abbreviated
+	Set jSession = New JavaSession()
+	Set jClass = jSession.GetClass("java/net/InetAddress")
+	Set jMethod = jClass.GetMethod("getLocalHost","()Ljava/net/InetAddress;")
+	Set jObject = jMethod.Invoke()
+
+	' Java functions
+	userip = CStr(jObject.getHostAddress())'getting IP
+	computerName = CStr(jObject.getHostName())'getting computer name
+	
+	If platform(0) = "Windows"  Then
+	
+		'Getting the System Mac Address for windows
+		
+		Set WSHNetwork = CreateObject("WScript.Network")
+		Set IPConfigSet = GetObject( "winmgmts:{impersonationLevel=impersonate}" ).ExecQuery( _
+		"select * from Win32_NetworkAdapterConfiguration where IPEnabled=TRUE" )
+		ForAll IPConfig In IPConfigSet
+			If Not IsNull(IPConfig.MacAddress) Then
+				MacAddress = CStr(IPConfig.MacAddress(i))
+			End If
+		End ForAll
+		
+	ElseIf platform(0) = "Macintosh" Then  
+		
+		'MacAddress
+		'domain	
+	End If
+
+	'Getting the Date Time
+	Dim timezone As String
+	timezone = CStr(Format(Now, "Long Date"))+ " " + CStr(Format(Now, "Long Time"))
+	
+	' Assigning Values to Array
+	user(1) = userip
+	user(2) = MacAddress
+	user(3) = username
+	user(4) = computerName
+	user(5) = timezone
+	user(6) = platform(0)
+
+End Sub
+	
+
+'++LotusScript Development Environment:2:1:getField:1:8
+Function getField ( fieldName As String) As String
+	''This function returns the contents of a field in current
+	'' document , if field is multi valued, it returns only first value
+	
+	Dim ws As New NotesUIWorkspace 
+	Dim doc As NotesDocument 
+	Set doc = ws.CurrentDocument.Document 
+	
+	If ws.CurrentDocument Is Nothing Then
+		Msgbox "Could not find current document" 		
+		Exit Function
+	End If
+	
+	If Not doc.HasItem(fieldName) Then
+		getField = "" '' item does not exist
+		Exit Function		
+	End If
+	
+	'' if item exists
+	
+	'getField = ws.CurrentDocument.FieldGetText(fieldname)
+	
+	Dim item As NotesItem 
+	Set item = doc.GetFirstItem(fieldName)
+	getField = item.Text 
+	
+	
+	
+End Function
+
+
+
+'++LotusScript Development Environment:2:1:getProfileDoc:1:8
+Function getProfileDoc() As NotesDocument
+	
+	
+	'the method returns the profile document of the database
+	
+	Dim session As New NotesSession
+	Dim db2 As NotesDatabase
+	Set db2 = session.CurrentDatabase
+	
+	Dim docProfile As NotesDocument
+	Set docProfile = db2.GetProfileDocument( "Settings" )
+	
+	Set getProfileDoc = docProfile
+	
+	
+End Function
+
+'++LotusScript Development Environment:2:1:CreateDocumentDelete_Log:1:8
+Function CreateDocumentDelete_Log(docSource As NotesDocument, docTarget As NotesDocument, reason1 As String)
+	'creating log document on record deletion
+	Dim session As New NotesSession
+	Dim userDetails List As Variant
+	Dim username As NotesName
+	Call docSource.Copyallitems(docTarget, True)
+	docTarget.UniversalID = docSource.UniversalID
+	Call getUserDetails(userDetails)			' getting user details deleting the record.
+	docTarget.ipaddress1   = userDetails(1)
+	docTarget.macaddress  = userDetails(2)
+	'docTarget.username    = userDetails(3)
+	docTarget.computer    = userDetails(4)
+	docTarget.timezone    = userDetails(5)
+	docTarget.platform    = userDetails(6)
+	docTarget.reason = reason1
+	Set username = session.Createname(session.Username,)
+	docTarget.deletedBy = username.Abbreviated
+	docTarget.deletionDate=CStr(Format(Now,"Long Date")) +" - "+ CStr(Format(Now,"Long Time"))	
+	Call docTarget.save(True, False)
+	
+End Function
+
+
+'++LotusScript Development Environment:2:2:alertUser:1:8
+Sub alertUser ( message As String ) 
+	Dim session As New NotesSession 
+	Dim db2 As NotesDatabase 
+	Set db2 = session.CurrentDatabase 
+	Messagebox message, MB_ICONSTOP, db2.Title 	
+End Sub
+
+
+'++LotusScript Development Environment:2:1:CheckDeletionRights:1:8
+Function CheckDeletionRights() As Boolean
+	On Error GoTo handler
+	Dim session As New NotesSession
+	Dim db As NotesDatabase
+	Dim NABdb As New NotesDatabase( session.CurrentDatabase.Server, "names.nsf" )
+	Dim dc As NotesDocumentCollection
+	Dim NABgroupsview As NotesView
+	Dim groupdoc As NotesDocument
+	Dim groupname As String
+	Dim workspace As New NotesUIWorkspace
+	Dim uidoc As NotesUIDocument
+	Dim GroupsWithin As String
+	Dim acl As NotesACL
+	Dim ACLEntry As NotesACLEntry
+	Dim username As NotesName
+
+	CheckDeletionRights = False	
+	
+		Set uidoc = workspace.CurrentDocument
+		Set db = session.CurrentDatabase
+		Set acl = db.ACL		
+		
+	Set ACLEntry = acl.Getentry(session.UserName)   ' single user entry exist in acl
+	If(Not ACLEntry Is Nothing ) Then
+		If ACLEntry.IsPerson And ACLEntry.CanDeleteDocuments= True Then ''checking if the user can delete the document
+				CheckDeletionRights = True
+				Exit Function			
+		Else
+			CheckDeletionRights = false
+			Exit Function
+		End If	
+		
+	Else  '' if user entry in group
+
+		Set ACLEntry = acl.GetFirstEntry
+		
+		While Not ( ACLEntry Is Nothing ) ''loop to go through all the acl entries
+			Set NABgroupsview = NABdb.GetView( "($VIMGroups)" ) ''view containing all the groups
+			Set groupdoc = NABgroupsview.GetDocumentByKey ( ACLEntry.Name , False )
+			If Not ( groupDoc Is Nothing ) Then
+				' Now that we have found the group document we need to search the members item for the
+				' current user.
+		    	ForAll entry In groupdoc.Members
+					If entry = session.UserName Then
+					   '' if the user is found in any group
+						If aclentry.IsGroup Then			
+						   If ACLEntry.CanDeleteDocuments= True Then  '' checking if the user can delete the document
+							CheckDeletionRights = True
+							Exit Function
+						   End If
+					    End If
+					End if
+				End ForAll
+			End If
+			Set ACLentry = acl.GetNextEntry( ACLentry )
+		Wend
+	End If
+	Exit Function
+
+handler:
+	MessageBox "You are not authorized to delete record(s).",94,db.Title
+	CheckDeletionRights=False
+
+End Function
+
+'++LotusScript Development Environment:2:2:editDoc:1:8
+Sub editDoc
+	
+	Dim ws As New NotesUIWorkspace 
+	Dim doc As NotesDocument 
+	Set doc = ws.CurrentDocument.Document 
+	If ws.CurrentDocument Is Nothing Then
+		Msgbox "Could not find current document" 		
+		Exit Sub
+	End If
+	
+	ws.CurrentDocument.EditMode = True
+	
+End Sub
+
+
+
+
+'++LotusScript Development Environment:2:1:getDBLog:5:8
+%REM
+	Function getDBLog
+	Description: Getting log database
+%END REM
+Function getDBLog() As NotesDatabase
+	On Error GoTo handler
+	Dim session As New NotesSession
+	Dim db2 As NotesDatabase
+	Set db2 = session.CurrentDatabase
+	Dim strHRPath As NotesDatabase
+	Dim docProfile As NotesDocument
+	Set docProfile = getProfileDoc()
+	'return nothing if the project profile does not exist
+	If Not docProfile Is Nothing Then
+		'return nothing if the path is empty
+		If docProfile.LogDBPath(  0 ) <> "" Then
+			Set getDBLog = session.GetDatabase( db2.Server , docProfile.LogDBPath( 0 ) )
+			Exit Function
+		Else ' as path was not found
+			Set getDBLog = Nothing
+			MsgBox "You are not authorized to access Log Database (log db path). Please contact CRM Administrator.",94,db2.Title
+			Exit Function
+		End If
+		
+	Else 'if the profile document is not found
+		
+		Set getDBLog = Nothing
+		MsgBox "You are not authorized to access Log Database (profile doc not found). Please contact CRM Administrator.",94,db2.Title
+		Exit Function
+		'end if Not docProfile Is Nothing Then
+	End If
+	
+	Set getDBLog = Nothing
+'	MsgBox "You are not authorized to access Log Database. Please contact CRM Administrator.",94,db2.Title
+	Exit Function
+	
+handler:
+	MsgBox "You are not authorized to access Log Database. Please contact CRM Administrator.",94,db2.Title
+	Set getDBLog = Nothing
+	Exit Function
+End Function
+
+'++LotusScript Development Environment:2:2:informUser:1:8
+Sub informUser ( message As String ) 
+	Dim session As New NotesSession 
+	Dim db2 As NotesDatabase 
+	Set db2 = session.CurrentDatabase 
+	Messagebox message, MB_ICONINFORMATION, db2.Title 	
+End Sub
+
+'++LotusScript Development Environment:2:1:CheckCRMDBAccess:5:8
+%REM
+	Function CheckCRMDBAccess
+	Description: Comments for Function
+%END REM
+Function CheckCRMDBAccess() As Boolean
+	On Error GoTo handler
+	Dim crmdb As NotesDatabase
+	Set crmdb = getDBCRM()
+	If crmdb Is Nothing Then
+		CheckCRMDBAccess=False
+		Exit Function
+	End If
+	
+	If Not crmdb.Isopen Then
+		MessageBox "You are not authorized to access CRM database. Please contact the CRM Administrator",64,crmdb.Title
+		CheckCRMDBAccess=False
+		Exit Function
+	End If
+'	If (crmdb.QueryAccess( session.CommonUserName ) < ACLLEVEL_Reader ) Then ''minimum rights of the user should be reader
+'		MessageBox "You are not authorized to access CRM database. Please contact the CRM Administrator",64,logdb.Title
+'		CheckCRMDBAccess=False
+'		Exit Function
+'	End If
+	
+	CheckCRMDBAccess = True
+	Exit Function
+handler:
+	MsgBox "You are not authorized to access CRM Database.Please contact CRM Administrator.",94,crmdb.Title
+	CheckCRMDBAccess=False
+	Exit Function
+End Function
+
+'++LotusScript Development Environment:2:2:refreshDoc:1:8
+Sub refreshDoc
+	Dim ws As New NotesUIWorkspace 
+	Dim doc As NotesDocument 
+	Set doc = ws.CurrentDocument.Document 
+	If ws.CurrentDocument Is Nothing Then
+		Msgbox "Could not find current document" 		
+		Exit Sub
+	End If
+	
+	ws.CurrentDocument.Refresh 
+End Sub
+
+
+'++LotusScript Development Environment:2:1:getHRDB:1:8
+Function getHRDB() As NotesDatabase
+	
+	
+	'Project: 	Benedict Engineering	
+	'Module: Pre Hiring
+	'Author: Mujahid ur Rehman
+	'Date: Jun 30 June, 2005
+	'Dependencies:	returns the HR database by fetching its path from the profile document
+	
+	'Modification Date:
+	'Modification Description:
+	'Modification Source:
+	'____________________________________________________________________
+	
+	Dim session As New NotesSession
+	Dim db2 As NotesDatabase
+	Set db2 = session.CurrentDatabase
+	
+	Dim strHRPath As NotesDatabase
+	Dim docProfile As NotesDocument
+	
+	Set docProfile = getProfileDoc()
+	
+	'return nothing if the project profile does not exist
+	If Not docProfile Is Nothing Then
+		
+		'return nothing if the path is empty
+		If docProfile.HRDatabase(  0 ) <> "" Then
+			
+			Set getHRDB = session.GetDatabase( db2.Server , docProfile.HRDatabase( 0 ) )
+			Exit Function
+			
+		Else ' as path was not found
+			
+			Set getHRDB = Nothing
+			Exit Function
+			
+		'end if docProfile.HRDatabase(  0 ) <> "" Then
+		End If
+		
+	Else 'if the profile document is not found
+		
+		Set getHRDB = Nothing
+		Exit Function
+		
+	'end if Not docProfile Is Nothing Then
+	End If
+	
+	Set getHRDB = Nothing
+	
+End Function
+
+'++LotusScript Development Environment:2:1:getDBTransfer:1:8
+Function getDBTransfer() As NotesDatabase
+	Dim session As New NotesSession
+	Dim db2 As NotesDatabase
+	Set db2 = session.CurrentDatabase
+	
+	Dim strHRPath As NotesDatabase
+	Dim docProfile As NotesDocument
+	
+	Set docProfile = getProfileDoc()
+	
+	'return nothing if the project profile does not exist
+	If Not docProfile Is Nothing Then
+		
+		'return nothing if the path is empty
+		If docProfile.proppath(  0 ) <> "" Then
+			
+			Set getDBTransfer = session.GetDatabase( db2.Server , docProfile.TransferDBPath( 0 ) )
+			Exit Function
+			
+		Else ' as path was not found
+			
+			Set getDBTransfer = Nothing
+			Exit Function
+			
+			'end if docProfile.HRDatabase(  0 ) <> "" Then
+		End If
+		
+	Else 'if the profile document is not found
+		
+		Set getDBTransfer = Nothing
+		Exit Function
+		
+		'end if Not docProfile Is Nothing Then
+	End If
+	
+	Set getDBTransfer = Nothing
+End Function
+
+'++LotusScript Development Environment:2:2:sendMail:4:8
+Sub sendMail( sendToInfo As Variant, ccInfo As Variant, bccInfo As Variant , _ 
+subject As String, strBody As String, _ 
+strDescription1 As String , doc1 As NotesDocument , _  
+bAuto As Boolean  )
+	
+	Dim notificationMemo As NotesDocument
+	Dim rtItem As NotesRichTextItem 
+	Dim db2 As NotesDatabase 
+	Dim session As New NotesSession 
+	
+	Set db2 = session.CurrentDatabase
+	Set notificationMemo = New NotesDocument( db2 )
+	
+	Set rtitem = New NotesRichTextItem( notificationMemo, "Body" )
+	
+	notificationMemo.Form = "Memo"
+	notificationMemo.SendTo = sendToInfo
+	notificationMemo.CopyTo = ccInfo
+	notificationMemo.BlindCopyTo = bccInfo
+	notificationMemo.Subject = subject	
+	
+	Call rtitem.AddNewLine( 2 )
+	Call rtitem.AppendText( strBody )
+	
+	If Not doc1 Is Nothing Then
+		Call rtitem.AddNewLine( 2 )
+		Call rtitem.AppendText(strDescription1)	
+		Call rtitem.AppendDocLink( doc1,strDescription1)		
+	End If
+	
+	If bAuto Then
+		Call rtitem.AddNewline(2)
+		Dim style As NotesRichTextStyle
+		Set style = session.CreateRichTextStyle
+		style.NotesColor = COLOR_GRAY
+		style.Underline = True
+		style.Italic = True
+		rtitem.AppendStyle style
+		Call rtitem.AddNewLine(5)
+		Call rtitem.AppendText( "Note:" ) ' put Note in underlined syle
+		style.Underline = False
+		rtitem.AppendStyle style
+		Call rtitem.AppendText( "This is an auto-generated email. Please do not reply." )
+	End If
+	
+	Call notificationMemo.Send( False )
+	
+End Sub
+
+
+'++LotusScript Development Environment:2:1:getField_View:1:8
+Function getField_View ( fieldName As String) As String 
+	
+	''This function returns the contents of a field in current
+	'' document , if field is multi valued, it returns only first value
+	Dim session As New NotesSession 
+	Dim db2 As NotesDatabase 
+	Set db2 = session.CurrentDatabase 
+	
+	Dim ws As New NotesUIWorkspace 
+	Dim doc As NotesDocument 
+	Set doc = db2.UnprocessedDocuments.GetFirstDocument 
+	'Set doc = ws.CurrentDocument.Document 
+	
+	
+	If Not doc.HasItem(fieldName) Then
+		getField_View = "" '' item does not exist
+		Exit Function		
+	End If
+	
+	'' if item exists
+	
+	Dim item As NotesItem 
+	Set item = doc.GetFirstItem(fieldName)
+	getField_View = item.Text 	
+End Function
+
+'++LotusScript Development Environment:2:1:getAllDocsByKeyDB:2:8
+Function getAllDocsByKeyDB( db2 As NotesDatabase , formname As String, field As String, value As Variant )_
+As NotesDocumentCollection 
+	''Author : Adeel Qureshi
+	'' This function is used as a replacement of getAlldocumentsbykey to remove_ 
+	' dependency on the view, it takes form name, field name and value and returns all 
+	' documents that match the search criteria, 
+	''Advantage: No need to define view, database etc.
+	
+	Dim searchString As String 
+	searchString = { Form ="}& formname & {" & }& field &{ = "}& value & {" }
+	
+	
+	Dim dc As NotesDocumentCollection 
+	Set dc = db2.Search(searchString,Nothing,0)
+	
+	If dc.GetFirstDocument Is Nothing Then
+		Set getAllDocsByKeyDB = Nothing
+		Exit Function
+	End If
+	
+	Set getAllDocsByKeyDB = dc		
+	
+	
+End Function
+
+'++LotusScript Development Environment:2:2:appendInChangeLogWithSysInfo:1:8
+Sub appendInChangeLogWithSysInfo( strAction As String )
+	
+	Dim session As New NotesSession
+	Dim uiDoc As NotesUIDocument
+	Dim ws As New NotesUIWorkspace
+	Dim doc As NotesDocument
+	Dim userDetails List As Variant
+	Dim itemAction As NotesItem
+	Dim itemPerformedBy As NotesItem
+	Dim itemActionDate As NotesItem
+
+	Set uiDoc = ws.CurrentDocument
+	Set doc = uiDoc.Document
+	
+	Call getUserDetails(userDetails)			' getting user details
+
+	Set itemAction = doc.GetFirstItem("Action")
+	Call itemAction.AppendToTextList( strAction )
+	
+	Set itemPerformedBy = doc.GetFirstItem("PerformedBy")
+	Call itemPerformedBy.AppendToTextList(userDetails(3))
+	
+	Set itemActionDate = doc.GetFirstItem("ActDate")
+	Call itemActionDate.AppendToTextList( Format(CStr(Now),"mmm dd, yyyy hh:mm:ss AM/PM" ) )
+	
+	Set itemActionDate = doc.GetFirstItem("IPAddress")
+	Call itemActionDate.AppendToTextList( userDetails(1) )
+	
+	Call uiDoc.Document.Save( True , True )
+	
+End Sub
+
+
+'++LotusScript Development Environment:2:1:isFieldUnique:1:8
+Function isFieldUnique ( formname As String , fieldName As String , fieldValue As Variant ) As Boolean 
+	
+	Dim dcDuplicates As NotesDocumentCollection 
+	Dim docDuplicate As NotesDocument 
+	Set dcDuplicates = getAllDocsByKey(formname, fieldName, fieldValue)
+	
+	count = dcDuplicates.Count 
+	
+	Select Case count
+		
+	Case 0
+		isFieldUnique = True
+		Exit Function		
+		
+	Case Is >=  1
+		isFieldUnique = False
+		Exit Function		
+		
+	End Select	
+	
+End Function
+
+'++LotusScript Development Environment:2:1:getAllDocsByKey:2:8
+Function getAllDocsByKey ( formname As String, field As String, value As Variant )_
+As NotesDocumentCollection 
+	''Author : Adeel Qureshi
+	'' This function is used as a replacement of getAlldocumentsbykey to remove_ 
+	' dependency on the view, it takes form name, field name and value and returns all 
+	' documents that match the search criteria, 
+	''Advantage: No need to define view, database etc.
+	
+	Dim searchString As String 
+	searchString = { Form ="}& formname & {" & }& field &{ = "}& value & {" }
+	
+	
+	Dim dc As NotesDocumentCollection 
+	Dim session As New NotesSession 
+	Dim db2 As NotesDatabase 
+	
+	Set db2 = session.CurrentDatabase 
+	Set dc = db2.Search(searchString,Nothing,0)
+	Set getAllDocsByKey = dc		
+End Function
+
+'++LotusScript Development Environment:2:1:getDBOpening:5:8
+%REM
+	Function getDBOpening
+	Description: Comments for Function
+%END REM
+Function getDBOpening() As NotesDatabase
+	Dim session As New NotesSession
+	Dim db2 As NotesDatabase
+	Set db2 = session.CurrentDatabase
+	
+	Dim strHRPath As NotesDatabase
+	Dim docProfile As NotesDocument
+	
+	Set docProfile = getProfileDoc()
+	
+	'return nothing if the project profile does not exist
+	If Not docProfile Is Nothing Then
+		
+		'return nothing if the path is empty
+		If docProfile.proppath(  0 ) <> "" Then
+			
+			Set getDBOpening = session.GetDatabase( db2.Server , docProfile.OpeningDBPath( 0 ) )
+			Exit Function
+			
+		Else ' as path was not found
+			
+			Set getDBOpening = Nothing
+			Exit Function
+			
+			'end if docProfile.HRDatabase(  0 ) <> "" Then
+		End If
+		
+	Else 'if the profile document is not found
+		
+		Set getDBOpening = Nothing
+		Exit Function
+		
+		'end if Not docProfile Is Nothing Then
+	End If
+	
+	Set getDBOpening = Nothing
+End Function
+
+'++LotusScript Development Environment:2:1:askUser:1:8
+Function askUser ( message As String ) As Boolean 
+	Dim session As New NotesSession 
+	Dim db2 As NotesDatabase 
+	Set db2 = session.CurrentDatabase 
+	retval = Messagebox (message, MB_ICONQUESTION + MB_YESNO, db2.Title)
+	
+	If retval = IDYES Then
+		askUser = True
+		
+	Else
+		askUser = False
+		
+	End If
+	
+End Function
+
+'++LotusScript Development Environment:2:1:getEmployeeProfile:1:8
+Function getEmployeeProfile( strEmpName As String ) As NotesDocument
+	
+	'Purpose: returns the employee profile
+
+	
+	Dim dbHR As NotesDatabase	
+	Set dbHR = getHRDB()
+	
+	'if the HR database is found
+	If Not dbHR Is Nothing Then
+		
+		
+		'===================
+		Dim searchString As String 
+		
+		searchString = { Form ="}& "EmpProfile" & {" & }& "EmployeeNameSimple" &{ = "}& strEmpName & {" }
+		
+		Dim doc As NotesDocument 
+		Dim dc As NotesDocumentCollection 
+		''Set doc = dbHR.CreateDocument 
+		
+		Set dc = dbHR.Search(searchString,Nothing,0)
+		
+		If Not dc.GetFirstDocument Is Nothing Then
+			Set doc = dc.GetFirstDocument 
+			Set getEmployeeProfile = doc
+			Exit Function
+		End If
+		
+		Set getEmployeeProfile = Nothing
+		Exit Function
+		'====================
+		
+		
+	End If
+	
+	
+	
+	
+End Function
+
+
+'++LotusScript Development Environment:2:1:getAllDocsBy2KeysDB:2:8
+Function getAllDocsBy2KeysDB ( db2 As NotesDatabase , formname As String, field1 As String, value1 As Variant, _ 
+field2 As String , value2 As Variant ) As NotesDocumentCollection 
+	
+	''Author : Adeel Qureshi
+	'' This function is used as a replacement of getAlldocumentsbykey to remove_ 
+	' dependency on the view, it takes form name, field name and value and returns all 
+	' documents that match the search criteria, 
+	''Advantage: No need to define view, database etc.
+	
+	Dim searchString As String 
+	searchString = { Form ="}& formname & {" & @text(}& field1 &{) = "}& value1 & {" & @text(}& field2 &{) = "} & value2 & {"}
+	
+	Dim dc As NotesDocumentCollection 
+	Set dc = db2.Search(searchString,Nothing,0)
+	Set getAllDocsBy2KeysDB = dc		
+	
+End Function
+
+
+
+
+'++LotusScript Development Environment:2:1:getDBCRM:1:8
+Function getDBCRM() As NotesDatabase
+	
+
+	'Dependencies:	returns the CRM database by fetching its path from the profile document
+
+	On Error GoTo handler
+	Dim session As New NotesSession
+	Dim db2 As NotesDatabase
+	Set db2 = session.CurrentDatabase
+	
+	Dim strHRPath As NotesDatabase
+	Dim docProfile As NotesDocument
+	
+	Set docProfile = getProfileDoc()
+	
+	'return nothing if the project profile does not exist
+	If Not docProfile Is Nothing Then
+		
+		'return nothing if the path is empty
+		If docProfile.CRMDBPath(  0 ) <> "" Then
+			
+			Set getDBCRM = session.GetDatabase( db2.Server , docProfile.CRMDBPath( 0 ) )
+			Exit Function
+			
+		Else ' as path was not found
+			
+			Set getDBCRM = Nothing
+			Exit Function
+			
+		'end if docProfile.HRDatabase(  0 ) <> "" Then
+		End If
+		
+	Else 'if the profile document is not found
+		
+		Set getDBCRM = Nothing
+		Exit Function
+		
+	'end if Not docProfile Is Nothing Then
+	End If
+	
+	Set getDBCRM = Nothing
+	
+handler:
+	MsgBox "You are not authorized to access Log Database.Please contact CRM Administrator.",94,db2.Title
+	Set getDBCRM = Nothing
+	Exit Function
+End Function
+
+
+
+
+'++LotusScript Development Environment:2:1:setField_View:1:8
+Function setField_View ( fieldName As String, fieldValue As Variant ) As Boolean 
+	''This function is written to imitate the @setField formula function
+	'' for ease of use, it sets a field value in current document
+	
+	
+	''''''''''''
+	Dim session As New NotesSession 
+	Dim db2 As NotesDatabase 
+	Set db2 = session.CurrentDatabase 
+	
+	Dim ws As New NotesUIWorkspace 
+	Dim doc As NotesDocument 
+	Set doc = db2.UnprocessedDocuments.GetFirstDocument 
+	Call doc.ReplaceItemValue(fieldName,fieldValue)
+	doc.Save True,False	
+	setField_View = True		
+End Function
+
+'++LotusScript Development Environment:2:1:getDBRefund:1:8
+Function getDBRefund() As NotesDatabase
+	Dim session As New NotesSession
+	Dim db2 As NotesDatabase
+	Set db2 = session.CurrentDatabase
+	
+	Dim strHRPath As NotesDatabase
+	Dim docProfile As NotesDocument
+	
+	Set docProfile = getProfileDoc()
+	
+	'return nothing if the project profile does not exist
+	If Not docProfile Is Nothing Then
+		
+		'return nothing if the path is empty
+		If docProfile.proppath(  0 ) <> "" Then
+			
+			Set getDBRefund = session.GetDatabase( db2.Server , docProfile.RefundDBPath( 0 ) )
+			Exit Function
+			
+		Else ' as path was not found
+			
+			Set getDBRefund = Nothing
+			Exit Function
+			
+			'end if docProfile.HRDatabase(  0 ) <> "" Then
+		End If
+		
+	Else 'if the profile document is not found
+		
+		Set getDBRefund = Nothing
+		Exit Function
+		
+		'end if Not docProfile Is Nothing Then
+	End If
+	
+	Set getDBRefund = Nothing
+End Function
+
+'++LotusScript Development Environment:2:1:getDBSize:5:8
+%REM
+	Function getDBSize
+	Description: checking the size of database
+%END REM
+Function getDBSize(db As notesdatabase) As boolean
+	Dim size As Double
+	size = db.Size
+	getDBsize = size
+End Function
+
+'++LotusScript Development Environment:2:1:deleteReminderDocument:1:8
+Function deleteReminderDocument() As Boolean 
+	
+	Dim session As New NotesSession 
+	Dim paymentdb As NotesDatabase 
+	Dim latedoc As NotesDocument 
+	Dim vPayments As NotesView 
+	Dim vLatePayments As NotesView 
+	Dim thisdb As NotesDatabase 
+	
+	Set thisdb=session.CurrentDatabase 
+	Set paymentdb=getDBPayments()
+	
+	If Not paymentdb Is Nothing Then
+		
+		Set vLatePayments=thisdb.GetView("(LatePaymentApplicants)")
+		
+		Set latedoc=vLatePayments.GetFirstDocument 
+		
+		
+		While Not latedoc Is Nothing
+			Dim key As String 
+			key=latedoc.Reg_No(0) + latedoc.subkey(0) + latedoc.Payment_Desc(0) + Cstr(latedoc.Install_No(0)) + Cstr(latedoc.Part(0))
+			
+			Set vPayments=paymentdb.GetView("Lookup_PaymentPaidByKey")
+			
+			Set doc=vPayments.GetDocumentByKey(key,True)
+			
+			If Not doc Is Nothing Then
+				latedoc.Status="In-Active"
+				latedoc.InActiveDate=Now
+				
+			End If
+			
+			Set latedoc=vLatePayments.GetNextDocument(latedoc)
+		Wend
+		
+		
+	End If
+	
+	
+	
+	
+End Function
+
+'++LotusScript Development Environment:2:1:getDBNDC:1:8
+Function getDBNDC() As NotesDatabase
+	Dim session As New NotesSession
+	Dim db2 As NotesDatabase
+	Set db2 = session.CurrentDatabase
+	
+	Dim strHRPath As NotesDatabase
+	Dim docProfile As NotesDocument
+	
+	Set docProfile = getProfileDoc()
+	
+	'return nothing if the project profile does not exist
+	If Not docProfile Is Nothing Then
+		
+		'return nothing if the path is empty
+		If docProfile.proppath(  0 ) <> "" Then
+			
+			Set getDBNDC = session.GetDatabase( db2.Server , docProfile.NDCDBPath( 0 ) )
+			Exit Function
+			
+		Else ' as path was not found
+			
+			Set getDBNDC = Nothing
+			Exit Function
+			
+			'end if docProfile.HRDatabase(  0 ) <> "" Then
+		End If
+		
+	Else 'if the profile document is not found
+		
+		Set getDBNDC = Nothing
+		Exit Function
+		
+		'end if Not docProfile Is Nothing Then
+	End If
+	
+	Set getDBNDC = Nothing
+End Function
+
+'++LotusScript Development Environment:2:2:saveDoc:1:8
+Sub saveDoc 
+	Dim ws As New NotesUIWorkspace 
+	Dim doc As NotesDocument 
+	Set doc = ws.CurrentDocument.Document 
+	If ws.CurrentDocument Is Nothing Then
+		Msgbox "Could not find current document" 		
+		Exit Sub
+	End If
+	
+	ws.CurrentDocument.Save
+	
+End Sub
+
+
+
+
+
+
+'++LotusScript Development Environment:2:1:getAllDocsByKey2Forms:1:8
+Function getAllDocsByKey2Forms( formname As String, formName2 As String , field As String, value As Variant  ) As NotesDocumentCollection
+	
+	'Author: Mujahid ur Rehman
+	'Dated: Sep 22, 2005
+	'Purpose: takes as input 2 form names. performs a db2 search based on a 
+	'field name and the value.
+	'the document collection returned will contain documents  based on 2 different forms
+	
+	
+	
+	Dim searchString As String 
+	searchString = { ( Form ="}& formname   &  {" | Form ="} & formName2 & {"   ) & }& field &{ = "}& value & {" }
+	
+	
+	Dim dc As NotesDocumentCollection 
+	Dim session As New NotesSession 
+	Dim db2 As NotesDatabase 
+	
+	Set db2 = session.CurrentDatabase 
+	Set dc = db2.Search(searchString,Nothing,0)
+	Set getAllDocsByKey2Forms = dc		
+	
+End Function

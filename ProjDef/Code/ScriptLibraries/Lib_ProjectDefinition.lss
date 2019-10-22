@@ -1,0 +1,186 @@
+'++LotusScript Development Environment:2:5:(Options):0:74
+%REM
+	Library PropDefinitionLib
+	Created Sep 3, 2019 by Samiullah Arshed/IT/BahriaTown/PK
+	Description: Comments for Library
+%END REM
+Option Public
+
+Use "LogUtilities"
+
+
+'++LotusScript Development Environment:2:5:(Forward):0:1
+Declare Sub Initialize
+Declare Sub Terminate
+Declare Function CheckBookingDetailsDuplicate(BookingDoc As NotesDocument) As Boolean
+Declare Function CheckPrefixDuplicate(PrefixDoc As NotesDocument) As Boolean
+
+'++LotusScript Development Environment:2:5:(Declarations):0:2
+
+'++LotusScript Development Environment:2:2:Initialize:1:10
+Sub Initialize
+
+End Sub
+
+
+'++LotusScript Development Environment:2:2:Terminate:1:10
+Sub Terminate
+	
+End Sub
+
+
+
+'++LotusScript Development Environment:2:1:CheckBookingDetailsDuplicate:9:8
+%REM
+	''-Puropse--------------------------------
+	''Check Whether a Booking Size already Exist or not. If already exists then Reture false otherwise returns true.
+	''Created By
+	''M.Samiullah Arshed
+	''Dated: 28-Aug-2019
+	'--------------------------------------------------
+%END REM
+Function CheckBookingDetailsDuplicate(BookingDoc As NotesDocument) As Boolean
+	On Error GoTo ErrHandler
+	'----------Declaration Part-----------------
+	On Error GoTo ErrHandler
+	Dim ws As New NotesUIWorkspace
+	Dim session As New NotesSession
+	Dim db As NotesDatabase
+	Dim BookingViewAII As NotesView
+	Dim BookingDcAll As NotesDocumentCollection
+	Dim BookingKey As String
+	Dim DocBookingDocBySize As NotesDocument
+	'---------------Initialization Part------------
+	
+	Set db=session.CurrentDatabase
+	
+	'''Get View of All Prefixes'''''''
+	Set BookingViewAII = db.GetView("(LookupProjectBookingDetails)")
+	If BookingViewAII Is Nothing Then
+		MsgBox "A view named (LookupPrefixDefinition) is not found in database, Please contact system administrator",64,"Alert"
+		CheckBookingDetailsDuplicate = False
+		Exit Function
+	End If
+	projectLocation= Trim(BookingDoc.ProjectLocation(0))
+	projectName= Trim(BookingDoc.ProjectName(0))
+	ProjectBookingSize= Trim(BookingDoc.ProjectBookingSize(0))
+	BookingKey= projectLocation+"~"+projectName+"~"+ProjectBookingSize
+	Set BookingDcAll = BookingViewAII.GetAllDocumentsByKey(BookingKey,True)		
+	isExistInCurrentProject = 0
+	If BookingDcAll.Count > 0 Then			
+		If BookingDcAll.Count=1 Then
+			Set BookingDocBySize=BookingDcAll.GetFirstDocument()
+			If BookingDocBySize.DocID(0)<>BookingDoc.DocID(0) Then
+				MsgBox "Booking size already exists.", 64,"Alert"
+				CheckBookingDetailsDuplicate=False	
+				Exit Function	
+			End If
+		End If	
+	End If	
+	CheckBookingDetailsDuplicate=True
+	Exit Function
+ErrHandler:
+	Dim ErrMsg As String 
+	CheckBookingDetailsDuplicate=False
+	ErrMsg = "An unhandeled error occured in CheckBookingDetailsDuplicate(). The error details are:  "  
+	ErrMsg = ErrMsg & Chr(10) & Chr(10)  & Error$ 
+	ErrMsg = ErrMsg & Chr(10) & " on line number: " & CStr(Erl)
+	ErrMsg = ErrMsg & Chr(10) &   Chr(10) & "Please contact IT Team with the details of this error."
+	MsgBox ErrMsg,64, db.Title
+	Exit Function
+End Function
+
+'++LotusScript Development Environment:2:1:CheckPrefixDuplicate:1:8
+Function CheckPrefixDuplicate(PrefixDoc As NotesDocument) As Boolean
+%REM
+	''-Puropse--------------------------------
+	''Check Whether a Prefix already Exist or not. If already exists then Reture false otherwise returns true.
+	''Created By
+	''M.Samiullah Arshed
+	''Dated: 27-Aug-2019
+	'--------------------------------------------------
+%END REM
+	'----------Declaration Part-----------------
+	On Error GoTo ErrHandler
+	Dim ws As New NotesUIWorkspace
+	Dim session As New NotesSession
+	Dim db As NotesDatabase
+	Dim PrefViewAII As NotesView
+	Dim PrefDcAll As NotesDocumentCollection
+	Dim AllPrefixKey,PrefixByLocKey As String
+	Dim DocPrefByLoc As NotesDocument
+	'---------------Initialization Part------------
+	
+	Set db=session.CurrentDatabase
+	
+	'''Get View of All Prefixes'''''''
+	Set PrefViewAII = db.GetView("(LookupPrefixDefinition)")
+	Dim PrefByLocViewAII As NotesView
+	Set PrefByLocViewAII = db.GetView("(LookupPrefixDefinitionByLocProjName)")
+	If PrefViewAII Is Nothing Then
+		MsgBox "A view named (LookupPrefixDefinition) is not found in database, Please contact system administrator",64,"Alert"
+		CheckPrefixDuplicate = False
+		Exit Function
+	End If
+	prefix =UCase(PrefixDoc.Prefix(0))
+	DocID= Trim(PrefixDoc.DocID(0))
+	projectName= Trim(PrefixDoc.ProjectName(0))
+	projectLocation= Trim(PrefixDoc.ProjectLocation(0))
+	AllPrefixKey= prefix
+	Set PrefDcAll = PrefViewAII.GetAllDocumentsByKey(AllPrefixKey,True)		
+	isExistInCurrentProject = 0
+	If PrefDcAll.Count =1  Then
+		Set DocPrefByLoc=PrefDcAll.GetFirstDocument
+		If DocPrefByLoc.DocID(0)<>PrefixDoc.DocID(0) Then
+			isExistInCurrentProject=2
+		Else
+			isExistInCurrentProject=0
+		End If
+	End If
+	If PrefDcAll.Count > 1 Then
+		isExistInCurrentProject=2 
+	End If
+	''''Now Check Whether Prefix Exists in Current Project by Location""
+	Dim PrefByLocDc As NotesDocumentCollection
+	PrefixByLocKey=projectLocation+"~"+projectName+"~"+prefix
+	Set PrefByLocDc = PrefByLocViewAII.GetAllDocumentsByKey(PrefixByLocKey,True)	
+	''''MsgBox 	PrefixByLocKey	
+	If PrefByLocDc.Count = 1 Then
+		Set PrefDocByLoc=PrefByLocDc.GetFirstDocument()
+		If PrefDocByLoc.DocID(0)<>PrefixDoc.DocID(0) Then
+			isExistInCurrentProject=1
+		Else
+			isExistInCurrentProject=0
+		End If
+	End If		
+	If PrefByLocDc.Count > 1 Then
+		isExistInCurrentProject=1
+	End If	
+	If isExistInCurrentProject=1 Then
+		MsgBox "Prefix exist in current project", 64,"Alert"
+		CheckPrefixDuplicate=False	
+		Exit Function
+	ElseIf isExistInCurrentProject =2 Then
+		Dim askme As Integer
+		askme = ws.Prompt (PROMPT_YESNO, "Alert", "Prefix is already defined in another project. Do you want to continue ?")
+		If askme <> 1 Then			
+			CheckPrefixDuplicate=False	
+			Exit Function	
+		End If
+	ElseIf isExistInCurrentProject = 0 Then
+		CheckPrefixDuplicate=True
+		Call ws.Viewrefresh()	
+		Exit Function	
+	End If	
+	CheckPrefixDuplicate=True
+	Exit Function
+ErrHandler:
+	Dim ErrMsg As String 
+	CheckPrefixDuplicate=False	
+	ErrMsg = "An unhandeled error occured in CheckPrefixDuplicate(). The error details are:  "  
+	ErrMsg = ErrMsg & Chr(10) & Chr(10)  & Error$ 
+	ErrMsg = ErrMsg & Chr(10) & " on line number: " & CStr(Erl)
+	ErrMsg = ErrMsg & Chr(10) &   Chr(10) & "Please contact IT Team with the details of this error."
+	MsgBox ErrMsg,64, db.Title
+	Exit Function
+End Function

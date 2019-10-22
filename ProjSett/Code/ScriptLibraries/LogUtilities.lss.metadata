@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?><note class="filter" maintenanceversion="1.0" replicaid="452583F400274E82" version="10.0" xmlns="http://www.lotus.com/dxl">
+<noteinfo noteid="682" sequence="10" unid="783D893C93898EC14525848D0022C4C6">
+<created><datetime>20191008T111945,98+05</datetime></created>
+<modified><datetime>20191017T010329,85+05</datetime></modified>
+<revised><datetime>20191016T162715,57+05</datetime></revised>
+<lastaccessed><datetime>20191017T010329,84+05</datetime></lastaccessed>
+<addedtofile><datetime>20191008T111946,32+05</datetime></addedtofile></noteinfo>
+<updatedby><name>CN=Attiya Waqar/OU=IT/O=BahriaTown/C=PK</name><name>CN=Samiullah Arshed/OU=IT/O=BahriaTown/C=PK</name><name>CN=Riaz Ul Hassan/OU=IT/O=BahriaTown/C=PK</name><name>CN=Salma Bibi/OU=IT/O=BahriaTown/C=PK</name><name>CN=Samiullah Arshed/OU=IT/O=BahriaTown/C=PK</name><name>CN=Riaz Ul Hassan/OU=IT/O=BahriaTown/C=PK</name><name>CN=Samiullah Arshed/OU=IT/O=BahriaTown/C=PK</name><name>CN=Riaz Ul Hassan/OU=IT/O=BahriaTown/C=PK</name></updatedby>
+<wassignedby><name>CN=Riaz Ul Hassan/OU=IT/O=BahriaTown/C=PK</name></wassignedby>
+<item name="$PublicAccess" sign="true"><text>1</text></item>
+<item name="$TITLE" sign="true"><text>LogUtilities</text></item>
+<item name="$DesignerVersion" sign="true"><text>8.5.3</text></item>
+
+
+
+<item name="$Class"><text>ScriptLibraryMaster</text></item>
+<item name="$Flags"><text>s34Q</text></item></note>

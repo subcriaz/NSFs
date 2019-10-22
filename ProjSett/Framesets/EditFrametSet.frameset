@@ -1,0 +1,27 @@
+<?xml version='1.0' encoding='utf-8'?>
+<note class='form' xmlns='http://www.lotus.com/dxl' version='10.0' maintenanceversion='1.0'
+ replicaid='452583F400274E82'>
+<noteinfo noteid='7ca' unid='B71F47BA5F8E83DF4525849B001B6BF3' sequence='1'>
+<created><datetime>20191022T095931,07+05</datetime></created>
+<modified><datetime>20191022T095931,09+05</datetime></modified>
+<revised><datetime>20191022T095931,08+05</datetime></revised>
+<lastaccessed><datetime>20191022T095931,08+05</datetime></lastaccessed>
+<addedtofile><datetime>20191022T095931,08+05</datetime></addedtofile></noteinfo>
+<updatedby><name>CN=Waseem Hassan/OU=IT/O=BahriaTown/C=PK</name><name>CN=Samiullah Arshed/OU=IT/O=BahriaTown/C=PK</name><name
+>CN=Waseem Hassan/OU=IT/O=BahriaTown/C=PK</name><name>CN=Riaz Ul Hassan/OU=IT/O=BahriaTown/C=PK</name></updatedby>
+<wassignedby><name>CN=Riaz Ul Hassan/OU=IT/O=BahriaTown/C=PK</name></wassignedby>
+<item name='$TITLE' sign='true'><text>EditFrametSet</text></item>
+<item name='$WindowTitle' sign='true'><formula>"Edit " + @DbTitle</formula></item>
+<item name='$Comment' sign='true'><text/></item>
+<item name='$FrameSet' sign='true'>
+<rawitemdata type='1'>
+7/8YAAIAAwAAAAAAAAAAAAAAAAAAAAAA8P8+AEUAAAABAAAAAAAFAAUAAAAAAAUAAAAAAAUAAAAA
+AAEAAgAAAAAAAQCSseIAAAADAAEAAwAUAAMAUwDx/zwAEQEAAABAAQABAAEAAQAAAAAAAAAAAAgA
+AQCSseIAAABFZGl0SG9tZQEA////fgEAAAoBAAAAAH72/y0AAAAAAAMABwALAAAAAAAAAAAAAAAA
+AAAAAAAAAAAATGVmdEVkaXROYXY/8f9AABEBAAAAQAEAAQABAAEAAAAAAAgAAAAEAAEAkrHiAAAA
+RWRpdEhvbWVfbmV3AQD///9+AQAACgEAAAAAfvb/KgAAAAAAAwAHAAgAAAAAAAAAAAAAAAAAAAAA
+AAAAAABFZGl0SG9tZQ==
+</rawitemdata></item>
+<item name='$Flags'><text>#34CQ</text></item>
+<item name='$DesignerVersion'><text>8.5.3</text></item></note>
+

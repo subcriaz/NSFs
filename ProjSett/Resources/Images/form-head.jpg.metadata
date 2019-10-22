@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?><note class="form" maintenanceversion="1.0" replicaid="452583F400274E82" version="10.0" xmlns="http://www.lotus.com/dxl">
+<noteinfo noteid="69e" sequence="1" unid="48AF7475E60624CA4525848D0022D32B">
+<created><datetime>20191008T112022,83+05</datetime></created>
+<modified><datetime>20191008T112023,03+05</datetime></modified>
+<revised><datetime>20191008T112023,02+05</datetime></revised>
+<lastaccessed><datetime>20191008T112023,02+05</datetime></lastaccessed>
+<addedtofile><datetime>20191008T112023,02+05</datetime></addedtofile></noteinfo>
+<updatedby><name>CN=Riaz Ul Hassan/OU=IT/O=BahriaTown/C=PK</name></updatedby>
+<wassignedby><name>CN=Riaz Ul Hassan/OU=IT/O=BahriaTown/C=PK</name></wassignedby>
+<item name="$TITLE"><text>form-head.jpg</text></item>
+<item name="$FlagsExt"><text>D</text></item>
+<item name="$ImagesWide" sign="true"><number>1</number></item>
+<item name="$ImagesHigh" sign="true"><number>1</number></item>
+<item name="$ImagesColorize" sign="true"><number>0</number></item>
+<item name="$FileModDT" sign="true"><datetime>20080116T115454,00+05</datetime></item>
+<item name="$Flags"><text>D34CiQP</text></item>
+<item name="$ImageNames" sign="true"><text>form-head.jpg</text></item>
+<item name="$DesignerVersion"><text>8.5.3</text></item>
+
+</note>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?><note class="form" maintenanceversion="1.0" replicaid="452583F400273992" version="10.0" xmlns="http://www.lotus.com/dxl">
+<noteinfo noteid="15e" sequence="6" unid="9FD0A1E3C7B2159F45257DA900298040">
+<created><datetime>20141209T123318,08+05</datetime></created>
+<modified><datetime>20190904T102152,82+05</datetime></modified>
+<revised><datetime>20190904T102152,81+05</datetime></revised>
+<lastaccessed><datetime>20190904T102152,81+05</datetime></lastaccessed>
+<addedtofile><datetime>20190508T120826,75+05</datetime></addedtofile></noteinfo>
+<updatedby><name>CN=Admin/O=BahriaTown</name><name>CN=Irfan Riaz/OU=IT/O=BahriaTown/C=PK</name><name>CN=Super Admin/O=BahriaTown/C=PK</name><name>CN=Samiullah Arshed/OU=IT/O=BahriaTown/C=PK</name><name>CN=Riaz Ul Hassan/OU=IT/O=BahriaTown/C=PK</name><name>CN=Waseem Hassan/OU=IT/O=BahriaTown/C=PK</name></updatedby>
+<wassignedby><name>CN=Waseem Hassan/OU=IT/O=BahriaTown/C=PK</name></wassignedby>
+<item name="$TITLE"><text>Banner_CRM.jpg</text></item>
+<item name="$FlagsExt"><text>D</text></item>
+<item name="$ImagesWide" sign="true"><number>1</number></item>
+<item name="$ImagesHigh" sign="true"><number>1</number></item>
+<item name="$ImagesColorize" sign="true"><number>0</number></item>
+
+
+
+
+<item name="$MimeType" sign="true"><text>image/jpeg</text></item>
+<item name="$FileModDT" sign="true"><datetime>20140201T104633,99+05</datetime></item>
+<item name="$ImageNames" sign="true"><text>Banner_CRM.jpg</text></item>
+<item name="$DesignerVersion"><text>8.5</text></item>
+<item name="$Flags"><text>34CiQP$</text></item>
+<item name="$EditFilePath"><text>C:\Users\Waseem\AppData\Local\Temp\notes1B744C\~Banner_CRM.jpg</text></item></note>

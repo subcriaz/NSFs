@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?><note class="filter" maintenanceversion="1.0" replicaid="452583F400273992" version="10.0" xmlns="http://www.lotus.com/dxl">
+<noteinfo noteid="192" sequence="300" unid="C953DCA3BD65C55D45257EA80025ED25">
+<created><datetime>20150821T115415,41+05</datetime></created>
+<modified><datetime>20191016T124703,15+05</datetime></modified>
+<revised><datetime>20191016T124703,14+05</datetime></revised>
+<lastaccessed><datetime>20191016T124703,14+05</datetime></lastaccessed>
+<addedtofile><datetime>20190508T120826,88+05</datetime></addedtofile></noteinfo>
+<updatedby><name>CN=Samiullah Arshed/OU=IT/O=BahriaTown/C=PK</name><name>CN=Riaz Ul Hassan/OU=IT/O=BahriaTown/C=PK</name></updatedby>
+<wassignedby><name>CN=Riaz Ul Hassan/OU=IT/O=BahriaTown/C=PK</name></wassignedby>
+<item name="$Flags"><text>s34Q</text></item>
+<item name="$PublicAccess" sign="true"><text>1</text></item>
+<item name="$TITLE" sign="true"><text>GeneralUtilities</text></item>
+<item name="$DesignerVersion" sign="true"><text>8.5.3</text></item>
+
+</note>

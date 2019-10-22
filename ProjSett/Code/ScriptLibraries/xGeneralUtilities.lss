@@ -1,0 +1,523 @@
+'++LotusScript Development Environment:2:5:(Options):0:66
+Option Public
+
+'++LotusScript Development Environment:2:5:(Forward):0:1
+Declare Class Utility
+
+'++LotusScript Development Environment:2:5:(Declarations):0:10
+Class Utility
+	
+	Private session As NotesSession
+	Private db As NotesDatabase
+	Private view As NotesView
+	Private doc As NotesDocument
+	
+	Public FLAG_ALPHA As Integer
+	Public FLAG_NUM As Integer
+	Public FLAG_STR As Integer 
+	Public FLAG_SNT As Integer 
+	Public FLAG_DEC As Integer 
+	Public FLAG_NWD As Integer
+	Public FLAG_ISD As Integer
+	
+Declare Function getNewID ( viewName As String ) As Integer
+Declare Function getDbName( fieldName As String ) As String
+Declare Function getAbbreviation( fullName As String ) As String		
+Declare Function getEmployeeId( serverName As String ) As Integer
+Declare Function assignPrimaryKeys( doc As notesDocument, viewWithIDs As String, compositeKey As Integer ) As Integer
+Declare 	Function sendMail( mailTo As Variant, mailCC As Variant, mailBCC As Variant, mailSubject As String , mailBody As String, IncludeDoclink As Variant, linkDoc As Variant )
+	
+Declare Function fieldValueValidation(value As String, flag As Integer) As Integer
+Declare	Function checkRole(theRoleName As String) As Integer
+'--------------------------------------------------------------------------------------------------------------------------------------------------------		
+	Sub new
+		Set session = New NotesSession 
+		
+		FLAG_ALPHA = 0		'whether alpha numeric or not
+		FLAG_NUM = 1			'whether numeric or not
+		FLAG_STR = 2			'whether string or not
+		FLAG_DEC = 3			'whether float or not
+		FLAG_SNT = 4			'whether string with spaces or not
+		FLAG_NWD = 5			'whether numeric or not (allows float value also)
+		FLAG_ISD = 6			'whether date or not
+	End Sub
+	
+'--------------------------------------------------------------------------------------------------------------------------------------------------------	
+	' Working: 	The following method given the name of a view gets LAST Document of the view
+	' 				Retrieves ID field value increments it by 1 and returns the value
+	' Caution:		View should be sorted by ID to get the correct results
+	
+	Function getNewID ( viewName As String ) As Integer
+		
+		Set db = session.CurrentDatabase
+		
+		Set view = db.GetView( viewName )
+		Set doc = view.GetLastDocument
+		
+		If doc Is Nothing Then
+			getNewID = 0		
+		Else
+			getNewID = Doc.ID(0)
+		End If
+		getNewID = getNewID + 1
+		
+	End Function	
+	
+'--------------------------------------------------------------------------------------------------------------------------------------------------------		
+	' Working: 	The following method given the name of a field in the configuration document of the setup
+	' 				database, returns the value of the field which contains the name of a database base name of a specific db
+	' Caution:		-NA-
+	
+	Function getEmployeeId( serverName As String ) As Integer
+		
+		'Getting Conanical Name of the current user from session and then making it convertable to Abreviated Name		
+		Dim currentUserName As New NotesName( session.UserName )		
+		Set db = New NotesDatabase( serverName, Me.getDbName( "HRM" ))
+		
+		Set view = Db.GetView( "ListOfEmployeeByNotesName" )
+		Set doc = view.GetDocumentByKey( currentUserName.Abbreviated )
+		
+		If doc Is Nothing Then
+			Messagebox "You are not a registered Employee of the Company"		
+			getEmployeeId = -1
+		Else
+			getEmployeeId = Cint( doc.fEmpID(0) )
+		End If
+		
+	End Function
+	
+'--------------------------------------------------------------------------------------------------------------------------------------------------------		
+	' Working: 	The following method given the name of a field in the configuration document of the setup
+	' 				database, returns the value of the field which contains the name of a database base name of a specific db
+	' Caution:		Make sure current Database's configuration document contains ConfigDb FilePath
+	
+	Function getDbName( fieldName As String ) As String
+		
+		Dim configDbName As String 
+		Dim configDb As notesDatabase 
+		
+		Set db = session.currentDatabase
+		Set view = db.getView( "Configuration" )
+		Set doc = view.getFirstDocument
+		
+		'Getting handle of Setup ( Organizational Management Db )	
+		Set configDb = New NotesDatabase( db.Server, Cstr( doc.getItemValue( "Setup" )(0) )	)	
+		Set view = configDb.getView( "Configuration" )
+		Set doc = view.getFirstDocument
+		
+		'Getting Value of the field passed to the function		
+		getDbName = Cstr( doc.getItemValue( fieldName )(0) )
+		
+	End Function	
+'--------------------------------------------------------------------------------------------------------------------------------------------------------		
+	' Working: 			The following method given the full name extracts the abrreviation for it
+	' Contribution:	Sajjad Shahid
+	' Caution:		
+	Function getAbbreviation( fullName As String ) As String
+		Dim wk As New NotesUIWorkspace
+		Dim uidoc As NotesUIDocument
+		Dim doc As NotesDocument
+		
+		Set uidoc=wk.CurrentDocument
+		Set doc=uidoc.Document
+		
+		doc.givenValue = Trim(fullName)
+		
+		If doc.givenValue(0)="" Then
+			'getAbbreviation="Missing argument"
+			Exit Function
+		End If
+		
+		Dim intPositionOfSpace As Integer
+		intPositionOfSpace=Instr(1,fullName," ")
+		
+		If intPositionOfSpace=0 And Len(fullName) < 5 Then
+			getAbbreviation = Ucase(fullName)
+			Exit Function
+		End If
+		
+		Dim result As String
+		result=Mid(fullName,1,1)
+		
+		While Not intPositionOfSpace=0
+			result=result+Mid(fullName,intPositionOfSpace+1,1)
+			intPositionOfSpace=Instr(intPositionOfSpace+1,fullName," ")
+		Wend
+		
+		getAbbreviation = Ucase(result)
+		
+	End Function
+	
+	
+'--------------------------------------------------------------------------------------------------------------------------------------------------------		
+	' Working: 	The following method given a document. stores ID & EmpID in the document.
+	' 				Name of the view which contains ID Listing for that perticular type of documents
+	'				& a key to tell the function whether the primary key is composite or single.
+	' Caution:		View should hold List of documents of this type with IDs.
+	
+	Function assignPrimaryKeys( doc As notesDocument, viewWithIDs As String, compositeKey As Integer ) As Integer
+		
+		Dim NewID As Integer 		
+		Dim EmpID As Integer
+		
+		NewID = Me.getNewID( viewWithIDs )
+		EmpID = Me.getEmployeeId( doc.parentDatabase.server )
+		
+		assignPrimaryKeys = True
+		If compositeKey = True  Then
+			
+			' To check if the EmpID recieved from the method above is valid or not.
+			If EmpID > 0 Then
+				
+				Doc.ID = NewID
+				Doc.EmployeeId = EmpID
+				
+			Else
+				assignPrimaryKeys = False
+			End If
+		Else
+			Doc.ID = NewID
+		End If
+		
+	End Function
+	
+'--------------------------------------------------------------------------------------------------------------------------------------------------------		
+	' Working: 	The following method given a value and a flag verifies if the value satisfies the flag conditions.
+	' 				FLAG_ALPHA = 0
+	'				FLAG_NUM = 1
+	'				FLAG_STR = 2
+	'				FLAG_DEC = 3
+	'				FLAG_SNT = 4
+	'				FLAG_NWD = 5
+	'				FLAG_ISD = 6
+	
+	' Caution:		View should hold List of documents of this type with IDs.
+	' Contribution: Sajjad Sahid
+	
+	
+	Function fieldValueValidation(value As String, flag As Integer) As Integer
+		
+		Dim wk As New NotesUIWorkspace
+		Dim uidoc As NotesUIDocument
+		Dim doc As NotesDocument
+		Dim result As Variant
+		
+		Set uidoc=wk.CurrentDocument
+		Set doc=uidoc.Document
+		
+		doc.givenValue = Trim(value)
+		
+		If doc.givenValue(0)="" Then
+			fieldValueValidation = False
+			Exit Function
+		End If
+		
+		Dim I09Exists As Integer
+		Dim IazExists As Integer
+		Dim IAZExists1 As Integer
+		Dim I_Exists As Integer
+		Dim IdotExists As Integer
+		Dim Iother As String
+		
+	'whether alpha numeric or not
+		If flag = Me.FLAG_ALPHA Then
+			result=Evaluate({@Contains(givenValue;"~":"!":"@":"#":"$":"%":"^":"&":"*":"(":")":"+":"=":"{":"[":"]":":":"/":";":"'":"<":">":"?":".":",":'"':"\\":"}}":"|")},doc)
+			If result(0)=0	 Then
+				fieldValueValidation = True
+			Else
+				fieldValueValidation = False
+			End If	
+			
+	'whether numeric or not
+		Elseif flag = Me.FLAG_NUM Then
+			result=Evaluate({@Contains(givenValue;".")},doc)
+			If result(0)<>0 Then
+				fieldValueValidation = False
+				Exit Function
+			End If	
+			Dim a As String
+			a=Isnumeric(value)
+		'Msgbox Cstr(a)
+			If a="True" Then
+				fieldValueValidation = True
+			Else
+				fieldValueValidation = False
+			End If
+			
+	'whether string or not
+		Elseif flag = Me.FLAG_STR Then	
+			result=Evaluate({@Contains(givenValue;" ")},doc)
+			
+			
+			
+			result=Evaluate({@Contains(givenValue;"0":"1":"2":"3":"4":"5":"6":"7":"8":"9")},doc)
+			If result(0)<>0	Then
+				fieldValueValidation = False
+				Exit Function
+			End If
+			result=Evaluate({@Contains(givenValue;"~":"!":"@":"#":"$":"%":"^":"&":"*":"(":")":"+":"=":"{":"[":"]":":":";":"<":">":"?":".":",":'"':"\\":"}}":"|")},doc)
+			If result(0)<>0	Then
+				fieldValueValidation = False
+				Exit Function
+			End If
+			result=Evaluate({@Contains(givenValue;"a":"b":"c":"d":"e":"f":"g":"h":"i":"j":"k":"l":"m":"n":"o":"p":"q":"r":"s":"t":"u":"v":"w":"x":"y":"z")},doc)
+			If result(0)=0	 Then
+				IazExists=0
+			Else
+				IazExists=1
+			End If
+			result=Evaluate({@Contains(givenValue;"A":"B":"C":"D":"E":"F":"G":"H":"I":"J":"K":"L":"M":"N":"O":"P":"Q":"R":"S":"T":"U":"V":"W":"X":"Y":"Z")},doc)
+			If result(0)=0	 Then
+				IAZExists1=0
+			Else
+				IAZExists1=1
+			End If
+			
+			If IazExists=1 Or IAZExists1=1 Then
+				fieldValueValidation = True
+			Else
+				fieldValueValidation = False
+			End If
+			
+	'whether float or not
+		Elseif flag = Me.FLAG_DEC Then
+			result=Evaluate({@Contains(givenValue;".")},doc)
+			If result(0)=0	 Then
+				fieldValueValidation = False
+				Exit Function
+			End If
+			
+			result=Evaluate({@Contains(givenValue;" ")},doc)
+			If result(0)<>0	 Then
+				fieldValueValidation = False
+				Exit Function
+			End If
+			
+			result=Evaluate({@Contains(givenValue;"a":"b":"c":"d":"e":"f":"g":"h":"i":"j":"k":"l":"m":"n":"o":"p":"q":"r":"s":"t":"u":"v":"w":"x":"y":"z")},doc)
+			If result(0)<>0	 Then
+				fieldValueValidation = False
+				Exit Function
+			End If
+			
+			result=Evaluate({@Contains(givenValue;"A":"B":"C":"D":"E":"F":"G":"H":"I":"J":"K":"L":"M":"N":"O":"P":"Q":"R":"S":"T":"U":"V":"W":"X":"Y":"Z")},doc)
+			If result(0)<>0	 Then
+				fieldValueValidation = False
+				Exit Function
+			End If
+			
+			result=Evaluate({@Contains(givenValue;"~":"!":"@":"#":"$":"%":"^":"&":"*":"(":")":"+":"=":"{":"[":"]":":":"/":";":"'":"<":">":"?":",":'"':"\\":"}}":"|")},doc)
+			If result(0)<>0	 Then
+				fieldValueValidation = False
+				Exit Function
+			End If
+			
+			Dim pos As Integer
+			Dim pos1 As Integer
+			Dim lvalue As Integer
+			lvalue=Len(value)'total length of given value
+			pos=Instr(1,value,".")
+			
+			If lvalue=pos Then
+				fieldValueValidation = False
+				Exit Function
+			End If
+			
+			pos1=Instr(pos+1,value,".")
+			
+			If pos1<>0 Then
+				fieldValueValidation = False
+				Exit Function
+			End If
+			
+			result=Evaluate({@Contains(givenValue;"0":"1":"2":"3":"4":"5":"6":"7":"8":"9")},doc)
+			If result(0)=0	 Then
+				I09Exists=0
+			Else
+				I09Exists=1
+			End If
+			
+			If I09Exists=1 Then
+				fieldValueValidation = True
+			Else
+				fieldValueValidation = False
+			End If
+			
+		'whether strings with spaces or not	
+		Elseif flag = Me.FLAG_SNT Then
+			result=Evaluate({@Contains(givenValue;"0":"1":"2":"3":"4":"5":"6":"7":"8":"9")},doc)
+			If result(0)<>0	Then
+				fieldValueValidation =  False
+				Exit Function
+			End If
+			result=Evaluate({@Contains(givenValue;"~":"!":"@":"#":"$":"%":"^":"&":"*":"(":")":"+":"=":"{":"[":"]":":":"/":";":"'":"<":">":"?":".":",":'"':"\\":"}}":"|")},doc)
+			If result(0)<>0	Then
+				fieldValueValidation = False
+				Exit Function
+			End If
+			result=Evaluate({@Contains(givenValue;"a":"b":"c":"d":"e":"f":"g":"h":"i":"j":"k":"l":"m":"n":"o":"p":"q":"r":"s":"t":"u":"v":"w":"x":"y":"z")},doc)
+			If result(0)=0	 Then
+				IazExists=0
+			Else
+				IazExists=1
+			End If
+			result=Evaluate({@Contains(givenValue;"A":"B":"C":"D":"E":"F":"G":"H":"I":"J":"K":"L":"M":"N":"O":"P":"Q":"R":"S":"T":"U":"V":"W":"X":"Y":"Z")},doc)
+			If result(0)=0	 Then
+				IAZExists1=0
+			Else
+				IAZExists1=1
+			End If
+			
+			If IazExists=1 Or IAZExists1=1 Then
+				fieldValueValidation = True
+			Else
+				fieldValueValidation = False
+			End If
+			
+		'whether numeric or not (allows float also)
+		Elseif flag = Me.FLAG_NWD Then
+			
+			a=Isnumeric(value)
+		'Msgbox Cstr(a)
+			If a="True" Then
+				fieldValueValidation = True
+			Else
+				fieldValueValidation = False
+			End If
+		'whether date or not 	
+		Elseif flag = Me.FLAG_ISD Then
+			a=Isdate(value)
+			
+			If a="True" Then
+				fieldValueValidation = True
+			Else
+				fieldValueValidation = False
+			End If	
+		End If
+		
+	End Function
+	
+	
+	Sub sendNotification( sendToInfo As Variant, ccInfo As Variant, subject As String, bodyTxt As String, includeDocLinkInfo As Integer, xDoc As NotesDocument   )
+		
+		Dim notificationMemo As NotesDocument
+		Dim rtItem As NotesRichTextItem 
+		
+		Set db = session.CurrentDatabase
+		Set notificationMemo = New NotesDocument( db )
+		
+		Set rtitem = New NotesRichTextItem( notificationMemo, "Body" )
+		
+		notificationMemo.Form = "Memo"
+		notificationMemo.SendTo = sendToInfo
+		notificationMemo.CopyTo = ccInfo
+		notificationMemo.Subject = subject
+		
+		Call rtitem.AddNewLine( 2 )
+		Call rtitem.AppendText( bodyTxt )
+		
+		If includeDocLinkInfo = True Then
+			Call rtitem.AppendDocLink( xDoc, "Request Link" )
+		End If
+		
+		Call notificationMemo.Send( False )
+		
+	End Sub
+'-------------------------------------------------------------------------------------------------------------------------------------------------------------------	
+	' Working: 	The following method given a name of the role returns a list of username who have been assigned.
+	' 				this perticular role
+	' Caution:		View should hold List of documents of this type with IDs.
+	' Contribution: Humayun Tareen Khan	
+	
+	Function getNamesByRole(theRole As String) As Variant
+		
+		Dim acl As NotesACL
+		Dim ACLEntry As NotesACLEntry
+		
+		Dim NameItem As NotesItem
+		Dim i As Integer
+		
+		Set db = Session.CurrentDatabase
+		
+		Set acl = db.ACL
+		Set ACLEntry = acl.GetFirstEntry
+		
+		Dim mUsers() As Variant
+		
+		i = 0
+		
+		While Not(ACLEntry Is Nothing)
+			
+			If ( ACLEntry.IsRoleEnabled( theRole ) And (	ACLEntry.UserType = ACLTYPE_PERSON Or ACLEntry.UserType = ACLTYPE_PERSON_GROUP ) ) Then
+				Redim Preserve mUsers( i ) As Variant 			
+				mUsers(i) = ACLEntry.Name
+				i = i + 1
+			End If
+			Set ACLEntry = acl.GetNextEntry( ACLEntry )
+		Wend
+		
+		getNamesByRole = mUsers
+		
+	End Function
+'-------------------------------------------------------------------------------------------------------------------------------------------------------------------		
+'=============================================================================================
+	Function sendMail( mailTo As Variant, mailCC As Variant, mailBCC As Variant, mailSubject As String , mailBody As String, IncludeDoclink As Variant, linkDoc As Variant )
+		
+		Dim session As New notesSession
+		Dim doc As notesDocument
+		Dim rtitem As notesRichTextItem
+		
+		Set doc = New NotesDocument( session.CurrentDatabase  )
+		doc.Form = "Memo"
+		doc.SendTo = mailTo
+		doc.CopyTo = mailCC
+		doc.BlindCopyTo = mailBCC
+		
+		doc.Subject = mailSubject
+		
+		Set rtitem = New NotesRichTextItem( doc, "Body" )
+		Call rtitem.AppendText( mailBody )
+		
+		If IncludeDoclink = True Then
+			
+			Call rtitem.AppendText( "  ->  " )
+			Call rtitem.AppendDocLink( linkDoc, "Click" )
+		End If
+		
+		Call doc.Send( False )
+		
+	End Function
+'==============================================	
+	'-------------------------------------------------------------------------------------------------------------------------------------------------------------------	
+	' Working: 	This method checks whether the user has certain role or not
+	' Contribution: Sajjad Shahid
+	' Caution:		View should hold List of documents of this type with IDs.
+	
+	'Function fieldValueValidation(value As String, flag As Integer) As Integer
+	Function checkRole(theRoleName As String) As Integer
+		
+		Dim acl As NotesACL
+		Dim ACLEntry As NotesACLEntry
+		
+		Dim NameItem As NotesItem
+		Dim i As Integer
+		
+		Set db = Session.CurrentDatabase
+		
+		Set acl = db.ACL
+		Set  ACLEntry = acl.GetEntry( session.CommonUserName )
+		
+		If ACLEntry Is Nothing Then
+			Set ACLEntry = acl.GetEntry( session.UserName )
+		End If
+		
+		If ACLEntry Is Nothing Then
+			checkRole = False
+			Exit Function
+		Elseif ACLEntry.IsRoleEnabled( theRoleName ) Then
+			checkRole = True
+			Exit Function
+		End If
+		
+	End Function
+'-------------------------------------------------------------------------------------------------------------------------------------------------------------------		
+End Class

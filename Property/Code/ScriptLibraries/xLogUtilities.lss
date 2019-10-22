@@ -1,0 +1,1924 @@
+'++LotusScript Development Environment:2:5:(Options):0:74
+%REM  
+	Library LogUtilities
+	Created Jan 22, 2016 by Madiha Nasrullah/IT/BahriaTown/PK
+	Modified By Aug 22, 2018 by Babur Mansoor/IT/BahriaTown/PK
+	Description: Comments for Library
+%END REM
+Option Public
+' Option Declare
+' Use "GeneralUtilities"
+UseLSX "*javacon"  
+ 
+
+ 
+
+
+'++LotusScript Development Environment:2:5:(Forward):0:1
+Declare Sub Initialize
+Declare Sub Terminate
+Declare Function DeleteLogForSingleDoc( docSource As NotesDocument, docTarget As NotesDocument, reason1 As String)
+Declare Function GetTimeZone_v2(TimeZone As String) As String
+Declare Sub getUserDetails_v2(user List As Variant) 
+Declare Function getNamesByLevels_v2(Levels As String) As Variant
+Declare Function LogJuly18_Deletion( LogDb As NotesDatabase ) As Boolean
+Declare Function CheckDbAccess_v2 (DbToCheck As NotesDatabase) As Boolean
+Declare Sub SendNotification( sendToInfo As Variant, ccInfo As Variant, subject As String, bodyTxt As String, includeDocLinkInfo As Integer, xDoc As NotesDocument   )
+Declare Function EditLog_v2(docSource As NotesDocument, OldVals List As Variant)
+Declare Function Build_OldVal_Array_v2(aFieldsToCheck_v2_Ext List As Variant, BackEndDocument As NotesDocument, FieldNames As String)
+Declare Function TimezoneValidation() As Boolean
+Declare Function Search_Log1(uidoc1 As NotesUIDocument, result As String, success As String)
+Declare Function CreationLog_Letters_v2(LogType As String, docSource As NotesUIDocument, FormName As String)
+Declare Function Manage_Critical_Fields_v2(LogType As String, CriticalFields List As Variant) As Boolean
+Declare Sub appendInChangeLogWithSysInfo( strAction As String )
+Declare Sub Postopen_v2( LogDb  As NotesDatabase)
+Declare Sub Queryclose_v2(LogDb As NotesDatabase)
+Declare Function EditLog_v2_Ext(docSource As NotesDocument, OldVals List As Variant, SourceElement As String, SourceElementType As String) 
+Declare Function CreationLog_v2(LogType As String, docSource As NotesDocument)
+Declare Function getProfileDocument_v3(db As NotesDatabase , callerfx As string ) As NotesDocument
+
+'++LotusScript Development Environment:2:5:(Declarations):0:10
+	
+' ************  Gloab Variables are set in initialize ************
+	Dim s As NotesSession	 ' 1
+	Dim ws As NotesUIWorkspace ' 2
+	Dim CurrDb As NotesDatabase  ' 3
+	
+		
+	Dim ProfileName As String  ' 4
+	Dim ProfileDoc As NotesDocument ' 5
+	Dim LogDBPathStr As String ' 6
+	
+	Dim LogDb As NotesDatabase  ' 7
+	
+	
+	Dim LogDocument As NotesDocument	'  8
+	Dim DC As NotesDocumentCollection   ' 9 
+	Dim NotesUiDb As NotesUIDatabase 	' 10
+	
+	'for Profile Form object
+	Dim form As NotesForm ' 11 
+	
+' ************ End  Global Variables ************ ************
+	
+	
+
+'++LotusScript Development Environment:2:2:Initialize:1:10
+Sub Initialize
+	
+	
+	Set s = New NotesSession  '  1
+	Set ws = New NotesUIWorkspace ' 2
+	Set CurrDb = s.CurrentDatabase  ' 3
+	ProfileName = "Settings"
+	LogDBPathStr = "LogDBPath" 
+	
+	If ProfileDoc Is Nothing Then 
+		Set ProfileDoc = getProfileDocument_v3( CurrDb , "logUtilites-Initialize()" ) ' object 7
+	Else
+		' do nothing
+	End If
+	
+	Dim strBody As String
+	Dim strSubject As String
+	' ******   
+	If ProfileDoc Is Nothing Then 
+		MsgBox  "ProfileDoc not found, LogUtiloites Initialize() - db :  " ,64,  CurrDb.Title
+		Print  " ProfileDoc Is Nothing Then " & CurrDb.Title
+		strSubject  = "ProfileDoc not found, LogUtiloites Initialize() - db :  " &  CurrDb.Title 
+		strBody = strSubject 
+		Call SendNotification( "" , ""  , strSubject  ,  strBody  , False , Nothing  )
+	End If
+	' ******   
+		
+	Set LogDb =  s.Getdatabase(CurrDb.server, ProfileDoc.Getitemvalue(LogDBPathStr)(0) )
+		
+	If LogDb Is Nothing Then 
+		MsgBox "Log db not found in Initialize - LogUtiilties " , 64 , CurrDb.Title
+		Print  " Log db not found in Initialize - LogUtiilties " & CurrDb.Title
+		strSubject  = "Log db not found in  LogUtiloites Initialize() - db :  " &  CurrDb.Title 
+		strBody = strSubject 
+		Call SendNotification( "" , ""  , strSubject  ,  strBody  , False , Nothing  )
+		Call ws.CurrentDatabase.Close
+		Exit Sub
+	Else
+		'MsgBox "Log db  found  " & " Initialize() logutiilties"
+	End If
+	
+End Sub
+
+
+
+
+
+
+
+
+
+'++LotusScript Development Environment:2:2:Terminate:1:10
+Sub Terminate
+	
+End Sub
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+'++LotusScript Development Environment:2:1:DeleteLogForSingleDoc:1:8
+Function DeleteLogForSingleDoc( docSource As NotesDocument, docTarget As NotesDocument, reason1 As String)
+	
+	
+	On Error GoTo HandleError
+	
+	
+	''Build a comprehensive log of the specified document before deleting it.
+	'MsgBox "fX dELETE lOG "
+	 
+	Call docSource.Copyallitems(docTarget, True)
+	'docTarget.UniversalID = docSource.UniversalID	
+	docTarget.Form =docSource.Form(0)+"_deleted"
+	Dim userDetails List As Variant
+	Call getUserDetails_v2(userDetails)
+	
+	Dim winun As String
+	winun = Environ("username")  
+	
+	If userDetails(7) = "Macintosh" Then
+		winun = Environ("USER")
+	End If
+	
+	docTarget.rp_ipaddress   = userDetails(1)
+	docTarget.rp_macaddress  = userDetails(2)
+	docTarget.rp_domain      = userDetails(3)
+	'docTarget.rp_modifyby    = userDetails(4)
+	docTarget.rp_createdby    = userDetails(4)
+	docTarget.rp_computer    = userDetails(5)
+	docTarget.rp_timezone    = userDetails(6)
+	docTarget.rp_platform    = userDetails(7)
+	docTarget.AssignedRoles = userDetails(8)
+	docTarget.LotusVersion = userDetails(9)
+	docTarget.rp_dblocation = userDetails(10)
+	docTarget.rp_osusername = winun 
+	docTarget.rp_servername = userDetails(11)
+
+	docTarget.rp_servertime = userDetails(15)			''Evaluate({@Now([SERVERTIME])})
+
+	docTarget.Remarks = reason1
+	Dim sdatetim As New NotesDateTime(docTarget.LastModified)	
+	docTarget.rp_servertimezone = userDetails(18)	 ''Evaluate({@TimeZoneToText(rp_servertime)})
+	docTarget.rp_timezone_1 = userDetails(17)		  ''Evaluate({@TimeZoneToText(@Text(@Now))})
+	docTarget.rp_databasepath = userDetails(20)
+	docTarget.rp_databasetitle = userDetails(21)
+	docTarget.rp_databasereplicaid = userDetails(22)
+	
+	Call docTarget.ReplaceItemValue("$KeepPrivate","1")
+	Call docTarget.save(True, False)
+		
+	''Send notification if one or more critical fields could not be captured for some reason.
+	Dim CriticalFields List As Variant
+	CriticalFields(1) = userDetails(4)
+	CriticalFields(2) = userDetails(15)
+	CriticalFields(3) = userDetails(18)
+	CriticalFields(4) = userDetails(1)
+	CriticalFields(5) = userDetails(2)
+	CriticalFields(6) = userDetails(11)
+	CriticalFields(7) = userDetails(10)		
+	CriticalFields(8) = userDetails(20)
+	CriticalFields(9) = userDetails(21)
+	CriticalFields(10) = userDetails(22)	
+	Call Manage_Critical_Fields_v2("Deletion Log", CriticalFields)	
+	'MsgBox "Delete Log For SingleDoc "
+	Exit Function
+	
+HandleError:
+	Dim ErrMsg As String 
+	ErrMsg = "An unhandeled error occured in DeleteLogForSingleDoc(). The error details are:  "  
+	ErrMsg = ErrMsg & Chr(10) & Chr(10)  & Error$ 
+	ErrMsg = ErrMsg & Chr(10) & " on line number: " & CStr(Erl)
+	ErrMsg = ErrMsg & Chr(10) &   Chr(10) & "Please contact IT Team with the details of this error."
+	MessageBox ErrMsg,64, CurrDb.Title
+
+	Exit Function
+	
+		
+		
+End Function
+
+'++LotusScript Development Environment:2:1:GetTimeZone_v2:1:8
+Function GetTimeZone_v2(TimeZone As String) As String
+	''Given Domino Server Timezone like -10, -5, 8.1, this function returns Time zone in human-readable form like UTC + 05:30
+		
+	Dim SrvTimeZone As Integer
+	Dim SrvTimeZonePM As String		''Plus/Minus symbol
+	Dim SrvTimeZoneFinal As String
+	
+	SrvTimeZone = TimeZone
+	
+	If SrvTimeZone < 0 Then		''Determine + or -.	
+		SrvTimeZonePM = "+"
+	Else
+		SrvTimeZonePM = "-"
+	End If
+	
+	SrvTimeZoneFinal = CStr(Abs(SrvTimeZone))
+	SrvTimeZoneFinal = Replace(SrvTimeZoneFinal, ".1", "")		''strip off day light saving flag (if any)
+	
+	If Len(SrvTimeZoneFinal)  = 4 Then		''e.g 3005 mean 5:30 from GMT
+		SrvTimeZoneFinal = Mid(SrvTimeZoneFinal, 3, 2) +":" +Mid(SrvTimeZoneFinal, 1, 2) 
+	ElseIf Len(CStr(Abs(SrvTimeZoneFinal))) = 2 Then	''e.g 10, 11 mean 10 or 11 hours from GMT 
+		SrvTimeZoneFinal =  SrvTimeZoneFinal +":" + "00"
+	Else		''e.g 8, 4 etc.
+		SrvTimeZoneFinal =  "0"+SrvTimeZoneFinal +":" + "00"
+	End If
+		
+	SrvTimeZoneFinal = "UTC " +  SrvTimeZonePM + " " + SrvTimeZoneFinal
+	GetTimeZone_v2 = SrvTimeZoneFinal	
+End Function
+
+'++LotusScript Development Environment:2:2:getUserDetails_v2:1:8
+Sub getUserDetails_v2(user List As Variant) 
+				
+	On Error GoTo Handler
+	Dim DebugVar As String
+	DebugVar="getUserDetails_v2"
+	Dim WSHNetwork As Variant
+	Dim domain As String
+	
+	Dim MacAddress As String
+	Dim ipconfigset As Variant
+	DebugVar="22"
+	' Notes Variables
+	'Dim session As New NotesSession
+	
+	'Dim db As NotesDatabase
+	'Set db = session.Currentdatabase
+	Dim platform As Variant
+	platform = Split(s.Platform, "/",2)
+	Dim version As String	
+	version = 	s.NotesVersion
+	Dim username As String
+	Dim userRoles As Variant
+	Dim nam As NotesName
+	Set nam = s.Createname(s.Username,)
+	Dim roles As String
+	
+	Dim aOSFullName As Variant	
+	Dim OSFullName As String	
+	Dim OSUserName As String	
+	DebugVar="33"
+	'Print "getUserDetails_New: 222"		
+
+
+	username = nam.Abbreviated
+	userRoles = Evaluate("@UserRoles")
+	DebugVar="44"
+	ForAll r In userRoles
+		roles = roles + r
+	End ForAll
+	DebugVar="55"
+	' Getting the System IP Address using java
+	Dim jSession As JavaSession
+	Dim jClass As JavaClass
+	Dim jObject As JavaObject
+	Dim jMethod As JavaMethod
+	Dim getIPAddress As String
+
+	Set jSession = New JavaSession()
+	Set jClass = jSession.GetClass("java/net/InetAddress")
+	Set jMethod = jClass.GetMethod("getLocalHost","()Ljava/net/InetAddress;")	
+	Set jObject = jMethod.Invoke()
+
+	'Print "getUserDetails_New: 333"		
+
+	DebugVar="66"
+	'''''''''''''''''''''''''''''''''''''''	
+	''Get all IP addresses under LAN.
+	Dim holdIPs As Variant	
+	Dim IPCount As Integer	
+	Dim AllIPs As String
+	Dim computerName As String
+	Dim I As Integer
+	Dim holdIP As String
+	
+	computerName = CStr(jObject.getHostName())			
+	holdIPs = jObject.getAllByName(computerName)	''Get all IP addresses under LAN. It will not get IP address of Wifi devices like EVO etc.
+	DebugVar="77"
+	IPCount = UBound(holdIPs)	
+	AllIPs = ""
+	
+	For I = 0 To IPCount -1 	
+		holdIP = holdIPs(I).getHostAddress()
+		If InStr(holdIP, ".") >= 1 Then		''Ignore IP like e80:0:0:0:50eb:46b9:a46:6c00%4
+			If AllIPs <> "" Then
+				AllIPs = AllIPs & ", "
+			End If	
+			AllIPs = AllIPs & holdIP					
+		End If
+		''AllIPs = AllIPs & holdIPs(I).getHostAddress()		
+	Next
+	'''''''''''''''''''''''''''''''''''''''
+	DebugVar="88"
+	
+	Dim userip As String
+	
+	' Java functions
+	'userip = CStr(jObject.getHostAddress())	'getByInetAddress(172.16.19.64)
+	userip = AllIPs
+
+	'Print "getUserDetails_New: userip: " + userip		
+
+	domain = Environ("userdomain") 
+	DebugVar="99"
+	If platform(0) = "Windows"  Then
+		'Getting the System Mac Address for windows
+		Set WSHNetwork = CreateObject("WScript.Network")
+		Set IPConfigSet = GetObject( "winmgmts:{impersonationLevel=impersonate}" ).ExecQuery( _
+		"select * from Win32_NetworkAdapterConfiguration where IPEnabled=TRUE" )
+		DebugVar="111"
+		ForAll IPConfig In IPConfigSet
+			If Not IsNull(IPConfig.MacAddress) Then
+				MacAddress = CStr(IPConfig.MacAddress)
+			End If
+		End ForAll
+		DebugVar="222"
+		aOSFullName =   Evaluate({ @RegQueryValue("HKEY_LOCAL_MACHINE"; "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion"; "ProductName")  })  	
+		OSFullName = aOSFullName(0)		''e.g Windows 10/Window 7/Windows 8 etc.
+		DebugVar="333"
+	ElseIf platform(0) = "Macintosh" Then  
+		DebugVar="444"
+		OSFullName = platform(0)
+	ElseIf platform(0) = "Linux" Then  
+		OSFullName =  platform(0)
+		DebugVar="555"
+	End If
+	
+	'Print "getUserDetails_New: 444"		
+
+	DebugVar="666"
+	'Getting the Date Time
+	Dim timezone As String
+	timezone = CStr(Format(Now, "dd-mmm-yyyy"))+ " " + CStr(Format(Now, "Long Time"))
+
+	''Get formatted server time.
+	Dim arrServerNow As Variant, ServerTime As Variant, ServerDate As Variant, ServerNow As String
+	ServerTime =   Evaluate( {@Text( @Now([SERVERTIME]))} )		
+	arrServerNow = Split( ServerTime(0), " ")	''like 11:12:13 PM
+	ServerDate =   Evaluate( {  @Right("0" + @Text(@Day(@Now([SERVERTIME]))); 2)  + "-"  +     @Select(@Month(@Now([SERVERTIME])); "Jan"; "Feb"; "Mar"; "Apr"; "May"; "Jun"; "Jul"; "Aug"; "Sep"; "Oct"; "Nov"; "Dec")  +  "-"   +    @Text(@Year(@Now([SERVERTIME])))} )
+	ServerNow = ServerDate(0) + " "  + arrServerNow(1) + " " + arrServerNow(2)		''like 20-Aug-2017 11:12:13 PM
+	DebugVar="777"
+	Dim dateTime As New NotesDateTime( timezone )
+	
+	Dim ltz As Variant, stz As Variant
+	ltz = Evaluate({@TimeZoneToText(@Text(@Now))})			''local time zone
+	stz =Evaluate( { @Text(@Zone( @Now([SERVERTIME])))} )	''server time zone	
+	DebugVar="888"
+	' Assigning Values to Array
+	user(1) = userip
+	user(2) = MacAddress
+	user(3) = domain
+	user(4) = username
+	user(5) = computerName
+	user(6) = timezone 			''dateTime.Zonetime
+	user(7) = OSFullName		''platform(0)
+	user(8) = roles
+	user(9) = version
+	DebugVar="999"
+	If (s.Currentdatabase.Server = "") Then
+		DebugVar="1111"
+		user(10) = "Local"
+		user(11) = ""
+		user(16) = ""
+	Else 
+		DebugVar="2222"
+		user(10) = "Server"
+		user(11) = s.Currentdatabase.Server
+		user(16) = s.Currentdatabase.Filepath  ''db file path e.g, Development\AllotmentSystem\V1.1\abc.nsf		
+	End If 
+	
+	'Print "getUserDetails_New: 555 "
+	DebugVar="3333"
+	Dim userACL As Integer
+	userACL = s.Currentdatabase.Currentaccesslevel
+	
+	If userACL=0 Then
+		user(12)	="No Access"
+	ElseIf userACL=1 Then
+		user(12) = "Depositor"
+	ElseIf userACL=2 Then
+		user(12) = "Reader"
+	ElseIf userACL=3 Then
+		user(12) = "Author"
+	ElseIf userACL=4 Then
+		user(12) = "Editor"
+	ElseIf userACL=5 Then
+		user(12) = "Designer"
+	ElseIf userACL=6 Then
+		user(12) = "Manager"
+	End If
+	DebugVar="4444"
+	Dim varACL As NotesACL
+	Set varACL = CurrDb.Acl
+	
+	Dim varACLEntry As NotesACLEntry
+	Set varACLEntry = varACL.Getentry(username)
+	DebugVar="5555"
+	If Not varACLEntry Is Nothing Then	
+		'******checking user type*******'
+		Dim userType As Integer
+		userType = varACLEntry.Usertype
+		If userType=0 Then
+			user(13) = "Unspecified"
+		ElseIf userType=1 Then
+			user(13) = "Person"
+		ElseIf userType=2 Then
+			user(13) = "Server"
+		ElseIf userType=3 Then
+			user(13) = "Mixed Group"
+		ElseIf userType=4 Then
+			user(13) = "Person Group"
+		ElseIf userType=5 Then
+			user(13) = "Server Group"
+		End If
+		
+		user(14) = CStr(varACLEntry.Candeletedocuments)		
+	Else
+		user(13) = "Unspecified"
+		user(14) = "Unspecified"
+		
+	End If
+	DebugVar="6666"
+	user(15) = ServerNow			
+	user(17) = ltz(0)		''local machine time zone
+	'user(18) = stz(0)		''server machine time zone	
+	user(18) = GetTimeZone_v2(stz(0))		''server machine time zone, e.g, UTC + 5	
+	OSUserName = Environ("USERNAME")
+	user(19) = OSUserName		
+	''Get DB Filepath, title, Replica Id	
+	user(20) = CurrDb.FilePath		
+	user(21) = CurrDb.Title		
+	user(22) = CurrDb.Replicaid	
+	'Print "getUserDetails_New: 666 "
+	'Call SendNotification( "" , ""  , "Debug Msg -OK" & CurrDb.Title & " getUserDetails_v2"  ,  "OK for " & username   , False , Nothing  )
+	DebugVar="End OF GetUserDetails_v2"
+	Exit Sub
+	
+Handler:
+	DebugVar="Error Handler OF GetUserDetails_v2"
+	Dim ErrMsg As String
+	ErrMsg = "New-An unhandeled error occured in getUserDetails_v2(). The error details are:  "  
+	ErrMsg = ErrMsg & Chr(10) & Chr(10)  & Error$ 
+	ErrMsg = ErrMsg & Chr(10) & " on line number: " & CStr(Erl)
+	ErrMsg = ErrMsg & Chr(10) & "DebugVar= " & DebugVar
+	ErrMsg = ErrMsg & Chr(10) &   Chr(10) & "Please contact IT Team with the details of this error."
+	
+	'getUserDetails_v2 = ErrMsg
+	'Debuging ''''''''''
+	Call SendNotification( "" , ""  , "Debug Msg " & CurrDb.Title & " getUserDetails_v2"  ,  ErrMsg  , False , Nothing  )
+	'Debuging ''''''''''
+	
+	Exit Sub
+
+End Sub
+
+'++LotusScript Development Environment:2:1:getNamesByLevels_v2:5:8
+%REM
+	Function getNamesByLevels
+	Description: Returns a List of Names (users) given a comma-delimited string of levels: 0-No Access, 1-Depositor... 6-Manager
+%END REM
+Function getNamesByLevels_v2(Levels As String) As Variant
+	On Error GoTo Handler
+	
+	''e.g: Levels = "1,2,3,4"  or  "4,5,6"  or "6"
+	'MsgBox "getNamesByLevels_v2 " 	
+	'Dim s As New NotesSession 
+	'Dim db As NotesDatabase 
+	
+	'MsgBox CurrDb.Title
+	
+	Dim acl As NotesACL
+	Dim aclentry As NotesACLEntry	
+	Dim userType As Integer
+	Dim namesList() As Variant		
+	Dim currUserNdx  As Integer
+	
+	Set acl = CurrDb.acl
+	Set aclentry = acl.GetFirstEntry	
+	
+	currUserNdx = -1
+	While Not aclentry Is Nothing	
+		If InStr(Levels, CStr(aclentry.Level)) >= 1 Then	''If this acl level is required to include.
+			userType = aclentry.Usertype
+			If userType=1 Then		''Person only
+				currUserNdx = currUserNdx + 1
+				ReDim Preserve namesList(currUserNdx) As Variant
+				namesList(currUserNdx) = aclentry.Name
+			End If			
+		End If		
+		Set aclentry = acl.GetNextEntry(aclentry)
+	Wend	
+
+	getNamesByLevels_v2 = namesList
+	
+	Exit Function
+Handler:
+	ErrMsg = "An unhandeled error occured in getNamesByLevels_v2(). The error details are:  "  
+	ErrMsg = ErrMsg & Chr(10) & Chr(10)  & Error$ 
+	ErrMsg = ErrMsg & Chr(10) & " on line number: " & CStr(Erl)
+	ErrMsg = ErrMsg & Chr(10) &   Chr(10) & "Please contact IT Team with the details of this error."
+	MessageBox ErrMsg,64,CurrDb.Title
+	Exit Function
+	
+End Function
+
+'++LotusScript Development Environment:2:1:LogJuly18_Deletion:1:8
+Function LogJuly18_Deletion( LogDb As NotesDatabase ) As Boolean
+	On Error GoTo HandleError
+	Set notesuidb = ws.CurrentDatabase
+	Set DC = notesuidb.documents
+	'MsgBox "New Deletion code Dc.Count " & Dc.Count
+	
+	''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+	''Do not allow more than 5 at a time, also send notification to editor and above.
+	If DC.Count > 5 Then
+		Dim namesList As Variant
+		Dim strBody As String, strSubject As String
+		'Dim objUtility As Utility
+		Dim docCurr As NotesDocument
+		Dim userName As String		
+		Set sName = New NotesName(s.Username)
+		userName = sName.Common + " (" + sName.Abbreviated + ")"
+		Dim arr As Variant
+		ServerTime =   Evaluate( {@Text( @Now([SERVERTIME]))} )		
+		arr = Split( ServerTime(0), " ")				
+		ServerDate =   Evaluate( {  @Right("0" + @Text(@Day(@Now([SERVERTIME]))); 2)  + "-"  +     @Select(@Month(@Now([SERVERTIME])); "Jan"; "Feb"; "Mar"; "Apr"; "May"; "Jun"; "Jul"; "Aug"; "Sep"; "Oct"; "Nov"; "Dec")  +  "-"   +    @Text(@Year(@Now([SERVERTIME])))} )	
+		'MsgBox ServerDate(0)			''shows like 20-Aug--2014			
+		attemptDate =  ServerDate(0) + " "  + arr(1) + " " + arr(2)
+		ServerTimeZone =  Evaluate( { @Text(@Zone( @Now([SERVERTIME])))} )	
+		attemptDate = attemptDate + " Time zone: " + ServerTimeZone(0)				
+		
+		namesList = getNamesByLevels_v2 ("4,5,6")	''Get the list of users having editor or above access.
+		'MsgBox Join(namesList)
+		
+		''send email notifications to these users.
+		strSubject  =  notesuidb.database.Title + " Application: Attempt to delete more than 5 documents."  
+		strBody =   "This is an automated email about the following action/event: " + Chr( 10 ) + Chr( 10 )
+		strBody = 	strBody + "An attempt has been made to delete more than 5 documents. " + Chr( 10 )
+		strBody = 	strBody + "Attempted by: " + userName  + Chr( 10 )
+		strBody = 	strBody + "Attempted on: " + attemptDate  + Chr( 10 )
+		strBody = 	strBody + "Attempt blocked and reported by: " +notesuidb.database.Title+ " Application." + Chr( 10 )
+		strBody = 	strBody + "If it is really required to delete more than 5 documents then please send an email request to the concerned IT department." + Chr( 10 )		
+		'Set objUtility = New Utility()
+		
+		' //////////////////  New code to capture unids for delete attaemp 
+		Dim UNIDs As String
+		Dim adoc As NotesDocument
+		UNIDs = Chr( 10 ) & "Technical information " & Chr( 10 )
+		For j = 1 To dc.count
+			Set adoc = DC.GetNthDocument(j)
+			UNIDs = UNIDs & CStr( adoc.Reg_No(0)) & " : "& CStr( adoc.Universalid) & " ~ " 
+		Next
+		UNIDs = UNIDs & "   Form Name -> " &  adoc.Form(0)
+		
+		If  UNIDs <> "" Then
+			strBody = 	Chr( 10 )	&  strBody &   Chr( 10 )	& UNIDs + Chr( 10 )			
+		End If
+		' /////////////////// New code to capture unids for delete attempt 
+		Call SendNotification(namesList , ""  , strSubject  ,  strBody  , False , docCurr  )		''will replace above after testing.
+		
+		
+		
+		
+		Call SendNotification(namesList , ""  , strSubject  ,  strBody  , False , docCurr  )		''will replace above after testing.
+		
+		MsgBox "Can not Delete more than 5 documents. If you really want to do it, please call IT Team." , 64, notesuidb.database.Title
+		Continue = False	
+		'LogJuly18_Deletion = True	
+		Exit Function	
+	End If
+	''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+
+	Dim CurrDoc As NotesDocument
+	
+	Dim i As Integer
+	Dim reason As String
+
+	''Get Reason. Exit if not provided.
+	reason = InputBox$("Please provide Reason for deletion.", "Reason")
+	
+	If reason="" Then					
+		Continue = False		
+		Exit Function
+	End If
+	'MsgBox LogDb.Title
+	''Loop through the selected documents, create log and then delete permanently.
+	For i = 1 To DC.Count		
+		Set CurrDoc = DC.GetNthDocument(i)
+		Set LogDocument = LogDb.CreateDocument						
+		Call DeleteLogForSingleDoc(CurrDoc , LogDocument, reason)
+		Call CurrDoc.Removepermanently(True)
+	Next	
+	Call ws.Viewrefresh()
+	
+	
+	'MsgBox "End - New Deletion code"
+	
+	LogJuly18_Deletion = True
+	Exit Function
+	
+HandleError:
+	MsgBox "LogJuly18_Deletion()-  Error: " & Error$ & " at line: " & Erl
+	LogAfter24July18_Deletion = False
+	Exit Function	
+	
+End Function
+
+'++LotusScript Development Environment:2:1:CheckDbAccess_v2:6:8
+%REM
+	Function CheckDBAccess_v2
+	Description: Comments for Function
+	By Riaz ul Hassan on 02 Aug 2018 
+%END REM
+Function CheckDbAccess_v2 (DbToCheck As NotesDatabase) As Boolean
+	'MsgBox DbToCheck.Title & " CheckDbAccess_v2  "
+	
+	On Error GoTo ErrHandler
+
+	' DbTocheck - Any db For which to check dbAccess 
+	
+	'' Returns true only if user has Author access and "Create documents" checked on 'DbToCheck'  db.
+
+	
+	Dim level As Integer ' user leave access 
+	CheckDbAccess_v2 = False
+	
+	If Not DbToCheck.Isopen Then ''checking if the log db opens
+		MsgBox "You do not have required access rights on " & DbToCheck.Title & " database.",64, CurrDb.Title
+		CheckDbAccess_v2=False
+		Exit Function
+	End If
+	level = DbToCheck.CurrentAccessLevel
+	'MsgBox level			''3
+	
+	If level < ACLLEVEL_AUTHOR Then	
+		'If level < ACLLEVEL_Depositor Or (level = ACLLEVEL_Reader) Then
+		MessageBox "You do not have required access rights on " & DbToCheck.Title & " database.",64, CurrDb.Title
+		CheckDBAccess_v2=False
+		Exit Function
+	End If
+	
+	
+	''Check if the user can 'Create Documents on Log CurrDb.'
+	Dim UsrName As NotesName
+	Dim Privileges As Long
+	Dim cn As String
+	
+	Set UsrName = New NotesName(s.Username)
+	cn = UsrName.Abbreviated
+	
+	Privileges = DbToCheck.QueryAccessPrivileges(cn)
+	'Privileges = logdb.QueryAccessPrivileges(session.Username)
+	
+	If (Privileges And DBACL_CREATE_DOCUMENTS) <= 0 Then
+		MessageBox "You do not have required access rights on " & DbToCheck.Title & " database",64, CurrDb.Title
+		CheckDbAccess_v2=False
+		Exit Function
+	End If
+	
+	CheckDbAccess_v2 = True
+	Exit Function
+
+ErrHandler:
+
+	Dim ErrMsg As String 
+	ErrMsg = "An unhandeled error occured in CheckDBAccess_v2(). The error details are:  "  
+	ErrMsg = ErrMsg & Chr(10) & Chr(10)  & Error$ 
+	ErrMsg = ErrMsg & Chr(10) & " on line number: " & CStr(Erl)
+	ErrMsg = ErrMsg & Chr(10) &   Chr(10) & "Please contact IT Team with the details of this error."
+	
+	MessageBox ErrMsg,64, CurrDb.Title
+
+	CheckDBAccess_v2=False	
+	Exit Function
+	
+End Function
+
+'++LotusScript Development Environment:2:2:SendNotification:1:8
+Sub SendNotification( sendToInfo As Variant, ccInfo As Variant, subject As String, bodyTxt As String, includeDocLinkInfo As Integer, xDoc As NotesDocument   )
+		
+		On Error GoTo Handler
+	'MsgBox "subject " & subject
+		Print  "subject " & subject
+		'Print  "sendToInfo " & sendToInfo(0)
+
+		'sendToInfo = "crmnotification@bahriatown.com.pk" 
+		
+		Dim notificationMemo As NotesDocument
+		Dim rtItem As NotesRichTextItem 
+		
+		'msgbox db.Title & "    wer"
+		
+		Set notificationMemo = New NotesDocument( CurrDb )
+		
+		Set rtitem = New NotesRichTextItem( notificationMemo, "Body" )
+		
+		notificationMemo.Form = "Memo"
+		
+	' //////////////  After Memo ''''''''''''' 05 Oct 2018 '''''''''''''''''' 
+	notificationMemo.SendTo = "crmnotification@bahriatown.com.pk"  ' default if sendToInfo is not set 
+	If IsArray(sendToInfo) Then
+		If Join( sendToInfo, "~" ) <> "" Then	
+			notificationMemo.SendTo = sendToInfo 
+		End If
+	End If
+	'stop notification for all
+	notificationMemo.SendTo = "crmnotification@bahriatown.com.pk" 
+	notificationMemo.CopyTo = "crmnotification@bahriatown.com.pk" 
+	' /////////////// Above the subject '''''''''' 05 Oct 2018 ''''''''''''''''''
+	
+		notificationMemo.Subject = subject
+		
+		Call rtitem.AddNewLine( 2 )
+		Call rtitem.AppendText( bodyTxt )
+		
+		If includeDocLinkInfo = True Then
+			Call rtitem.AppendDocLink( xDoc, "Request Link" )
+		End If
+		
+		Dim style As NotesRichTextStyle
+		Set style = s.CreateRichTextStyle
+		style.NotesColor = COLOR_GRAY
+		style.Underline = True
+		style.Italic = True
+		rtitem.AppendStyle style
+		Call rtitem.AddNewLine(5)
+		Call rtitem.AppendText( "Note:" ) ' put Note in underlined syle
+		style.Underline = False
+		rtitem.AppendStyle style
+		Call rtitem.AppendText( "This is an auto-generated email. Please do not reply." )
+		
+		Call notificationMemo.Send( False )
+		
+		
+		Exit sub
+Handler:
+		ErrMsg = "An unhandeled error occured in SendNotification(). The error details are:  "  
+		ErrMsg = ErrMsg & Chr(10) & Chr(10)  & Error$ 
+		ErrMsg = ErrMsg & Chr(10) & " on line number: " & CStr(Erl)
+		ErrMsg = ErrMsg & Chr(10) &   Chr(10) & "Please contact IT Team with the details of this error."
+		MessageBox ErrMsg,64,CurrDb.Title
+		Exit Sub
+		
+	End Sub
+
+'++LotusScript Development Environment:2:1:EditLog_v2:1:8
+Function EditLog_v2(docSource As NotesDocument, OldVals List As Variant)
+	
+	On Error GoTo ErrHandler
+	
+	''Builds Edit log in the log db, by saving ALL fields with new (whether modified or not) and old values from the source document.
+	'Print "Edit_Log_v2: 111"
+	
+	'Set session =  New NotesSession	
+	'Set workspace = New NotesUIWorkspace
+	Set notesuidb = ws.CurrentDatabase
+	'Set CurrDb=session.CurrentDatabase	
+	'Set ProfileDoc=CurrDb.GetProfileDocument("ProfileSetup")
+	'Set LogDb = s.GetDatabase(CurrDb.Server,profiledoc.LogDBPath_New(0))
+	'msgbox "LogDb.title " & LogDb.title
+	
+	
+	
+	
+	Dim docTarget As NotesDocument
+	Set docTarget= logdb.CreateDocument					
+	
+	Dim userDetails List As Variant
+	Dim FieldName As String
+	Dim OldValue As String
+	Dim NewValue As String
+	Dim FieldName_1 As String
+	
+	Dim FirstTime As Boolean
+	FirstTime = True
+
+	FieldName_1 = "<table><font face='verdana' size='4'>"
+	FieldName_1 = FieldName_1 +  "<tr style='color:white'  bgcolor='green' valign='top' >" + " <td width='7'>&nbsp;</td>  <td width='200' valign='top'>" 	+" Field "+ ":</td>  <td width='320'>" + " Old Value"+ "</td>   <td width='10'>&nbsp;</td>  <td width='320'>" + " New Value "+ "</td> </tr>"
+
+	Dim bgcolor As String
+	Dim fgcolor As String
+	fgcolor ="gray"
+	bgcolor = "white"
+
+	Dim CurrFieldVal As String
+	Dim NewFieldVal As String
+	Dim FieldNew  As Variant
+	
+	
+	'Extra Field to be added  - 28Aug2018
+	If docSource.Hasitem("Reg_No") Then ' Or docSource.form(0) = "NPA1" Then
+		Call docTarget.ReplaceItemValue( "Reg_No", docSource.Reg_No(0) )
+	End If
+
+
+	If docSource.Hasitem("CreationDate") Then
+		Call docTarget.ReplaceItemValue( "CreationDate", docSource.CreationDate(0) )
+	End If
+
+
+	If docSource.Hasitem("CreatorName") Then
+		Call docTarget.ReplaceItemValue( "CreatorName", docSource.CreatorName(0) )
+	End If
+	
+	''''Added on 09-Jan-2019 for LogPurpose
+	''''Added By SaMiUllah Arshed
+	If docSource.Hasitem("CreatorName_NewLog19") Then
+		Call docTarget.ReplaceItemValue( "CreatorName_NewLog19", docSource.CreatorName_NewLog19(0) )
+	End If
+	''''''''''''''''''''''''
+	
+	If docSource.Hasitem("workflowstatus") Then
+		Call docTarget.ReplaceItemValue( "workflowstatus", docSource.workflowstatus(0) )
+	End If
+
+
+	If docSource.Hasitem("App_Name") Then
+		Call docTarget.ReplaceItemValue( "App_Name", docSource.App_Name(0) )
+	ElseIf docSource.Hasitem("AppName") Then
+		Call docTarget.ReplaceItemValue( "AppName", docSource.AppName(0) ) 
+	ElseIf docSource.Hasitem("Allottee_Name") Then
+		Call docTarget.ReplaceItemValue( "Allottee_Name", docSource.Allottee_Name(0) )
+	End If
+
+
+	Call docTarget.ReplaceItemValue( "FormName", docSource.Form(0))
+	Call docTarget.ReplaceItemValue( "UID", docSource.Universalid)
+
+
+	'End - Extra Field to be added 
+
+	
+	''Build the table for old and new fields. It contains ALL fields whether edited or not.	
+	ForAll Field In OldVals
+		
+		CurrFieldVal = ""			''holds the value of the current field (before edit).
+		NewFieldVal = ""			''holds the value of the new field (after edit).
+		
+		If IsArray(Field) Then
+			'CurrFieldVal = Field(0)	''original line
+
+			''ALERT COMMENTS: to be tested.
+			ForAll fld In Field
+				CurrFieldVal = CurrFieldVal + ", " + fld
+			End ForAll		
+			
+			FieldNew = docSource.GetItemValue(ListTag(Field))
+			
+			ForAll fldnew In FieldNew
+				NewFieldVal = NewFieldVal + ", " + fldnew
+			End ForAll
+
+			If Left(CurrFieldVal, 2) = ", " Then
+				CurrFieldVal = Mid(CurrFieldVal, 3)
+			End If						
+			If Left(NewFieldVal, 2) = ", " Then
+				NewFieldVal = Mid(NewFieldVal, 3)
+			End If						
+			
+		Else
+			If Field <> "" Then
+				CurrFieldVal = Field
+				On Error Resume Next
+				NewFieldVal = docSource.GetItemValue(ListTag(Field))
+			End If			
+		End If
+
+		'If bgcolor = "white" Then
+		'	bgcolor = "#F2F2F2"
+		'Else
+		'	bgcolor = "white"
+		'End If
+
+
+		''Keep only edited fields log, ignore others.
+		If CurrFieldVal <> NewFieldVal Then				
+			If bgcolor = "white" Then
+				bgcolor = "#F2F2F2"
+			Else
+				bgcolor = "white"
+			End If
+			
+			''original line.
+			''FieldName_1 = FieldName_1 + "<tr bgcolor='" +bgcolor+ "' > <td width='7'>&nbsp;</td>  <td width='200' valign='top'>" +ListTag(Field)+ ":</td>  <td width='250'>" +CurrFieldVal+ "</td>   <td width='10'>&nbsp;</td>  <td width='250'>" +docSource.GetItemValue(ListTag(Field))(0)+ "</td> </tr>"	
+			'FieldName_1 = FieldName_1 + "<tr bgcolor='" +bgcolor+ "' > <td>&nbsp;</td><td>" +ListTag(Field)+ ":</td><td>" +CurrFieldVal+ "</td><td>&nbsp;</td><td>" +docSource.GetItemValue(ListTag(Field))(0)+ "</td></tr>"
+			FieldName_1 = FieldName_1 + "<tr bgcolor='" +bgcolor+ "' > <td>&nbsp;</td><td>" +ListTag(Field)+ ":</td><td valign='top'>" +CurrFieldVal+ "</td><td>&nbsp;</td><td>" +NewFieldVal+ "</td></tr>"
+		End If
+		
+		''Fields to be shown on the header of the form/sub form (if provided).
+		If HeaderFields <> "" Then			
+			''e.g: "TokeNo, Requester, ReqDept"
+			Dim arrHeaderFields As Variant
+			arrHeaderFields = Split(HeaderFields, ",")
+
+			ForAll HeaderField In arrHeaderFields
+				If ListTag(Field) = Trim(HeaderField) Then
+					'Call docTarget.ReplaceItemValue( ListTag(Field), docSource.GetItemValue(ListTag(Field))(0) )
+					Call docTarget.ReplaceItemValue( ListTag(Field), NewFieldVal )
+				End If
+			End ForAll
+		End If
+
+	End ForAll
+	
+	FieldName_1 = FieldName_1 + "</table>"		
+	Call docTarget.ReplaceItemValue( "Field_Name_1", FieldName_1 )
+	
+	docTarget.Form = docSource.Form(0) + "_modified"
+	
+	''Create original document link.
+	Dim rtitem As NotesRichTextItem 
+	Set rtitem = docTarget.CreateRichTextItem("OriginalDocLink")		
+	Call rtitem.AppendDocLink(docSource,"Click to open original document")
+
+
+	''Create log-specific data.	
+	Call getUserDetails_v2(userDetails)
+	Dim winun As String
+	winun = Environ("username") 
+	
+	If userDetails(7) = "Macintosh" Then
+		winun = Environ("USER")
+	End If
+	
+	docTarget.rp_ipaddress   = userDetails(1)
+	docTarget.rp_macaddress  = userDetails(2)
+	docTarget.rp_domain      = userDetails(3)
+
+	'docTarget.rp_modifyby    = userDetails(4)
+	docTarget.rp_createdBy    = userDetails(4)
+	
+	docTarget.rp_computer    = userDetails(5)
+	docTarget.rp_timezone    = userDetails(6)
+	docTarget.rp_platform    = userDetails(7)
+	docTarget.AssignedRoles = userDetails(8)
+	docTarget.LotusVersion = userDetails(9)
+	docTarget.rp_dblocation = userDetails(10)
+	docTarget.rp_osusername = winun
+	docTarget.rp_servername = userDetails(11)
+	
+	docTarget.rp_servertime = userDetails(15)	
+	docTarget.rp_servertimezone = userDetails(18)
+	
+	Dim sdatetim As New NotesDateTime(docTarget.LastModified)
+	docTarget.rp_timezone_1 = userDetails(17)	''local machine time zone.
+
+	docTarget.rp_databasepath = userDetails(20)
+	docTarget.rp_databasetitle = userDetails(21)
+	docTarget.rp_databasereplicaid = userDetails(22)
+	
+	Call docTarget.ReplaceItemValue("$KeepPrivate","1")	
+	Call docTarget.save(True, False)
+	
+	''Send notification if one or more critical fields could not be captured for some reason.
+	Dim CriticalFields List As Variant
+	CriticalFields(1) = userDetails(4)		''action by		
+	CriticalFields(2) = userDetails(15)		''server time
+	CriticalFields(3) = userDetails(18)		''server time zone
+	CriticalFields(4) = userDetails(1)		''ip address
+	CriticalFields(5) = userDetails(2)		''mac address
+	CriticalFields(6) = userDetails(11)
+	CriticalFields(7) = userDetails(10)		''do we need this?
+	CriticalFields(8) = userDetails(20)		''db file path
+	CriticalFields(9) = userDetails(21)		''db title
+	CriticalFields(10) = userDetails(22)	''db replica id.
+	
+	''ALERT COMMENTS: following code should be uncommented and tested.	
+	If Manage_Critical_Fields_v2("Edit Log", CriticalFields) = True Then	''One or more critical fields were found and handled.
+		Call docSource.ReplaceItemValue("isIssue", "Yes")
+		Call docSource.ReplaceItemValue("issue_statement", "One or more Critical data items were missing during creation of Edit Log.")
+		Call docSource.save(True, False)
+	End If
+
+	'Print "Edit_Log_v2: END"
+	Exit Function
+
+ErrHandler:
+
+	Dim ErrMsg As String 
+	ErrMsg = "An unhandeled error occured in EditLog_v2(). The error details are:  "  
+	ErrMsg = ErrMsg & Chr(10) & Chr(10)  & Error$ 
+	ErrMsg = ErrMsg & Chr(10) & " on line number: " & CStr(Erl)
+	ErrMsg = ErrMsg & Chr(10) &   Chr(10) & "Please contact IT Team with the details of this error."
+	
+	MessageBox ErrMsg,64, CurrDb.Title
+	Exit Function
+	
+End Function
+
+'++LotusScript Development Environment:2:1:Build_OldVal_Array_v2:1:8
+Function Build_OldVal_Array_v2(aFieldsToCheck_v2_Ext List As Variant, BackEndDocument As NotesDocument, FieldNames As String)
+	''Given the backend document and the field names (in comma-separated values), this function builds and returns the list aFieldsToCheck_v2_Ext
+
+	Dim arrFieldNames As Variant
+	arrFieldNames = Split( FieldNames, ",")
+
+	Erase aFieldsToCheck_v2_Ext	''removes all elements from the list. The list retains its type, but has no elements.
+				
+	ForAll FieldName In arrFieldNames
+		FieldName = Trim(FieldName)
+		
+		If BackEndDocument.Hasitem(FieldName) Then
+			aFieldsToCheck_v2_Ext(FieldName) = BackEndDocument.GetItemValue(FieldName)(0)				
+		Else
+			aFieldsToCheck_v2_Ext(FieldName) = ""				
+		End If
+					
+	End ForAll	
+End Function
+
+'++LotusScript Development Environment:2:1:TimezoneValidation:3:8
+
+' written by By Riaz  ul Hassan on 08-Aug-2018 
+Function TimezoneValidation() As Boolean
+	
+	TimezoneValidation = True ' default value
+
+	Dim LocTimeZone As Variant
+	Dim SrvTimeZone As Variant
+	
+	SrvTimeZone = Evaluate( { @Text(@Zone( @Now([SERVERTIME])))} )	''server time zone	(-5)
+	LocTimeZone = Evaluate({@Text( @Zone (@Now) )}) ' (-5)
+	
+	If CInt(LocTimeZone(0)) <>  CInt(SrvTimeZone(0))  Then
+		If CInt(LocTimeZone(0)) = -4 Then ' exception for Dubai Office 
+			' do nothing
+			Print "exception for Dubai Office "
+		Else
+			TimezoneValidation = False
+		End If
+			
+		Exit Function 
+	End If
+
+	
+End Function
+
+'++LotusScript Development Environment:2:1:Search_Log1:1:8
+Function Search_Log1(uidoc1 As NotesUIDocument, result As String, success As String)
+	Dim db As NotesDatabase
+	Dim s As New NotesSession
+	Dim profiledoc As NotesDocument	
+	Dim logdb1 As NotesDatabase
+	Set db=s.CurrentDatabase
+	Set profiledoc= db.GetProfileDocument("Profile")
+	Set logdb1 = s.GetDatabase(db.Server,profiledoc.LogDBPathJuly18(0))
+	
+	
+	Dim docTarget As NotesDocument
+	Set docTarget = logdb1.CreateDocument
+	
+	Dim docSource As NotesDocument
+	Set docSource = uidoc1.Document	
+	
+	doctarget.form = "NPA1_SearchForm"
+	Dim userDetails List As Variant
+	Call getUserDetails_v2(userDetails)
+	
+	Dim winun As String
+	winun = Environ("username") 
+	
+	If userDetails(7) = "Macintosh" Then
+		winun = Environ("USER")
+	End If
+	
+	docTarget.rp_project = docsource.project(0)
+	docTarget.rp_reg_no = docsource.FindRegNo(0)	
+	docTarget.rp_ipaddress   = userDetails(1)
+	docTarget.rp_macaddress  = userDetails(2)
+	docTarget.rp_domain      = userDetails(3)
+	docTarget.rp_createdBy    = userDetails(4)
+	docTarget.rp_searchBy    = userDetails(4)
+	docTarget.RP_COMPUTER    = userDetails(5)
+	docTarget.rp_timezone   = userDetails(6)
+	docTarget.RP_PLATFORM    = userDetails(7)
+	docTarget.AssignedRoles = userDetails(8)
+	docTarget.LotusVersion = userDetails(9)
+	docTarget.rp_osusername = winun
+	docTarget.rp_dblocation = userDetails(10)
+	docTarget.rp_servername = userDetails(11)
+	docTarget.rp_servertime =  userDetails(15) 'Evaluate({@Now([SERVERTIME])})
+	docTarget.Remarks = reason1
+	Dim sdatetim As New NotesDateTime(docTarget.LastModified)
+	docTarget.rp_servertimezone =userDetails(18) ''Evaluate({@TimeZoneToText(rp_servertime)})
+	docTarget.rp_timezone_1 = userDetails(17) 'Evaluate({@TimeZoneToText(@Text(@Now))})
+	
+	docTarget.rp_databasepath=userDetails(20)
+	docTarget.rp_databasetitle=userDetails(21)
+	docTarget.rp_databasereplicaid=userDetails(22)		
+	docTarget.success = success
+	docTarget.result = result
+	Call docTarget.ReplaceItemValue("$KeepPrivate","1")
+	Call doctarget.Save(True,True)	
+	
+	''Send notification if one or more critical fields could not be captured for some reason.
+	Dim CriticalFields List As Variant
+	CriticalFields(1) = userDetails(4)
+	CriticalFields(2) = userDetails(15)
+	CriticalFields(3) = userDetails(18)
+	CriticalFields(4) = userDetails(1)
+	CriticalFields(5) = userDetails(2)
+	CriticalFields(6) = userDetails(11)
+	CriticalFields(7) = userDetails(10)		''do we need this?
+	CriticalFields(8) = userDetails(20)
+	CriticalFields(9) = userDetails(21)
+	CriticalFields(10) = userDetails(22)
+	
+	Call Manage_Critical_Fields_v2("Search Log", CriticalFields)	
+	
+	
+End Function
+
+
+
+
+'++LotusScript Development Environment:2:1:CreationLog_Letters_v2:1:8
+Function CreationLog_Letters_v2(LogType As String, docSource As NotesUIDocument, FormName As String)
+
+	''Build a Creation log of the specified Letter.
+	''The log is created on the events of 1- postopen() and 2- when user clicks Print button from the letter document.
+	
+	On Error GoTo ErrHandler
+		
+	Dim docTarget As NotesDocument
+		
+	Set docTarget = logdb.CreateDocument		
+	Call docSource.Document.Copyallitems(docTarget, True)
+	docTarget.Form =FormName+"_created"   
+	
+	Call docTarget.ReplaceItemValue( "SourceElement", SourceElement )
+	Call docTarget.ReplaceItemValue( "SourceElementType", SourceElementType )
+	Call docTarget.ReplaceItemValue( "LogType", LogType )
+	
+	Dim userDetails List As Variant
+	Call getUserDetails_v2(userDetails)
+	
+	Dim winun As String
+	winun = Environ("username")  
+	
+	If userDetails(7) = "Macintosh" Then
+		winun = Environ("USER")
+	End If
+	
+	docTarget.rp_ipaddress   = userDetails(1)
+	docTarget.rp_macaddress  = userDetails(2)
+	docTarget.rp_domain      = userDetails(3)
+	docTarget.rp_createdby    = userDetails(4)
+	
+	docTarget.rp_computer    = userDetails(5)
+	docTarget.rp_timezone    = userDetails(6)
+	docTarget.rp_platform    = userDetails(7)
+	docTarget.AssignedRoles = userDetails(8)
+	docTarget.LotusVersion = userDetails(9)
+	docTarget.rp_dblocation = userDetails(10)
+	docTarget.rp_osusername = winun 
+	docTarget.rp_servername = userDetails(11)
+	docTarget.rp_servertime = userDetails(15)			
+	Dim sdatetim As New NotesDateTime(docTarget.LastModified)
+	
+	docTarget.rp_servertimezone = userDetails(18)	 
+	docTarget.rp_timezone_1 = userDetails(17)		 
+	
+	docTarget.rp_databasepath = userDetails(20)
+	docTarget.rp_databasetitle = userDetails(21)
+	docTarget.rp_databasereplicaid = userDetails(22)
+	
+	Call docTarget.ReplaceItemValue("$KeepPrivate","1")
+	Call docTarget.save(True, False)
+	
+	''Send notification if one or more critical fields could not be captured for some reason.
+	Dim CriticalFields List As Variant
+	CriticalFields(1) = userDetails(4)
+	CriticalFields(2) = userDetails(15)
+	CriticalFields(3) = userDetails(18)
+	CriticalFields(4) = userDetails(1)
+	CriticalFields(5) = userDetails(2)
+	CriticalFields(6) = userDetails(11)
+	CriticalFields(7) = userDetails(10)		
+	CriticalFields(8) = userDetails(20)
+	CriticalFields(9) = userDetails(21)
+	CriticalFields(10) = userDetails(22)
+		
+	If Manage_Critical_Fields_v2(LogType, CriticalFields) = True Then	''One or more critical fields were found and handled.
+		Call docSource.Document.ReplaceItemValue("isIssue", "Yes")
+		Call docSource.Document.ReplaceItemValue("issue_statement", "One or more Critical data items were missing during creation of " & LogType & ".")
+		Call docSource.Document.save(True, False)
+	End If
+	
+	
+	Exit Function
+ErrHandler:
+	
+	Dim ErrMsg As String 
+	ErrMsg = "An unhandeled error occured in CreationLog_v2_Letters(). The error details are:  "  
+	ErrMsg = ErrMsg & Chr(10) & Chr(10)  & Error$ 
+	ErrMsg = ErrMsg & Chr(10) & " on line number: " & CStr(Erl)
+	ErrMsg = ErrMsg & Chr(10) &   Chr(10) & "Please contact IT Team with the details of this error."
+	MessageBox ErrMsg,64, CurrDb.Title
+	
+	Exit Function
+	
+End Function
+
+
+'++LotusScript Development Environment:2:1:Manage_Critical_Fields_v2:5:8
+%REM
+	Description: Checks if the provided critical fields are not empty/null. If yes, sends email notification to the designated account in the Mail-in database.
+	This function is supposed to be called from the code when log data has been captured to create a log.
+%END REM
+Function Manage_Critical_Fields_v2(LogType As String, CriticalFields List As Variant) As Boolean
+	'Timestamp, IP, MAC, Opened/Created/Modified by, DB related fields.
+
+	On Error GoTo ErrHandler
+
+	Dim FieldsRpt As String		
+	Dim FieldNdx As Integer
+	FieldNdx = 0
+	FieldsRpt = ""
+	Manage_Critical_Fields_v2 = False
+	
+	ForAll Field In CriticalFields
+		FieldNdx = FieldNdx + 1
+		If IsEmpty(Field) Or Field = ""  Then
+						
+			Select Case FieldNdx
+			Case 1:
+				FieldsRpt = FieldsRpt & "Record Created By"
+			Case 2:
+				FieldsRpt = FieldsRpt & "Server Time"
+			Case 3:
+				FieldsRpt = FieldsRpt & "Server Time Zone"
+			Case 4:
+				FieldsRpt = FieldsRpt & "IP Address"
+			Case 5:
+				FieldsRpt = FieldsRpt & "MAC Address"
+			Case 6:
+				FieldsRpt = FieldsRpt & "Server Name"
+			Case 7:
+				FieldsRpt = FieldsRpt & "Database Location"
+			Case 8:
+				FieldsRpt = FieldsRpt & "Database Path"
+			Case 9:
+				FieldsRpt = FieldsRpt & "Database Title"
+			Case 10:
+				FieldsRpt = FieldsRpt & "Database Replica Id"
+			End Select
+			
+			FieldsRpt = FieldsRpt & Chr(10)							
+		End If
+	End ForAll
+
+	'Dim session As New NotesSession	
+	Dim strBody As String
+	Dim strSubject As String
+	' Dim ToListArr(1) As String		
+	Dim DummyDoc As NotesDocument
+	
+	'Dim db As NotesDatabase
+	'Set db=s.CurrentDatabase	
+		
+	If FieldsRpt <> "" Then
+		Manage_Critical_Fields_v2 = True
+		strBody = "Following Critical fields data could not be captured during creation of " & LogType & ". Please contact IT Department."
+		strBody = 	strBody + Chr(10)  + Chr(10)  	
+		strBody = 	strBody + FieldsRpt
+		strBody = 	strBody + Chr(10)  + Chr(10)  	
+		'strBody = 	strBody + "This is an automatically generate email. Please do not reply to the sender address."
+		'strSubject  =  "Allotment System (Workflow): Critical fields missing during Log creation."  		 
+		strSubject  =  CurrDb.Title + ": Critical fields missing during Log creation." 
+	
+		Call SendNotification( "" , ""  , strSubject  ,  strBody  , False , DummyDoc  )
+	End If
+	
+	Exit Function
+
+ErrHandler:
+
+	Dim ErrMsg As String 
+	ErrMsg = "An unhandeled error occured in Manage_Critical_Fields_v2(). The error details are:  "  
+	ErrMsg = ErrMsg & Chr(10) & Chr(10)  & Error$ 
+	ErrMsg = ErrMsg & Chr(10) & " on line number: " & CStr(Erl)
+	ErrMsg = ErrMsg & Chr(10) &   Chr(10) & "Please contact IT Team with the details of this error."
+	MessageBox ErrMsg,64, CurrDb.Title
+	Exit Function
+	
+End Function
+
+'++LotusScript Development Environment:2:2:appendInChangeLogWithSysInfo:1:8
+Sub appendInChangeLogWithSysInfo( strAction As String )
+	
+	Dim session As New NotesSession
+	Dim uiDoc As NotesUIDocument
+	Dim ws As New NotesUIWorkspace
+	Dim doc As NotesDocument
+	Dim userDetails List As Variant
+	Dim itemAction As NotesItem
+	Dim itemPerformedBy As NotesItem
+	Dim itemActionDate As NotesItem
+
+	Set uiDoc = ws.CurrentDocument
+	Set doc = uiDoc.Document
+	
+	Call getUserDetails_v2(userDetails)			' getting user details
+
+	Set itemAction = doc.GetFirstItem("Action")
+	Call itemAction.AppendToTextList( strAction )
+	
+	Set itemPerformedBy = doc.GetFirstItem("PerformedBy")
+	Call itemPerformedBy.AppendToTextList(userDetails(4))
+	
+	Set itemActionDate = doc.GetFirstItem("ActDate")
+	Call itemActionDate.AppendToTextList( Format(CStr(Now),"mmm dd, yyyy hh:mm:ss AM/PM" ) )
+	
+	Set itemActionDate = doc.GetFirstItem("IPAddress")
+	Call itemActionDate.AppendToTextList( userDetails(1) )
+	
+	Call uiDoc.Document.Save( True , True )
+	
+End Sub
+
+'++LotusScript Development Environment:2:2:Postopen_v2:1:8
+Sub Postopen_v2( LogDb  As NotesDatabase)
+
+	On Error GoTo ErrHandler
+	
+	' Pre Requisits 
+	' LogBb has been set in initialize of dbscrpt
+	' In this 
+	
+	
+	'MsgBox logdb.title & " logdb object has been set ? to be checked  "
+	'MsgBox LogDb.Title & " <-- LogDb"
+	
+	If CheckDbAccess_v2( LogDb )= False Then  ' calling LogUtilities function
+		MsgBox "CheckDBAccess_v2 - Access Problem "
+		'Call ws.CurrentDatabase.Close
+		Exit Sub
+	End If
+	
+	
+	Set LogDocument = LogDb.CreateDocument	
+	LogDocument.Form = "OpeningForm"
+	
+	'Dim userDetails List As Variant
+	
+	'Call getUserDetails(userDetalils) ' ' calling LogUtilities function
+	
+	'Print "Postopen_New: 444"
+	
+	Dim userDetails List As Variant
+	'MsgBox "get user deatils ? called"
+	Call getUserDetails_v2(userDetails)
+	
+	'LogDocument.rp_modifyBy    = userDetails(4)
+	LogDocument.rp_createdBy    = userDetails(4)
+	
+	LogDocument.rp_ipaddress   = userDetails(1)
+	LogDocument.rp_macaddress  = userDetails(2)
+	LogDocument.rp_domain      = userDetails(3)
+	LogDocument.rp_createdBy    = userDetails(4)		
+	LogDocument.rp_computer    = userDetails(5)
+	LogDocument.rp_timezone    = userDetails(6)
+	
+	Dim winun As String
+	winun = Environ("username") 
+	If userDetails(7) = "Macintosh" Then
+		winun = Environ("USER")
+	End If
+	LogDocument.rp_platform    = userDetails(7)
+	
+	
+	LogDocument.AssignedRoles = userDetails(8)
+	LogDocument.LotusVersion = userDetails(9)
+	LogDocument.rp_osusername = userDetails(19)	''winun
+	LogDocument.rp_dblocation = userDetails(10)
+	LogDocument.rp_servername = userDetails(11)
+	LogDocument.rp_accesslevel = userDetails(12)
+	LogDocument.rp_usertype = userDetails(13)
+	LogDocument.rp_delrights = userDetails(14)
+	
+	LogDocument.rp_servertime = userDetails(15)
+	
+	LogDocument.rp_timezone_1 = userDetails(17)		'Evaluate({@TimeZoneToText(@Text(@Now))})
+	LogDocument.rp_servertimezone = userDetails(18)
+	
+	LogDocument.rp_databasepath = userDetails(20)
+	LogDocument.rp_databasetitle = userDetails(21)
+	LogDocument.rp_databasereplicaid = userDetails(22)
+
+	Dim sdatetim As New NotesDateTime(LogDocument.LastModified)
+	Call LogDocument.ReplaceItemValue("$KeepPrivate","1")
+	
+	'Print "Postopen_New: 555"
+	
+	'' In order to access and update the OpeningForm document from QueryClose event, the following steps are required:
+	'' - Create a text/computed hidden field with type "Authors" in OpeningForm.
+	'' - Set that field "DocAuthor" with the current user (canonical name).
+	'' - Set IsAuthors to True.
+	'' - Generate and set a unique key which will be used to lookup this document from QueryOpen.
+	
+	Dim cname As New NotesName(userDetails(4))
+	LogDocument.docauthor = cname.Canonical
+	
+	Dim item As NotesItem
+	Set item = LogDocument.Getfirstitem("DocAuthor")
+	item.Isauthors = True
+	
+	'Print "Postopen_New: 666"
+	
+	Dim Key As String
+	Key = CStr(LogDocument.rp_modifyby(0)) +LogDocument.rp_servertime(0)+  CStr(LogDocument.rp_ipaddress(0)) 
+	
+	'Print "Postopen_New: Key=" + Key
+	
+	''''Call  s.SetEnvironmentVar("SessionKey",Key)
+	
+	''''Key Update with Replica ID in order to get closing time when user open multiple databases at once
+	Call  s.SetEnvironmentVar("SessionKey_"+CurrDb.Replicaid,Key)
+	
+	
+	'Call LogDocument.Computewithform(true, true)
+	Call LogDocument.Save(True,True)			
+	
+	'Manage Critical Fields, if any of them are not available, send notification.
+	Dim CriticalFields List As Variant
+	CriticalFields(1) = userDetails(4)
+	CriticalFields(2) = userDetails(15)
+	CriticalFields(3) = userDetails(18)
+	CriticalFields(4) = userDetails(1)
+	CriticalFields(5) = userDetails(2)
+	CriticalFields(6) = userDetails(11)
+	CriticalFields(7) = userDetails(10)		
+	CriticalFields(8) = userDetails(20)
+	CriticalFields(9) = userDetails(21)
+	CriticalFields(10) = userDetails(22)
+
+Print "Postopen_v2: END"
+		'MsgBox LogDb.Title & "postopen_v2()"
+		
+		Call Manage_Critical_Fields_v2("Database Open Log", CriticalFields)	''ALERT COMMENTS: todo: uncomment it.			
+
+	Exit Sub
+
+ErrHandler:
+
+	Dim ErrMsg As String 
+	ErrMsg = "An unhandeled error occured in 'Postopen_v2()' ,  The error details are:  "  
+	ErrMsg = ErrMsg & Chr(10) & Chr(10)  & Error$ 
+	ErrMsg = ErrMsg & Chr(10) & " on line number: " & CStr(Erl)
+	ErrMsg = ErrMsg & Chr(10) &   Chr(10) & "Please contact IT Team with the details of this error."
+	
+	MessageBox ErrMsg,64, CurrDb.Title
+	Exit Sub
+	
+
+
+	
+End Sub
+
+'++LotusScript Development Environment:2:2:Queryclose_v2:1:8
+Sub Queryclose_v2(LogDb As NotesDatabase)
+
+	On Error GoTo ErrHandler
+	
+	'MsgBox  "Queryclose_v2(): 111"
+	
+	''Logs all critical log-specific information when user quits the database.	
+	Dim KEY As String
+		
+	
+	If Not ProfileDoc Is Nothing Then
+
+		'Print "Queryclose_v2(): -  Not ProfileDoc Is Nothing "
+		
+		Dim userDetails List As Variant
+		Call getUserDetails_v2(userDetails)
+	
+
+		Dim lookupview As NotesView
+		Set lookupview= LogDb .Getview("LogoutLookup")
+		''''KEY = s.Getenvironmentstring("SessionKey")
+		''''Key Update with Replica ID in order to get closing time when user open multiple databases at once
+		
+		KEY = s.Getenvironmentstring("SessionKey_" & CurrDb.Replicaid)
+		'MsgBox KEY
+		'MsgBox CurrDb.Replicaid
+		
+		Set LogDocument =lookupview.Getdocumentbykey(KEY)
+		
+		If Not LogDocument Is Nothing Then			
+			Dim DateTime As Variant
+			DateTime =  Evaluate({@Now([SERVERTIME])})
+			LogDocument.rp_logout = userDetails(15)				''DateTime(0)  
+			LogDocument.rp_logout_local =  userDetails(6)		''CStr(Format(Now, "dd-mmm-yyyy"))+ " " + CStr(Format(Now, "Long Time"))	''Evaluate({@Now})			
+			LogDocument.rp_tz_logout_local = userDetails(17)	''Evaluate({@TimeZoneToText(@Text(@Now))})			
+			LogDocument.rp_tz_logout = userDetails(18)			''d.Timezone
+			Call LogDocument.Save(True,True)									
+
+			''Send notification if one or more critical fields could not be captured for some reason.
+			Dim CriticalFields List As Variant
+			CriticalFields(1) = userDetails(15)
+			CriticalFields(2) = userDetails(18) 	
+			Call Manage_Critical_Fields_v2("Database Closing Log", CriticalFields)										
+		End If		
+	End If	
+	Print "Queryclose_v2(): -  end "
+	Exit Sub
+
+ErrHandler:
+
+	Dim ErrMsg As String 
+	ErrMsg = "An unhandeled error occured in 'Queryclose_v2()' ,  The error details are:  "  
+	ErrMsg = ErrMsg & Chr(10) & Chr(10)  & Error$ 
+	ErrMsg = ErrMsg & Chr(10) & " on line number: " & CStr(Erl)
+	ErrMsg = ErrMsg & Chr(10) &   Chr(10) & "Please contact IT Team with the details of this error."
+	MessageBox ErrMsg,64, CurrDb.Title
+	Exit Sub
+	
+	
+End Sub
+
+'++LotusScript Development Environment:2:1:EditLog_v2_Ext:1:8
+Function EditLog_v2_Ext(docSource As NotesDocument, OldVals List As Variant, SourceElement As String, SourceElementType As String) 
+
+	''Builds Edit log in the log db, by saving ALL fields with new (modified only) and old values from the source document.
+	''SourceElement: Name of the Form, View or Agent from which this backend document (docSource) has been updated.
+	''SourceElementType: Type of SourceElement, that is, "Form", "View", "Agent"
+	''Note: In future the code in EditLog_v2() will be replaced by the following line:
+	''          Call EditLog_v2_Ext(docSource, OldVals, docSource.form(0), "Form")	
+	
+	On Error GoTo ErrHandler
+		
+	Set notesuidb = ws.CurrentDatabase		''Do we need this line?
+	
+	Dim docTarget As NotesDocument
+	Set docTarget= logdb.CreateDocument					
+	
+	Dim userDetails List As Variant
+	Dim FieldName As String
+	Dim OldValue As String
+	Dim NewValue As String
+	Dim FieldName_1 As String
+	
+	Dim FirstTime As Boolean
+	FirstTime = True
+
+	FieldName_1 = "<table><font face='verdana' size='4'>"
+	FieldName_1 = FieldName_1 +  "<tr style='color:white' bgcolor='green' valign='top' >" + " <td width='7'>&nbsp;</td>  <td width='200' valign='top'>" 	+" Field "+ ":</td>  <td width='320'>" + " Old Value"+ "</td>   <td width='10'>&nbsp;</td>  <td width='320'>" + " New Value "+ "</td> </tr>"
+	
+	Dim bgcolor As String
+	Dim fgcolor As String
+	fgcolor ="gray"
+	bgcolor = "white"
+
+	Dim CurrFieldVal As String
+	Dim NewFieldVal As String
+	Dim FieldNew  As Variant
+	
+	'Extra Field (normally on the header of the log document) to be added  - 28Aug2018
+	If docSource.Hasitem("Reg_No") Then 
+		Call docTarget.ReplaceItemValue( "Reg_No", docSource.Reg_No(0) )
+	End If
+
+	If docSource.Hasitem("CreationDate") Then
+		Call docTarget.ReplaceItemValue( "CreationDate", docSource.CreationDate(0) )
+	End If
+
+	If docSource.Hasitem("CreatorName") Then
+		Call docTarget.ReplaceItemValue( "CreatorName", docSource.CreatorName(0) )
+	End If
+
+	If docSource.Hasitem("CreatorName_NewLog19") Then
+		Call docTarget.ReplaceItemValue( "CreatorName_NewLog19", docSource.CreatorName_NewLog19(0) )
+	End If	
+
+	If docSource.Hasitem("workflowstatus") Then
+		Call docTarget.ReplaceItemValue( "workflowstatus", docSource.workflowstatus(0) )
+	End If
+
+	If docSource.Hasitem("App_Name") Then
+		Call docTarget.ReplaceItemValue( "App_Name", docSource.App_Name(0) )
+	ElseIf docSource.Hasitem("AppName") Then
+		Call docTarget.ReplaceItemValue( "AppName", docSource.AppName(0) )	
+	ElseIf docSource.Hasitem("Allottee_Name") Then
+		Call docTarget.ReplaceItemValue( "Allottee_Name", docSource.Allottee_Name(0) )
+	End If
+
+	Call docTarget.ReplaceItemValue( "FormName", docSource.Form(0))
+	Call docTarget.ReplaceItemValue( "UID", docSource.Universalid)	
+
+	Call docTarget.ReplaceItemValue( "SourceElement", SourceElement )
+	Call docTarget.ReplaceItemValue( "SourceElementType", SourceElementType )
+				
+	'End - Extra Field to be added 
+
+	''Build the table for old and new fields. It contains ALL modified fields only.	
+	ForAll Field In OldVals
+		
+		CurrFieldVal = ""			''holds the value of the current field (before edit).
+		NewFieldVal = ""			''holds the value of the new field (after edit).
+		
+		If IsArray(Field) Then
+
+			ForAll fld In Field
+				CurrFieldVal = CurrFieldVal + ", " + fld
+			End ForAll		
+			
+			FieldNew = docSource.GetItemValue(ListTag(Field))
+			
+			ForAll fldnew In FieldNew
+				NewFieldVal = NewFieldVal + ", " + fldnew
+			End ForAll
+
+			If Left(CurrFieldVal, 2) = ", " Then
+				CurrFieldVal = Mid(CurrFieldVal, 3)
+			End If						
+			If Left(NewFieldVal, 2) = ", " Then
+				NewFieldVal = Mid(NewFieldVal, 3)
+			End If						
+			
+		Else
+			If Field <> "" Then
+				CurrFieldVal = Field
+				'''''alert
+				'''''On Error Resume Next
+				NewFieldVal = docSource.GetItemValue(ListTag(Field))
+			End If			
+		End If
+
+		''Keep only edited fields log, ignore others.
+		If CurrFieldVal <> NewFieldVal Then				
+			If bgcolor = "white" Then
+				bgcolor = "#F2F2F2"
+			Else
+				bgcolor = "white"
+			End If
+			
+			FieldName_1 = FieldName_1 + "<tr bgcolor='" +bgcolor+ "' > <td>&nbsp;</td><td>" +ListTag(Field)+ ":</td><td valign='top'>" +CurrFieldVal+ "</td><td>&nbsp;</td><td>" +NewFieldVal+ "</td></tr>"
+		End If
+		
+	End ForAll
+	
+	FieldName_1 = FieldName_1 + "</table>"		
+	Call docTarget.ReplaceItemValue( "Field_Name_1", FieldName_1 )
+	
+	docTarget.Form = docSource.Form(0) + "_modified"
+	
+	''Create original document link.
+	Dim rtitem As NotesRichTextItem 
+	Set rtitem = docTarget.CreateRichTextItem("OriginalDocLink")		
+	Call rtitem.AppendDocLink(docSource,"Click to open original document")
+
+
+	''Create log-specific data.	
+	Call getUserDetails_v2(userDetails)
+	Dim winun As String
+	winun = Environ("username") 
+	
+	If userDetails(7) = "Macintosh" Then
+		winun = Environ("USER")
+	End If
+	
+	docTarget.rp_ipaddress   = userDetails(1)
+	docTarget.rp_macaddress  = userDetails(2)
+	docTarget.rp_domain      = userDetails(3)
+
+	'docTarget.rp_modifyby    = userDetails(4)
+	docTarget.rp_createdBy    = userDetails(4)
+	
+	docTarget.rp_computer    = userDetails(5)
+	docTarget.rp_timezone    = userDetails(6)
+	docTarget.rp_platform    = userDetails(7)
+	docTarget.AssignedRoles = userDetails(8)
+	docTarget.LotusVersion = userDetails(9)
+	docTarget.rp_dblocation = userDetails(10)
+	docTarget.rp_osusername = winun
+	docTarget.rp_servername = userDetails(11)
+	
+	docTarget.rp_servertime = userDetails(15)	
+	docTarget.rp_servertimezone = userDetails(18)
+	
+	Dim sdatetim As New NotesDateTime(docTarget.LastModified)
+	docTarget.rp_timezone_1 = userDetails(17)	''local machine time zone.
+
+	docTarget.rp_databasepath = userDetails(20)
+	docTarget.rp_databasetitle = userDetails(21)
+	docTarget.rp_databasereplicaid = userDetails(22)
+	
+	Call docTarget.ReplaceItemValue("$KeepPrivate","1")	
+	Call docTarget.save(True, False)
+	
+	''Send notification if one or more critical fields could not be captured for some reason.
+	Dim CriticalFields List As Variant
+	CriticalFields(1) = userDetails(4)		''action by		
+	CriticalFields(2) = userDetails(15)		''server time
+	CriticalFields(3) = userDetails(18)		''server time zone
+	CriticalFields(4) = userDetails(1)		''ip address
+	CriticalFields(5) = userDetails(2)		''mac address
+	CriticalFields(6) = userDetails(11)
+	CriticalFields(7) = userDetails(10)		''do we need this?
+	CriticalFields(8) = userDetails(20)		''db file path
+	CriticalFields(9) = userDetails(21)		''db title
+	CriticalFields(10) = userDetails(22)	''db replica id.
+	
+	''ALERT COMMENTS: following code should be uncommented and tested.	
+	If Manage_Critical_Fields_v2("Edit Log", CriticalFields) = True Then	''One or more critical fields were found and handled.
+		Call docSource.ReplaceItemValue("isIssue", "Yes")
+		Call docSource.ReplaceItemValue("issue_statement", "One or more Critical data items were missing during creation of Edit Log.")
+		Call docSource.save(True, False)
+	End If
+
+	'Print "Edit_Log_v2: END"
+	Exit Function
+
+ErrHandler:
+
+	Dim ErrMsg As String 
+	ErrMsg = "An unhandeled error occured in EditLog_v2_Ext(). The error details are:  "  
+	ErrMsg = ErrMsg & Chr(10) & Chr(10)  & Error$ 
+	ErrMsg = ErrMsg & Chr(10) & " on line number: " & CStr(Erl)
+	ErrMsg = ErrMsg & Chr(10) &   Chr(10) & "Please contact IT Team with the details of this error."
+	
+	MessageBox ErrMsg,64, CurrDb.Title
+	Exit Function
+	
+End Function
+
+'++LotusScript Development Environment:2:1:CreationLog_v2:1:8
+Function CreationLog_v2(LogType As String, docSource As NotesDocument)
+	
+	On Error GoTo ErrHandler
+	
+	''Build a Creation log of the specified document.
+	'Dim Session As New NotesSession
+	'Dim db As NotesDatabase
+	'Dim logdb As NotesDatabase
+	Dim docTarget As NotesDocument
+	
+	'Set db=session.CurrentDatabase	
+	
+	'Set profiledoc=db.GetProfileDocument("ProfileSetup")
+	'''''''''''''  Set profiledoc=db.GetProfileDocument("ProfileSetup")
+	'Set profiledoc=db.GetProfileDocument("Profile")
+	
+	'Set logdb = session.GetDatabase(db.Server,profiledoc.LogDBPath(0))
+	'Set logdb = s.GetDatabase(db.Server,profiledoc.LogDBPath(0)) ' LogDBPathAfter24July18
+	'Set logdb = session.GetDatabase(db.Server,profiledoc.LogDBPathAfter24July18(0)) ' 
+	
+	' MsgBox "Creation Log" & LogDb.Title
+	
+	Set docTarget = LogDb.CreateDocument	
+	''docTarget.Form =docSource.Form(0)+"_created"
+	
+	Call docSource.Copyallitems(docTarget, True)
+	docTarget.Form =docSource.Form(0)+"_created"
+	
+	Dim userDetails List As Variant
+	Call getUserDetails_v2(userDetails)
+	
+	Dim winun As String
+	winun = Environ("username")  
+	
+	If userDetails(7) = "Macintosh" Then
+		winun = Environ("USER")
+	End If
+	
+	docTarget.rp_ipaddress   = userDetails(1)
+	docTarget.rp_macaddress  = userDetails(2)
+	docTarget.rp_domain      = userDetails(3)
+
+	'docTarget.rp_modifyby    = userDetails(4)
+	docTarget.rp_createdby    = userDetails(4)
+	
+	docTarget.rp_computer    = userDetails(5)
+	docTarget.rp_timezone    = userDetails(6)
+	docTarget.rp_platform    = userDetails(7)
+	docTarget.AssignedRoles = userDetails(8)
+	docTarget.LotusVersion = userDetails(9)
+	docTarget.rp_dblocation = userDetails(10)
+	docTarget.rp_osusername = winun 
+	docTarget.rp_servername = userDetails(11)
+	docTarget.rp_servertime = userDetails(15)			''Evaluate({@Now([SERVERTIME])})
+	Dim sdatetim As New NotesDateTime(docTarget.LastModified)
+	
+	docTarget.rp_servertimezone = userDetails(18)	 ''Evaluate({@TimeZoneToText(rp_servertime)})
+	docTarget.rp_timezone_1 = userDetails(17)		  ''Evaluate({@TimeZoneToText(@Text(@Now))})
+
+	docTarget.rp_databasepath = userDetails(20)
+	docTarget.rp_databasetitle = userDetails(21)
+	docTarget.rp_databasereplicaid = userDetails(22)
+	
+	Call docTarget.ReplaceItemValue("$KeepPrivate","1")
+	Call docTarget.save(True, False)
+
+	''Send notification if one or more critical fields could not be captured for some reason.
+	Dim CriticalFields List As Variant
+	CriticalFields(1) = userDetails(4)
+	CriticalFields(2) = userDetails(15)
+	CriticalFields(3) = userDetails(18)
+	CriticalFields(4) = userDetails(1)
+	CriticalFields(5) = userDetails(2)
+	CriticalFields(6) = userDetails(11)
+	CriticalFields(7) = userDetails(10)		''do we need this?
+	CriticalFields(8) = userDetails(20)
+	CriticalFields(9) = userDetails(21)
+	CriticalFields(10) = userDetails(22)
+	
+	'Call Manage_Critical_Fields(LogType, CriticalFields)		
+
+	If Manage_Critical_Fields_v2(LogType, CriticalFields) = True Then	''One or more critical fields were found and handled.
+		Call docSource.ReplaceItemValue("isIssue", "Yes")
+		Call docSource.ReplaceItemValue("issue_statement", "One or more Critical data items were missing during creation of " & LogType & ".")
+		Call docSource.save(True, False)
+	End If
+
+	Exit Function
+ErrHandler:
+
+	Dim ErrMsg As String 
+	ErrMsg = "An unhandeled error occured in CreationLog_v2(). The error details are:  "  
+	ErrMsg = ErrMsg & Chr(10) & Chr(10)  & Error$ 
+	ErrMsg = ErrMsg & Chr(10) & " on line number: " & CStr(Erl)
+	ErrMsg = ErrMsg & Chr(10) &   Chr(10) & "Please contact IT Team with the details of this error."
+	MessageBox ErrMsg,64, CurrDb.Title
+
+	Exit Function
+
+End Function
+
+
+'++LotusScript Development Environment:2:1:getProfileDocument_v3:1:8
+Function getProfileDocument_v3(db As NotesDatabase , callerfx As string ) As NotesDocument
+	
+	On Error GoTo Handler
+	 
+	If Not ProfileDoc Is nothing Then ' to avoid duplicate code run
+		Set getProfileDocument_v3 = ProfileDoc
+		'Print  " *********  already set getProfileDocument_v3() in database: " & db.Title & " , callerfx  " & callerfx
+		Exit function	
+	Else
+		
+		Set form = CurrDb.GetForm( ProfileName ) ' DbProfileName is set in initilalaize() 
+		If form Is Nothing Then
+			MsgBox "Profile form - " & ProfileName & "not found in db  " & CurrDb .title 
+			Set getProfileDocument_v3 = Nothing
+			Exit Function
+		End If
+		
+		Set ProfileDoc = CurrDb.GetProfileDocument( ProfileName ) ' Profile document setting
+		
+		Set getProfileDocument_v3 = ProfileDoc ' returning profile doc obeject to caller function 
+		'Print  " *********  end getProfileDocument_v3() ProfileDoc form " & ProfileDoc.form(0)  & " database: " & db.Title & " , callerfx  " & callerfx
+	End If
+
+	Exit Function
+
+Handler:
+	ErrMsg = "An unhandeled error occured in getProfileDocument_v3(). The error details are:  "  
+	ErrMsg = ErrMsg & Chr(10) & Chr(10)  & Error$ 
+	ErrMsg = ErrMsg & Chr(10) & " on line number: " & CStr(Erl)
+	ErrMsg = ErrMsg & Chr(10) &   Chr(10) & "Please contact IT Team with the details of this error."
+	MessageBox ErrMsg,64,CurrDb.Title
+	Exit Function
+	
+End Function

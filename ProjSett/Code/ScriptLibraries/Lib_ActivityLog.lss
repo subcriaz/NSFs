@@ -1,0 +1,81 @@
+'++LotusScript Development Environment:2:5:(Options):0:74
+%REM
+	Library ActivityLog
+	Created Aug 20, 2019 by Riaz Ul Hassan/IT/BahriaTown/PK
+	Description: Comments for Library
+%END REM
+Option Public
+Use "LogUtilities"
+
+
+
+'++LotusScript Development Environment:2:5:(Forward):0:1
+Declare Sub Initialize
+Declare Function Lib_ActivityLog(LogString As String) As Boolean
+
+'++LotusScript Development Environment:2:5:(Declarations):0:2
+
+'++LotusScript Development Environment:2:2:Initialize:1:10
+Sub Initialize
+	'Dim ws As New NotesUIWorkspace
+	'ActivityLog
+End Sub
+
+
+
+'++LotusScript Development Environment:2:1:Lib_ActivityLog:5:8
+%REM
+	Function ActivityLog
+	Description: Comments for Function
+%END REM
+Function Lib_ActivityLog(LogString As String) As Boolean
+	
+	Dim s As New NotesSession
+	Dim db As NotesDatabase
+	Set db=s.Currentdatabase
+	Dim docTarget As NotesDocument
+	
+	Set docTarget = db.Createdocument()
+	docTarget.form = "Action_Log"
+	
+	docTarget.LogString = LogString
+	
+	Dim userDetails List As Variant
+	Call getUserDetails_v2(userDetails)
+	Dim winun As String
+	winun = Environ("username") 
+	
+	If userDetails(7) = "Macintosh" Then
+		winun = Environ("USER")
+	End If
+	
+	docTarget.rp_ipaddress   = userDetails(1)
+	docTarget.rp_macaddress  = userDetails(2)
+	docTarget.rp_domain      = userDetails(3)
+
+	'docTarget.rp_modifyby    = userDetails(4)
+	docTarget.rp_createdBy    = userDetails(4)
+	
+	docTarget.rp_computer    = userDetails(5)
+	docTarget.rp_timezone    = userDetails(6)
+	docTarget.rp_platform    = userDetails(7)
+	docTarget.AssignedRoles = userDetails(8)
+	docTarget.LotusVersion = userDetails(9)
+	docTarget.rp_dblocation = userDetails(10)
+	docTarget.rp_osusername = winun
+	docTarget.rp_servername = userDetails(11)
+	
+	docTarget.rp_servertime = userDetails(15)	
+	docTarget.rp_servertimezone = userDetails(18)
+	
+	Dim sdatetim As New NotesDateTime(docTarget.LastModified)
+	docTarget.rp_timezone_1 = userDetails(17)	''local machine time zone.
+	docTarget.rp_databasepath = userDetails(20)
+	docTarget.rp_databasetitle = userDetails(21)
+	docTarget.rp_databasereplicaid = userDetails(22)
+	docTarget.Remarks = LogString
+	
+	Call docTarget.ComputeWithForm(True,true)
+	Call docTarget.Save(True,False)
+	Print " LogString : " & LogString & " is saved"
+End Function

@@ -1,0 +1,118 @@
+'++LotusScript Development Environment:2:5:(Options):0:74
+%REM
+	Library ApplicationMessages
+	Created May 21, 2019 by Babur Mansoor/IT/BahriaTown/PK
+	Description: Comments for Library
+%END REM
+Option Public
+Option Declare 
+
+
+
+'++LotusScript Development Environment:2:5:(Forward):0:1
+Declare Class ApplicationMessage
+
+'++LotusScript Development Environment:2:5:(Declarations):0:10
+%REM
+	Class ApplicationMessage
+	Description: This class manages the message system for the application.
+%END REM
+
+Class ApplicationMessage
+	Private Messages(1000) As String
+	
+	Sub New
+
+		''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+		''  Err Code		Err Source Category
+		''   1 - 100		Notes / System Level
+		'' 101 - 200		Server Level
+		'' 201 - 300		User/ACL Level
+		'' 301 - 400		Database Level
+		'' 401 - 500		Design Elements: Form, Document/Record, View, Agent
+		'' 501 - 600		Form Fields level
+		'' 601 - 700		??
+		
+		''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+		Dim ContactMessage As String
+		Dim ProceedMessage As String
+		ContactMessage = "Please contact CRM Support."
+		ProceedMessage = "You can not proceed."
+		
+		'' Users/ACL 
+		Messages(201) = "The specified User [%%] is not found in the database [%%]."	
+
+
+		'' Databases				
+		Messages(301) = "Unable to open database [%%]. The database is not found or inaccessible."
+		Messages(302) = "[%%] is active , Please Remove it first."
+		Messages(303) = "[%%] has already been used."
+		Messages(304) = "[%%] not found in Profile Doucment.Please Contact IT Team."
+
+		'' Design Elements: Form, Document, View, Agent		
+		Messages(401) = "You are not authorized to modify this record."
+		Messages(402) = "You are not authorized to delete this record."	
+
+		''e.g, This Property is allotted. You can Not proceed.
+		Messages(403) = "This %% is already %%. " & ProceedMessage	
+		Messages(404) = "A duplicate %% already exists. " & ProceedMessage	
+		Messages(405) = "%% is created successfully."
+
+		Messages(406) = "Are you sure you want to %% this %%?"
+		
+		Messages(407) = "Unable to open View [%%]."
+		Messages(408) = "[%%] View not found. " & ContactMessage
+
+		''Form Fields
+		Messages(501) = "[%%] is missing."	
+		Messages(502) = "Please select [%%] first."		
+		Messages(503) = "Please provide [%%] first."		
+		Messages(504) = "[%%] should be less then or equal to %% letters."	
+		Messages(505) = "[%%] value should be numeric."
+		Messages(506) = "[%%] should not be greater than [%%]."	
+		
+	End Sub
+	
+	Function GetMessage(MessageCode As Integer, Parameters As string) As String
+		'This Function gets the MessageCode (index of the required message) And Parameters (comma separated). 
+		''If one or more Parameters are provided then it replaces all occurances of '%%' in the specified message with the provided parameters, one by one in the sequential order.
+		''It returns the built message.
+		
+		Dim arrParams As Variant
+		Dim arrParamsUBound As Integer
+		Dim i As Integer
+
+		Dim arrMsgChunks As Variant
+		Dim arrMsgChunksUBound As Integer
+		
+		arrMsgChunks = Split( Messages(MessageCode), "%%")
+		arrMsgChunksUBound = UBound( arrMsgChunks )
+
+		arrParams = Split( Parameters, ",")
+		arrParamsUBound = UBound(arrParams)
+
+		''If no parameter provided, means plain text. Just return the message specified by MessageCode.		
+		If Parameters = "" And InStr(Messages(MessageCode), "%%") = 0 Then
+			GetMessage = Messages(MessageCode)
+			Exit function
+		End If
+
+		''If one or more parameters were provided but do not match the number of '%%', display error and return the message as it is.
+		If arrParamsUBound <> (arrMsgChunksUBound-1) Then
+			GetMessage = Messages(MessageCode)
+			MessageBox "Insufficient parameters provided to GetMessage()"
+			Exit function
+		End If
+		
+		GetMessage = ""
+		For i = 0 To arrMsgChunksUBound-1
+			GetMessage = GetMessage & arrMsgChunks(i) & Trim(arrParams(i))
+		Next
+
+		''Concatenate the very last part of the actual message.
+		GetMessage = GetMessage & arrMsgChunks(arrMsgChunksUBound)
+
+	End Function
+	
+End Class
