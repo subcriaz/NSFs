@@ -66,3 +66,9 @@ git config --global user.email "rhassan70@gmail.com"
 
 ====================
 
+Path :=@GetProfileField("Settings" ; "CRMSettingsDBPath");
+
+@If ( Form= "ProjectDefinition" ;
+@Command( [Compose];  @Subset( @Name( [Canonicalize]  ;@DbName)  ; 1)  :  Path ;  "SubProject" );
+@Prompt([Ok]; @DbTitle ; "Please Select a Valid Project Document "  )
+)
