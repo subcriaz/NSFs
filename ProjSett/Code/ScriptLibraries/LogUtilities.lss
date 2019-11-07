@@ -682,6 +682,11 @@ Function CheckDbAccess_v2 (DbToCheck As NotesDatabase) As Boolean
 	
 	Dim level As Integer ' user leave access 
 	CheckDbAccess_v2 = False
+	If ProfileDoc.LogDBPath(0)="" Then
+		MsgBox "Log Database path not found in profile document.",64, CurrDb.Title
+		CheckDbAccess_v2=False
+		Exit Function
+	End If
 	
 	If Not DbToCheck.Isopen Then ''checking if the log db opens
 		MsgBox "You do not have required access rights on " & DbToCheck.Title & " database.",64, CurrDb.Title

@@ -72,6 +72,7 @@ Class ApplicationMessage
 		Messages(415) = "Test..@"
 		Messages(416) = "This Street has been modified from [%%] to [%%]."
 		Messages(417) = "[%%] document not found." & ContactMessage
+		Messages(418) = "%% has been created successfully."
 		
 		''Form Fields
 		Messages(501) = "[%%] is missing."	
@@ -79,6 +80,7 @@ Class ApplicationMessage
 		Messages(503) = "Please provide [%%] first."		
 		Messages(504) = "[%%] should be less then or equal to %% letters."	
 		Messages(505) = "[%%] value should be numeric."
+		Messages(506) = "Following fields are missing." & Chr(13) & " %%" ' 
 		
 	End Sub
 	

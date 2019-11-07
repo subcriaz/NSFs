@@ -697,9 +697,6 @@ Function CheckMultipleRights(dbs As NotesDatabase, roleList As Variant) As Boole
 	Set db = session.CurrentDatabase
 	Set acl = db.ACL
 	Set ACLEntry = acl.Getentry(session.UserName)   ' single user entry exist in acl
-
-
-
 	
 	If(Not ACLEntry Is Nothing ) Then 'checking user rights if the he/she exists as Single acl entry
 		CheckMultipleRights = True	
@@ -741,6 +738,7 @@ handler:
 	CheckMultipleRights=False
 	Exit Function ' added by Riaz on 16 oct 2019
 End Function
+
 
 
 

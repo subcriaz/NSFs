@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?><note class="filter" maintenanceversion="1.0" replicaid="452583F400274E82" version="10.0" xmlns="http://www.lotus.com/dxl">
-<noteinfo noteid="7a6" sequence="24" unid="47B1BD534AC4A1994525848F003EA75B">
+<noteinfo noteid="7a6" sequence="36" unid="47B1BD534AC4A1994525848F003EA75B">
 <created><datetime>20191010T162420,75+05</datetime></created>
-<modified><datetime>20191022T010408,03+05</datetime></modified>
-<revised><datetime>20191021T145235,28+05</datetime></revised>
-<lastaccessed><datetime>20191022T010408,02+05</datetime></lastaccessed>
+<modified><datetime>20191024T010406,24+05</datetime></modified>
+<revised><datetime>20191023T111333,18+05</datetime></revised>
+<lastaccessed><datetime>20191024T010406,22+05</datetime></lastaccessed>
 <addedtofile><datetime>20191010T162441,85+05</datetime></addedtofile></noteinfo>
-<updatedby><name>CN=Riaz Ul Hassan/OU=IT/O=BahriaTown/C=PK</name><name>CN=Babur Mansoor/OU=IT/O=BahriaTown/C=PK</name><name>CN=Riaz Ul Hassan/OU=IT/O=BahriaTown/C=PK</name><name>CN=Babur Mansoor/OU=IT/O=BahriaTown/C=PK</name><name>CN=Samiullah Arshed/OU=IT/O=BahriaTown/C=PK</name><name>CN=Shoaib Farooq/OU=IT/O=BahriaTown/C=PK</name><name>CN=Riaz Ul Hassan/OU=IT/O=BahriaTown/C=PK</name><name>CN=Samiullah Arshed/OU=IT/O=BahriaTown/C=PK</name><name>CN=Waseem Hassan/OU=IT/O=BahriaTown/C=PK</name><name>CN=Sohail Ahmed/OU=IT/O=BahriaTown/C=PK</name><name>CN=Riaz Ul Hassan/OU=IT/O=BahriaTown/C=PK</name><name>CN=Sohail Ahmed/OU=IT/O=BahriaTown/C=PK</name></updatedby>
-<wassignedby><name>CN=Sohail Ahmed/OU=IT/O=BahriaTown/C=PK</name></wassignedby>
+<updatedby><name>CN=Riaz Ul Hassan/OU=IT/O=BahriaTown/C=PK</name><name>CN=Babur Mansoor/OU=IT/O=BahriaTown/C=PK</name><name>CN=Riaz Ul Hassan/OU=IT/O=BahriaTown/C=PK</name><name>CN=Babur Mansoor/OU=IT/O=BahriaTown/C=PK</name><name>CN=Samiullah Arshed/OU=IT/O=BahriaTown/C=PK</name><name>CN=Shoaib Farooq/OU=IT/O=BahriaTown/C=PK</name><name>CN=Riaz Ul Hassan/OU=IT/O=BahriaTown/C=PK</name><name>CN=Samiullah Arshed/OU=IT/O=BahriaTown/C=PK</name><name>CN=Waseem Hassan/OU=IT/O=BahriaTown/C=PK</name><name>CN=Sohail Ahmed/OU=IT/O=BahriaTown/C=PK</name><name>CN=Riaz Ul Hassan/OU=IT/O=BahriaTown/C=PK</name><name>CN=Sohail Ahmed/OU=IT/O=BahriaTown/C=PK</name><name>CN=Riaz Ul Hassan/OU=IT/O=BahriaTown/C=PK</name></updatedby>
+<wassignedby><name>CN=Riaz Ul Hassan/OU=IT/O=BahriaTown/C=PK</name></wassignedby>
 <item name="$PublicAccess" sign="true"><text>1</text></item>
 <item name="$TITLE" sign="true"><text>ApplicationMessages</text></item>
 <item name="$DesignerVersion" sign="true"><text>8.5.3</text></item>
